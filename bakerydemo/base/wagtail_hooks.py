@@ -1,5 +1,16 @@
+import os
+
+import docutils
+
+from django.http import HttpResponse
+from django.conf.urls import url
+from django.core.urlresolvers import reverse
+from django.shortcuts import render
+
+from wagtail.wagtailadmin.menu import MenuItem
 from wagtail.contrib.modeladmin.options import (
     ModelAdmin, ModelAdminGroup, modeladmin_register)
+from wagtail.wagtailcore import hooks
 
 from bakerydemo.breads.models import Country, BreadIngredient, BreadType
 from bakerydemo.base.models import People, FooterText
@@ -64,3 +75,50 @@ class BakeryModelAdminGroup(ModelAdminGroup):
 # you only need to register the ModelAdminGroup class with Wagtail:
 modeladmin_register(BreadModelAdminGroup)
 modeladmin_register(BakeryModelAdminGroup)
+
+# mucking around with idea of putting user editors manual inside wagtail
+
+
+def admin_editors_manual_view(request):
+    # dir = os.listdir('../')
+    # dir =
+    location_of_file = os.path.dirname(hooks.__file__)
+    location_of_docs = os.path.join(
+        location_of_file, '..', '..', './docs', './editor_manual'
+    )
+    dir = os.listdir(
+        location_of_docs
+        # ['administrator_tasks', 'browser_issues.rst', 'documents_images_snippets',
+        # 'editing_existing_pages.rst', 'finding_your_way_around', 'getting_started.rst',
+        # 'index.rst', 'intro.rst', 'managing_redirects.rst', 'new_pages']
+    )
+    file_path = os.path.join(location_of_docs, './index.rst')
+    file = open(file_path, 'r')
+    contents = docutils.core.publish_parts(file.read(), writer_name='html')
+    print('dir', dir)
+    return render(request, 'wagtailmanual/base.html', {
+        'title': 'Editors Manual',
+        'something': dir,
+        'contents': contents,
+    })
+
+
+@hooks.register('register_admin_urls')
+def urlconf_time():
+    return [
+        url(
+            r'^editors_manual/$',
+            admin_editors_manual_view,
+            name='editors-manual'
+        ),
+    ]
+
+
+@hooks.register('register_admin_menu_item')
+def register_editors_manual_item():
+    return MenuItem(
+        'Manual',
+        reverse('editors-manual'),
+        classnames='icon icon-folder-inverse',
+        order=10000
+    )

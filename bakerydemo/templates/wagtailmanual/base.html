@@ -1,0 +1,16 @@
+{% extends "wagtailadmin/base.html" %}
+{% load wagtailadmin_tags i18n staticfiles gravatar %}
+
+{% block titletag %}{{ title }}{% endblock %}
+{% block bodyclass %}editors-manual{% endblock %}
+
+{% block content %}
+  {% include "wagtailadmin/shared/header.html" with title=title %}
+  <div class="nice-padding">
+    <h4>Test</h4>
+    <strong>something: {{ something }}</strong>
+    <p>
+      {{ contents.html_body|safe }}
+    </p>
+  </div>
+{% endblock %}
