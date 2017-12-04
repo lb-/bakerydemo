@@ -42,7 +42,7 @@ class People(ClusterableModel):
     job_title = models.CharField("Job title", max_length=254)
 
     image = models.ForeignKey(
-        'wagtailimages.Image',
+        'images.Image',
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
@@ -110,7 +110,7 @@ class StandardPage(Page):
         help_text='Text to describe the page',
         blank=True)
     image = models.ForeignKey(
-        'wagtailimages.Image',
+        'images.Image',
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
@@ -140,7 +140,7 @@ class HomePage(Page):
 
     # Hero section of HomePage
     image = models.ForeignKey(
-        'wagtailimages.Image',
+        'images.Image',
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
@@ -157,7 +157,7 @@ class HomePage(Page):
         help_text='Text to display on Call to Action'
         )
     hero_cta_link = models.ForeignKey(
-        'wagtailcore.Page',
+        'core.Page',
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
@@ -173,7 +173,7 @@ class HomePage(Page):
 
     # Promo section of the HomePage
     promo_image = models.ForeignKey(
-        'wagtailimages.Image',
+        'images.Image',
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
@@ -204,7 +204,7 @@ class HomePage(Page):
         help_text='Title to display above the promo copy'
     )
     featured_section_1 = models.ForeignKey(
-        'wagtailcore.Page',
+        'core.Page',
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
@@ -221,7 +221,7 @@ class HomePage(Page):
         help_text='Title to display above the promo copy'
     )
     featured_section_2 = models.ForeignKey(
-        'wagtailcore.Page',
+        'core.Page',
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
@@ -238,7 +238,7 @@ class HomePage(Page):
         help_text='Title to display above the promo copy'
     )
     featured_section_3 = models.ForeignKey(
-        'wagtailcore.Page',
+        'core.Page',
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
@@ -295,7 +295,7 @@ class GalleryPage(Page):
         help_text='Text to describe the page',
         blank=True)
     image = models.ForeignKey(
-        'wagtailimages.Image',
+        'images.Image',
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
@@ -341,7 +341,7 @@ class FormField(AbstractFormField):
 
 class FormPage(AbstractEmailForm):
     image = models.ForeignKey(
-        'wagtailimages.Image',
+        'images.Image',
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
