@@ -1,0 +1,29 @@
+{% extends "wagtailadmin/base.html" %}
+{% block titletag %}Timeline{% endblock %}
+{% block bodyclass %}timeline{% endblock %}
+
+{% block extra_css %}
+    {{ block.super }}
+    <style>
+      #timeline {
+        padding: 3rem;
+        background: aliceblue;
+        text-align: center;
+      }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <header class="merged nice-padding" role="banner">
+        <div class="row row-flush">
+            <div class="col9">
+                <h1>Timeline</h1>
+            </div>
+        </div>
+    </header>
+    <main>
+      <div id="timeline">
+        Timeline
+      </div>
+    </main>
+{% endblock %}
