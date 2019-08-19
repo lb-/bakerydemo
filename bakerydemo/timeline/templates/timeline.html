@@ -13,6 +13,16 @@
     </style>
 {% endblock %}
 
+{% block extra_js %}
+  {{ block.super }}
+  <script>
+    ReactDOM.render(
+      <h1>Timeline!</h1>,
+      document.getElementById('timeline')
+    );
+  </script>
+{% endblock %}
+
 {% block content %}
     <header class="merged nice-padding" role="banner">
         <div class="row row-flush">
