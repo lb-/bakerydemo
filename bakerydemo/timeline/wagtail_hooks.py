@@ -18,6 +18,6 @@ def register_timeline_menu_item():
     return MenuItem(
         'Timeline',
         reverse('timeline'),
-        classnames='icon icon-folder-inverse',
+        classnames='icon icon-timeline',
         order=10000
     )
