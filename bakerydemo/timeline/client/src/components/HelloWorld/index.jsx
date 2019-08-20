@@ -1,6 +1,8 @@
 import { PureComponent } from 'react'; // eslint-disable-line import/no-extraneous-dependencies
 import { string } from 'prop-types'; // eslint-disable-line import/no-extraneous-dependencies
 
+import './style.css';
+
 const generateColor = () => `#${
   (0x1000000 + ((Math.random()) * 0xffffff))
     .toString(16)
@@ -34,7 +36,7 @@ export default class HelloWorld extends PureComponent {
 
   render() {
     return (
-      <div>
+      <div className="hello">
         <h1 style={{ color: this.state.color, padding: '20px' }}>Hello World!</h1>
         <button onClick={this.handleClick}>Change color</button>
       </div>
