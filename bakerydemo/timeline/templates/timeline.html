@@ -19,22 +19,15 @@
   {{ block.super }}
   <script>
     require = function(requireKey) {
-      console.log('requireKey', requireKey);
-      
-      if (requireKey === 'react') {
-        console.log(requireKey, React);
-        return React;
-      }
-      return function() {};
-      // return ReactDOM;
+      if (requireKey === 'react') return React;
+      return function() {}; // propTypes will be a noop function
     };
   </script>
-  <script src="{% static 'js/HelloWorld.js' %}"></script>
+  <script src="{% static 'HelloWorld.js' %}"></script>
   <script>
-    //import ReactDom from 'react'
     document.addEventListener('DOMContentLoaded', function() {
-      console.log('HelloWorld', HelloWorld.default);
-      ReactDom.render(HelloWorld.default, document.getElementById('timeline'));
+      const component = HelloWorld.default;
+      ReactDOM.render(React.createElement(component), document.getElementById('timeline'));
     });
   </script>
 {% endblock %}
