@@ -16,3 +16,10 @@
 * Would you like to add linting to your project? Airbnb style rules
 * cd client, yarn start
 * add .gitignore manually
+
+
+
+## Notes
+
+* add `os.path.join(PROJECT_DIR, 'timeline/client/build'),` to STATICFILES_DIRS in settings.py
+* Issue; requires a `require` in global, does not strip proptypes (nwb does)
