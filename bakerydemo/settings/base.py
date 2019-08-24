@@ -157,7 +157,7 @@ STATICFILES_FINDERS = [
 
 STATICFILES_DIRS = [
     os.path.join(PROJECT_DIR, 'static'),
-    os.path.join(PROJECT_DIR, 'timeline/client/build'),
+    os.path.join(PROJECT_DIR, 'timeline/client/build'), # alternative approach - add the default neutrino 'build' folder
 ]
 
 STATIC_ROOT = os.path.join(PROJECT_DIR, 'collect_static')
