@@ -17,5 +17,10 @@
     "prop-types": "^15.7.2",
     "react": "^16.9.0",
     "react-dom": "^16.9.0"
+  },
+  "dependencies": {
+    "interactjs": "^1.5.4",
+    "moment": "^2.24.0",
+    "react-calendar-timeline": "^0.26.1"
   }
 }
