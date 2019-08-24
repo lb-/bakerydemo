@@ -27,10 +27,13 @@
 ## Steps
 
 * see steps below first (neutrino)
+* setting up static files - this is the result of 'yarn build', we can either set `STATICFILES_DIRS` to point to the default build directory or update neturinorc.js options to move to the static, we will assume the later for now
 * https://github.com/namespace-ee/react-calendar-timeline#getting-started
 * `yarn add react-calendar-timeline`
 * `yarn add moment`
 * `yarn add interactjs`
+* Copy in the basic getting started data for rendering & then yarn build to update in admin (check it works)
+* Note: Stuck here, cannot get the moment js library to bundle with the component output
 
 
 
