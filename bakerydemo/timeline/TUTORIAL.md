@@ -10,6 +10,13 @@
 * Installing/bundling external react dependency
 * Bundling css *maybe even scss*
 * Must leverage existing Wagtail view, sidebar, header etc
+* Set up prettier
+
+
+## Understanding
+
+* yarn build & refresh to see changes in admin
+* hot reloading to see changes in dev
 
 ## Assumptions
 * Wagtail project set up
@@ -17,7 +24,13 @@
 * Basic knowledge of React, NPM, Yarn and JS ecosystem
 
 
+## Steps
 
+* see steps below first (neutrino)
+* https://github.com/namespace-ee/react-calendar-timeline#getting-started
+* `yarn add react-calendar-timeline`
+* `yarn add moment`
+* `yarn add interactjs`
 
 
 
