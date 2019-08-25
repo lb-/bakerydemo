@@ -1,4 +1,9 @@
 module.exports = {
+  devServer: {
+    proxy: {
+      '/api': 'http://localhost:8000', // Wagtail dev server
+    },
+  },
   type: 'react-component',
   npm: {
     esModules: false,
