@@ -27,6 +27,8 @@ Describe client here.
 - Bundling css _maybe even scss_
 - Must leverage existing Wagtail view, sidebar, header etc
 - Set up prettier
+- Basic styling
+- Wagtail / Django view template search field - filtering results
 
 ### Understanding
 
@@ -65,6 +67,19 @@ add css file & update nwb.config.js to remove hash from production build css
 - https://github.com/namespace-ee/react-calendar-timeline#usage
 
 WAGTAILAPI_LIMIT_MAX = 200
+
+- `npm install --save-dev --save-exact prettier` // add prettierrc file
+- `npm install eslint --save-dev` // add config file `./node_modules/.bin/eslint --init` // ran into issues here because of sub-folder set up
+
+  - ? How would you like to use ESLint? To check syntax, find problems, and enforce code style
+  - ? What type of modules does your project use? JavaScript modules (import/export)
+  - ? Which framework does your project use? React
+  - ? Where does your code run? (Press <space> to select, <a> to toggle all, <i> to invert selection)Browser
+  - ? How would you like to define a style for your project? Use a popular style guide
+  - ? Which style guide do you want to follow? Airbnb (https://github.com/airbnb/javascript)
+  - ? What format do you want your config file to be in? JavaScript
+
+- dev server proxy (reminder changing nwb.config.js requires npm run start again)
 
 ### Useful links
 
