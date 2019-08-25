@@ -61,7 +61,11 @@ export default class extends Component {
       .reduce(
         (groups, group, index, arr) =>
           arr.indexOf(group) >= index
-            ? groups.concat({ id: group, title: group })
+            ? groups.concat({
+                id: group,
+                /* convert 'base.IndexPage' to 'Index Page' */
+                title: group.replace(/([a-z](?=[A-Z]))/g, '$1 ').split('.')[1],
+              })
             : groups,
         [],
       );
