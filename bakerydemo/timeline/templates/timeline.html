@@ -13,7 +13,7 @@
     <script src="{% static 'client.js' %}"></script>
     <script>
       document.addEventListener('DOMContentLoaded', function() {
-        const props = {className: 'greeting'};
+        const props = { className: 'inner' };
         const element = React.createElement(Timeline, props);
         const container = document.querySelector('#timeline');
         ReactDOM.render(element, container);
