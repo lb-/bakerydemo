@@ -52,7 +52,7 @@ export default class extends Component {
       ...meta,
       group: type,
       start_time: moment(first_published_at),
-      end_time: moment(first_published_at).add(4, 'week'), // temporary
+      end_time: moment().add(1, 'year'), // indicates they are live
     }));
 
   getGroups = items =>
