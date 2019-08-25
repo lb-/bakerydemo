@@ -94,6 +94,8 @@ export default class extends Component {
             defaultTimeEnd={end}
             groups={groups}
             items={items}
+            sidebarWidth={250}
+            stackItems={true}
           />
         )}
       </div>
