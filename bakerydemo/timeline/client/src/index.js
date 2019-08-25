@@ -89,7 +89,7 @@ export default class extends Component {
     } = this.state;
 
     return (
-      <div className="timeline">
+      <div className={['timeline', this.props.className].join(' ')}>
         {isLoading && <span>Loading...</span>}
         {error && <span>Error: {error.message}</span>}
         {!(isLoading || error) && (
