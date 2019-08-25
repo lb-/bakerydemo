@@ -6,6 +6,7 @@ from wagtail.core import hooks
 
 from .views import timeline_view
 
+
 @hooks.register('register_admin_urls')
 def urlconf_time():
     return [
