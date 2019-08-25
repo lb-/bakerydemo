@@ -22,16 +22,10 @@
 {% endblock %}
 
 {% block content %}
-    <header class="merged nice-padding" role="banner">
-        <div class="row row-flush">
-            <div class="col9">
-                <h1>Timeline</h1>
-            </div>
-        </div>
-    </header>
+    {% include "wagtailadmin/shared/header.html" with title=title %}
     <div class="container">
       <div id="timeline">
-        Timeline
+        {{ title }}
       </div>
     </div>
 {% endblock %}
