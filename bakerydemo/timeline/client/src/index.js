@@ -7,62 +7,95 @@ import moment from 'moment';
 import 'react-calendar-timeline/lib/Timeline.css'; // must include to ensure the timeline itself is styled
 import './style.css';
 
-const groups = [{ id: 1, title: 'group 1' }, { id: 2, title: 'group 2' }];
-
-const items = [
-  {
-    id: 1,
-    group: 1,
-    title: 'item 1',
-    start_time: moment(),
-    end_time: moment().add(1, 'hour'),
-  },
-  {
-    id: 2,
-    group: 2,
-    title: 'item 2',
-    start_time: moment().add(-0.5, 'hour'),
-    end_time: moment().add(0.5, 'hour'),
-  },
-  {
-    id: 3,
-    group: 1,
-    title: 'item 3',
-    start_time: moment().add(2, 'hour'),
-    end_time: moment().add(3, 'hour'),
-  },
-];
-
 export default class extends Component {
   constructor() {
     super();
     this.state = {
-      isLoading: false,
-      pages: [],
+      defaultTimes: {},
+      error: null,
+      groups: [],
+      isLoading: true,
+      items: [],
     };
   }
 
   componentDidMount() {
     const endpointUrl = '/api/v2/pages/?limit=200';
+    this.setState({ isLoading: true });
     fetch(endpointUrl)
-      .then(function(response) {
-        return response.json();
+      .then(response => response.json())
+      .then(response => {
+        const items = this.getTransformedItems(response);
+
+        console.log('result', {
+          defaultTimes: this.getDefaultTimes(items),
+          error: null,
+          groups: this.getGroups(items),
+          isLoading: false,
+          items,
+        });
+
+        this.setState({
+          defaultTimes: this.getDefaultTimes(items),
+          error: null,
+          groups: this.getGroups(items),
+          isLoading: false,
+          items,
+        });
       })
-      .then(function(myJson) {
-        console.log(JSON.stringify(myJson));
-      })
-      .catch(error => console.log('error', error));
+      .catch(error => this.setState({ error, isLoading: false }));
   }
 
+  getTransformedItems = ({ items = [] } = {}) =>
+    items.map(({ meta: { first_published_at, type, ...meta }, ...item }) => ({
+      ...item,
+      ...meta,
+      group: type,
+      start_time: moment(first_published_at),
+      end_time: moment(first_published_at).add(4, 'week'), // temporary
+    }));
+
+  getGroups = items =>
+    items
+      .map(({ group }) => group)
+      .reduce(
+        (groups, group, index, arr) =>
+          arr.indexOf(group) >= index
+            ? groups.concat({ id: group, title: group })
+            : groups,
+        [],
+      );
+
+  getDefaultTimes = items =>
+    items.reduce(({ start = null, end = null }, { start_time, end_time }) => {
+      if (!start && !end) return { start: start_time, end: end_time };
+      return {
+        start: start_time.isBefore(start) ? start_time : start,
+        end: end_time.isAfter(end) ? end_time : end,
+      };
+    }, {});
+
   render() {
+    const {
+      defaultTimes: { start, end },
+      error,
+      groups,
+      isLoading,
+      items,
+    } = this.state;
+
     return (
       <div className="timeline">
-        <Timeline
-          groups={groups}
-          items={items}
-          defaultTimeStart={moment().add(-12, 'hour')}
-          defaultTimeEnd={moment().add(12, 'hour')}
-        />
+        {isLoading && <span>Loading...</span>}
+        {error && <span>Error: {error.message}</span>}
+        {!(isLoading || error) && (
+          <Timeline
+            defaultTimeStart={start}
+            defaultTimeEnd={end}
+            groups={groups}
+            items={items}
+          />
+        )}
       </div>
     );
   }
