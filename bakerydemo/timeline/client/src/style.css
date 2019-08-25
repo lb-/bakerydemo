@@ -1,4 +1,3 @@
-
-.timeline { 
-  background-color: bisque;
+.timeline {
+  font: inherit;
 }
