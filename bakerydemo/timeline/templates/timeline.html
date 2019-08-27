@@ -13,7 +13,7 @@
     <script src="{% static 'client.js' %}"></script>
     <script>
       document.addEventListener('DOMContentLoaded', function() {
-        const props = { className: 'inner' };
+        const props = { className: 'inner', initialSearchValue: '{{ query_string }}', searchFormId: 'id_q' };
         const element = React.createElement(Timeline, props);
         const container = document.querySelector('#timeline');
         ReactDOM.render(element, container);
