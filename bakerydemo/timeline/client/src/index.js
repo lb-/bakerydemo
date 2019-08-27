@@ -1,83 +1,106 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 
-import Timeline from 'react-calendar-timeline';
-import moment from 'moment';
+import Timeline, {
+  DateHeader,
+  SidebarHeader,
+  TimelineHeaders,
+} from 'react-calendar-timeline';
+
+import Message from './Message';
+import transform from './transform';
 
 // styles
 import 'react-calendar-timeline/lib/Timeline.css'; // must include to ensure the timeline itself is styled
 import './style.css';
 
 export default class extends Component {
-  constructor() {
-    super();
+  static defaultProps = {
+    apiUrl: '/api/v2/pages/?limit=200',
+    className: '',
+    initialSearchValue: null,
+    searchFormId: null,
+  };
+
+  static propTypes = {
+    apiUrl: PropTypes.string,
+    className: PropTypes.string,
+    initialSearchValue: PropTypes.string,
+    searchFormId: PropTypes.string,
+  };
+
+  constructor(props) {
+    super(props);
+
     this.state = {
       defaultTimes: {},
       error: null,
       groups: [],
       isLoading: true,
       items: [],
+      searchValue: props.initialSearchValue,
     };
   }
 
   componentDidMount() {
-    const endpointUrl = '/api/v2/pages/?limit=200';
+    this.fetchData();
+    this.setUpSearchForm();
+  }
+
+  /** set state to loading and then call the API for the items data */
+  fetchData() {
+    const { apiUrl } = this.props;
     this.setState({ isLoading: true });
-    fetch(endpointUrl)
+    fetch(apiUrl)
       .then(response => response.json())
-      .then(response => {
-        const items = this.getTransformedItems(response);
-
-        console.log('result', {
-          defaultTimes: this.getDefaultTimes(items),
-          error: null,
-          groups: this.getGroups(items),
-          isLoading: false,
-          items,
-        });
-
+      .then(transform)
+      .then(({ items, defaultTimes, groups }) =>
         this.setState({
-          defaultTimes: this.getDefaultTimes(items),
+          defaultTimes,
           error: null,
-          groups: this.getGroups(items),
+          groups,
           isLoading: false,
           items,
-        });
-      })
+        }),
+      )
       .catch(error => this.setState({ error, isLoading: false }));
   }
 
-  getTransformedItems = ({ items = [] } = {}) =>
-    items.map(({ meta: { first_published_at, type, ...meta }, ...item }) => ({
-      ...item,
-      ...meta,
-      group: type,
-      start_time: moment(first_published_at),
-      end_time: moment().add(1, 'year'), // indicates they are live
-    }));
+  /** set up a listener on a search field that is outside this component (rendered by Django/Wagtail) */
+  setUpSearchForm() {
+    const { searchFormId } = this.props;
 
-  getGroups = items =>
-    items
-      .map(({ group }) => group)
-      .reduce(
-        (groups, group, index, arr) =>
-          arr.indexOf(group) >= index
-            ? groups.concat({
-                id: group,
-                /* convert 'base.IndexPage' to 'Index Page' */
-                title: group.replace(/([a-z](?=[A-Z]))/g, '$1 ').split('.')[1],
-              })
-            : groups,
-        [],
-      );
+    /* set up a listener on a search field that is outside this component (rendered by Django/Wagtail) */
+    const searchForm = document.getElementById(searchFormId);
+    if (searchForm) {
+      searchForm.addEventListener('keyup', event => this.onSearch(event));
+    }
+  }
 
-  getDefaultTimes = items =>
-    items.reduce(({ start = null, end = null }, { start_time, end_time }) => {
-      if (!start && !end) return { start: start_time, end: end_time };
-      return {
-        start: start_time.isBefore(start) ? start_time : start,
-        end: end_time.isAfter(end) ? end_time : end,
-      };
-    }, {});
+  /** handler for search form changing */
+  onSearch({ target: { value } = {} } = {}) {
+    const { searchValue } = this.state;
+
+    if (value !== searchValue) {
+      this.setState({ searchValue: value });
+    }
+  }
+
+  /** return filtered items based on the searchValue and that
+   * value being included in either the group (eg. Location Page) or title.
+   * Ensure we handle combinations of upper/lowercase in either parts of data.
+   */
+  getFilteredItems() {
+    const { items, searchValue } = this.state;
+    return searchValue
+      ? items.filter(({ group, title }) =>
+          [group, title]
+            .join(' ')
+            .toLowerCase()
+            .includes(searchValue.toLowerCase()),
+        )
+      : items;
+  }
 
   render() {
     const {
@@ -85,22 +108,39 @@ export default class extends Component {
       error,
       groups,
       isLoading,
-      items,
+      searchValue,
     } = this.state;
 
+    const { className } = this.props;
+
     return (
-      <div className={['timeline', this.props.className].join(' ')}>
-        {isLoading && <span>Loading...</span>}
-        {error && <span>Error: {error.message}</span>}
+      <div className={['timeline', className].join(' ')}>
+        <Message error={error} isLoading={isLoading} />
         {!(isLoading || error) && (
           <Timeline
             defaultTimeStart={start}
             defaultTimeEnd={end}
             groups={groups}
-            items={items}
+            items={this.getFilteredItems()}
             sidebarWidth={250}
             stackItems={true}
-          />
+          >
+            <TimelineHeaders>
+              <SidebarHeader>
+                {({ getRootProps }) => (
+                  <div {...getRootProps()}>
+                    {searchValue && (
+                      <p className="search">
+                        <strong>Search</strong>: {searchValue}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </SidebarHeader>
+              <DateHeader unit="primaryHeader" />
+              <DateHeader />
+            </TimelineHeaders>
+          </Timeline>
         )}
       </div>
     );
