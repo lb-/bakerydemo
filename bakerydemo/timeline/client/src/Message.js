@@ -7,10 +7,10 @@ import PropTypes from 'prop-types';
  * @param {Object} props
  */
 const Message = ({ error, isLoading }) => (
-  <div class="messages">
+  <div className="messages">
     <ul>
-      {isLoading && <li class="success">Loading...</li>}
-      {error && <li class="error">Error: {error.message}</li>}
+      {isLoading && <li className="success">Loading...</li>}
+      {error && <li className="error">Error: {error.message}</li>}
     </ul>
   </div>
 );
