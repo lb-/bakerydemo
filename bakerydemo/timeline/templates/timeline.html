@@ -15,7 +15,7 @@
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       const component = HelloWorld.default;
-      ReactDOM.render(React.createElement(component), document.getElementById('timeline'));
+      ReactDOM.render(React.createElement(component, { className: 'content' }), document.getElementById('timeline'));
     });
   </script>
 {% endblock %}
