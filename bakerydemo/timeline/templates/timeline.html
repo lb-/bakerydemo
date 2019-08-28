@@ -1,25 +1,22 @@
 {% extends "wagtailadmin/base.html" %}
+{% load static %}
+
 {% block titletag %}Timeline{% endblock %}
 {% block bodyclass %}timeline{% endblock %}
 
 {% block extra_css %}
     {{ block.super }}
-    <style>
-      #timeline {
-        padding: 3rem;
-        background: aliceblue;
-        text-align: center;
-      }
-    </style>
+    {% comment %} <link rel="stylesheet" type="text/css" href="{% static 'HelloWorld.css' %}"> {% endcomment %}
 {% endblock %}
 
 {% block extra_js %}
   {{ block.super }}
+  <script src="{% static 'HelloWorld.js' %}"></script>
   <script>
-    ReactDOM.render(
-      <h1>Timeline!</h1>,
-      document.getElementById('timeline')
-    );
+    document.addEventListener('DOMContentLoaded', function() {
+      const component = HelloWorld.default;
+      ReactDOM.render(React.createElement(component), document.getElementById('timeline'));
+    });
   </script>
 {% endblock %}
 
