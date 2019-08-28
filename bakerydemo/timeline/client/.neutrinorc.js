@@ -12,12 +12,22 @@ module.exports = {
       {
         // name: "HelloWorld",
         // externals: {
-        // whitelist: ["moment", "react-calendar-timeline"]
-        // whitelist: ["react-calendar-timeline"]
-        // }
+        //   // https://github.com/neutrinojs/neutrino/blob/master/packages/react-components/index.js#L62
+        //   // https://www.npmjs.com/package/webpack-node-externals
+        //   // https://webpack.js.org/configuration/externals/#externals
+        //   // https://github.com/neutrinojs/neutrino/issues/1425
+        //   // https://github.com/liady/webpack-node-externals/issues/17
+        //   importType: "root",
+        //   whitelist: ["interactjs", "moment", "react-calendar-timeline"]
+        //   // whitelist: ["react-calendar-timeline"]
+        //   // externals: {
+        //   //   react: "React"
+        //   // }
+        // },
+        // externals: false // this bundles even React with everything
       }
     ],
-    "@neutrinojs/jest"
+    "@neutrinojs/jest",
     // [
     //   "@neutrinojs/library",
     //   {
@@ -27,5 +37,9 @@ module.exports = {
     //     }
     //   }
     // ]
+    neutrino => {
+      console.log("neutrino", neutrino);
+      return neutrino;
+    }
   ]
 };
