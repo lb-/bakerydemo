@@ -79,6 +79,7 @@
 
 ### 4. Add external js dependencies and timeline component
 
+- add new component components/Timeline/Timeline.jsx + index.js default export method
 - https://github.com/namespace-ee/react-calendar-timeline#getting-started
 - `yarn add react-calendar-timeline`
 - `yarn add moment`
@@ -98,7 +99,6 @@
 
 ### 7. Add API calls & transform data in the react component
 
-- bit of refactoring, renaming (rename to Timeline.jsx)
 - add API calls (ensure Wagtail API is configured)
 - transform data and pass in to the react timeline component
 - remember to keep the 'mocked' value in the index.jsx file for quick hot loading development
@@ -174,10 +174,12 @@
 
 - ✓ no need for global install
 - ✓ testing, linting, multible variants just works, including various testing libraries
-- ✓ appears to have a lot of capacity to do many things, maybe too much
+- ✓ appears to have a lot of capacity to do many things and be very specific to what you want
 - ✓ docs are huge
 - ✓ yarn seems to be better at recovering after a clean install / new branch
+- ✓ easy to set up multiple isolated 'components' that can each be their own bundle file
 - ✘ detailed docs for specific things is a bit hard to find
 - ✘ uses yarn, yet another package manager (but it is not too much overhead)
-- ✘ react-component by default will need `require` in global to work in prod
-- ✘ does not remove proptypes requirement in production build
+- ✘ react-component by default will need `require` in global to work in prod _fixed_
+- ✘ does not remove proptypes requirement in production build _fixed_
+- ✘ need MyComponent.default in production build usage
