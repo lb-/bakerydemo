@@ -4,8 +4,4 @@ import HelloWorld from './components/HelloWorld';
 
 const root = document.getElementById('root');
 
-render(
-  (
-    <HelloWorld />
-  ), root,
-);
+render(<HelloWorld />, root);

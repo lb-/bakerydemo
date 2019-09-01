@@ -1,11 +1,11 @@
 module.exports = {
   use: [
-    "@neutrinojs/airbnb",
-    "@neutrinojs/react-components",
-    "@neutrinojs/jest",
+    '@neutrinojs/airbnb',
+    '@neutrinojs/react-components',
+    '@neutrinojs/jest',
     /**
      * Ensure that react is read from global - and webpack-node-externals is NOT used.
-     * 
+     *
      * By default the react-components plugin uses webpack-node-externals to build
      * the externals object. This will simply get all dependencies and assume they are
      * external AND assume that requirejs is used.
@@ -19,9 +19,9 @@ module.exports = {
      * https://webpack.js.org/configuration/externals/#externals
      */
     neutrino => {
-      neutrino.config.when(process.env.NODE_ENV === "production", config => {
-        config.externals({ react: "React" });
+      neutrino.config.when(process.env.NODE_ENV === 'production', config => {
+        config.externals({ react: 'React' });
       });
-    }
-  ]
+    },
+  ],
 };

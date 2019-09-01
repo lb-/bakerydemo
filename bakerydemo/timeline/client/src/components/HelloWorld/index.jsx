@@ -2,11 +2,10 @@ import { PureComponent } from 'react'; // eslint-disable-line import/no-extraneo
 import { string } from 'prop-types'; // eslint-disable-line import/no-extraneous-dependencies
 import classNames from 'classnames';
 
-const generateColor = () => `#${
-  (0x1000000 + ((Math.random()) * 0xffffff))
-    .toString(16)
-    .substr(1, 6)
-}`;
+const generateColor = () => {
+  const random = Math.random() * 0xffffff;
+  return `#${(0x1000000 + random).toString(16).substr(1, 6)}`;
+};
 
 export default class HelloWorld extends PureComponent {
   static defaultProps = {
@@ -38,7 +37,9 @@ export default class HelloWorld extends PureComponent {
   render() {
     return (
       <div className={classNames('component', this.props.className)}>
-        <h1 style={{ color: this.state.color, padding: '20px' }}>Hello World!</h1>
+        <h1 style={{ color: this.state.color, padding: '20px' }}>
+          Hello World!
+        </h1>
         <button onClick={this.handleClick}>Change color</button>
       </div>
     );
