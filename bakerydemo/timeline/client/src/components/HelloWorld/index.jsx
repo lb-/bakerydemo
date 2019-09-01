@@ -2,6 +2,8 @@ import { PureComponent } from 'react'; // eslint-disable-line import/no-extraneo
 import { string } from 'prop-types'; // eslint-disable-line import/no-extraneous-dependencies
 import classNames from 'classnames';
 
+import './style.css';
+
 const generateColor = () => {
   const random = Math.random() * 0xffffff;
   return `#${(0x1000000 + random).toString(16).substr(1, 6)}`;
