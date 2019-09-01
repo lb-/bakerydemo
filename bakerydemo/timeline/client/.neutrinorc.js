@@ -1,4 +1,7 @@
 module.exports = {
+  options: {
+    // output: '../../static/timeline/dist' // override to a relative directory (django static folder) - remove STATICFILES_DIRS addition
+  },
   use: [
     '@neutrinojs/airbnb',
     '@neutrinojs/react-components',
