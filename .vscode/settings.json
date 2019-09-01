@@ -1,5 +1,7 @@
 {
   "editor.formatOnSave": true,
+  "editor.rulers": [80],
   "eslint.packageManager": "yarn",
-  "editor.rulers": [80]
+  "[html]": { "editor.formatOnSave": false },
+  "[python]": { "editor.formatOnSave": false }
 }
