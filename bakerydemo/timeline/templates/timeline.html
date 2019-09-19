@@ -6,16 +6,18 @@
 
 {% block extra_css %}
     {{ block.super }}
-    <link rel="stylesheet" type="text/css" href="{% static 'HelloWorld.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'Timeline.css' %}">
 {% endblock %}
 
 {% block extra_js %}
   {{ block.super }}
-  <script src="{% static 'HelloWorld.js' %}"></script>
+  <script src="{% static 'Timeline.js' %}"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      const component = HelloWorld.default;
-      ReactDOM.render(React.createElement(component, { className: 'content' }), document.getElementById('timeline'));
+      ReactDOM.render(
+        React.createElement(Timeline.default, { className: 'content' }),
+        document.getElementById('timeline')
+      );
     });
   </script>
 {% endblock %}
