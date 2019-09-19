@@ -4,7 +4,20 @@ module.exports = {
   },
   use: [
     '@neutrinojs/airbnb',
-    '@neutrinojs/react-components',
+    [
+      '@neutrinojs/react-components',
+      {
+        /** Change options related to starting a webpack-dev-server
+         * https://webpack.js.org/configuration/dev-server/#devserverproxy
+         */
+        devServer: {
+          proxy: {
+            // Proxy requests to /api to Wagtail local Django server
+            '/api': 'http://localhost:8000',
+          },
+        },
+      },
+    ],
     '@neutrinojs/jest',
     /**
      * Ensure that react is read from global - and webpack-node-externals is NOT used.
