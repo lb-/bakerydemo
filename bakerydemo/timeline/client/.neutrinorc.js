@@ -3,7 +3,17 @@ module.exports = {
     // output: '../../static/timeline/dist' // override to a relative directory (django static folder) - remove STATICFILES_DIRS addition
   },
   use: [
-    '@neutrinojs/airbnb',
+    [
+      '@neutrinojs/airbnb',
+      {
+        eslint: {
+          rules: {
+            'arrow-parens': ['error', 'as-needed'],
+            'function-paren-newline': 'off',
+          },
+        },
+      },
+    ],
     [
       '@neutrinojs/react-components',
       {
