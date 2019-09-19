@@ -12,6 +12,8 @@
 - Bundling css _maybe even scss_
 - Must leverage existing Wagtail view, sidebar, header etc
 - Set up prettier
+- Important to note: changing eslint config done in .neutrino.js and requires dev server restart AND editor reload Vscode
+- moment js is huge, see how we can reduce what is included
 
 ## Understanding
 
@@ -99,9 +101,11 @@
 
 ### 7. Add API calls & transform data in the react component
 
-- add API calls (ensure Wagtail API is configured)
+- add API calls (ensure Wagtail API is configured with more than 20 returned items)
 - transform data and pass in to the react timeline component
 - remember to keep the 'mocked' value in the index.jsx file for quick hot loading development
+- dev server proxy (neutrino config)
+- note about eslint configuration (required reload)
 - filter based on search value
 - yarn build
 - test it all & commit changes
