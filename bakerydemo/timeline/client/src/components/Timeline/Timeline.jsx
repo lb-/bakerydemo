@@ -14,7 +14,7 @@ import transform from './transform';
 
 // styles
 
-import './style.css';
+import './timeline.css';
 
 export default class extends PureComponent {
   static defaultProps = {
