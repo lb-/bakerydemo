@@ -1,7 +1,7 @@
 {% extends "wagtailadmin/base.html" %}
 {% load static %}
 
-{% block titletag %}Timeline{% endblock %}
+{% block titletag %}{{ title }}{% endblock %}
 {% block bodyclass %}timeline{% endblock %}
 
 {% block extra_css %}
@@ -14,25 +14,20 @@
   <script src="{% static 'Timeline.js' %}"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      ReactDOM.render(
-        React.createElement(Timeline.default, { className: 'content' }),
-        document.getElementById('timeline')
-      );
+      const props = { className: 'inner', initialSearchValue: '{{ query_string }}', searchFormId: 'id_q' };
+      const element = React.createElement(Timeline.default, props);
+      const container = document.querySelector('#timeline');
+      ReactDOM.render(element, container);
     });
   </script>
 {% endblock %}
 
 {% block content %}
-    <header class="merged nice-padding" role="banner">
-        <div class="row row-flush">
-            <div class="col9">
-                <h1>Timeline</h1>
-            </div>
-        </div>
-    </header>
-    <main>
-      <div id="timeline">
-        Timeline
-      </div>
-    </main>
+  {% include "wagtailadmin/shared/header.html" with title=title %}
+  <div class="container">
+    <div id="timeline">
+      {{ title }}
+    </div>
+  </div>
 {% endblock %}
+
