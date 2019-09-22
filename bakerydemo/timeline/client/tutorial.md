@@ -1,5 +1,6 @@
 # Tutorial
 
+**Goal:** How to integrate a single React component in Wagtail's CMS admin
 **Goal:** Integrate a single npm react component to leverage it inside an existing Wagtail admin project.
 
 ## Problems to work through
@@ -110,9 +111,12 @@
 - yarn build
 - test it all & commit changes
 
-### 8. Stretch: get more complex data from custom API endpoint
+### Not Covered
 
-- important: must have a way to secure the response to signed in only
+- more complex data scenarios, or custom API endpoint creation
+- unit tests
+- scss or other css variants
+- minimising the moment js bundle (it is huge by default)
 
 ## Attempts
 
