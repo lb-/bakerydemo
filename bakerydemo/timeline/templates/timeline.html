@@ -5,6 +5,23 @@
 {% block titletag %}{{ title }}{% endblock %}
 {% block bodyclass %}timeline{% endblock %}
 
+{% block extra_js %}
+  {{ block.super }}
+  <script>
+    // templates/timeline/timeline.html
+    document.addEventListener('DOMContentLoaded', function() {
+      ReactDOM.render(
+        React.createElement(
+          'div',
+          {
+            children: 'TIMELINE CONTENT HERE',
+            className: 'timeline-content'
+          }
+        ), document.getElementById('timeline'));
+    });
+  </script>
+{% endblock %}
+
 {% block content %}
   {% include "wagtailadmin/shared/header.html" with title=title %}
   <div class="container">
