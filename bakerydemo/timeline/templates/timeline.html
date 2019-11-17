@@ -1,0 +1,15 @@
+{% extends "wagtailadmin/base.html" %}
+{% comment %} timeline/templates/timeline.html {% endcomment %}
+{% load static %}
+
+{% block titletag %}{{ title }}{% endblock %}
+{% block bodyclass %}timeline{% endblock %}
+
+{% block content %}
+  {% include "wagtailadmin/shared/header.html" with title=title %}
+  <div class="container">
+    <div id="timeline">
+      {{ title }}
+    </div>
+  </div>
+{% endblock %}
