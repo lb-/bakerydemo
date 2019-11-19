@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 
+import './style.css';
+
 // From https://reactjs.org/docs/hooks-state.html
 export default function Example() {
   // Declare a new state variable, which we'll call "count"
