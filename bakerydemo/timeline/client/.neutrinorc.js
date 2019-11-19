@@ -6,9 +6,5 @@ module.exports = {
   options: {
     root: __dirname,
   },
-  use: [
-    airbnb(),
-    reactComponents(),
-    jest(),
-  ],
+  use: [airbnb(), reactComponents(), jest()],
 };
