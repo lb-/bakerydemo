@@ -7,19 +7,18 @@
 
 {% block extra_css %}
     {{ block.super }}
-    <link rel="stylesheet" type="text/css" href="{% static 'Example.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'Timeline.css' %}">
 {% endblock %}
 
 {% block extra_js %}
   {{ block.super }}
-  <script src="{% static 'Example.js' %}"></script>
+  <script src="{% static 'Timeline.js' %}"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       ReactDOM.render(
         React.createElement(
-          Example.default, // note - using .default here as this is how the global is set up
+          Timeline.default, // note - using .default here as this is how the global is set up
           {
-            children: 'TIMELINE CONTENT HERE',
             className: 'timeline-content'
           }
         ), document.getElementById('timeline'));
