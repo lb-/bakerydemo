@@ -5,14 +5,19 @@
 {% block titletag %}{{ title }}{% endblock %}
 {% block bodyclass %}timeline{% endblock %}
 
+{% block extra_css %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static 'Example.css' %}">
+{% endblock %}
+
 {% block extra_js %}
   {{ block.super }}
+  <script src="{% static 'Example.js' %}"></script>
   <script>
-    // templates/timeline/timeline.html
     document.addEventListener('DOMContentLoaded', function() {
       ReactDOM.render(
         React.createElement(
-          'div',
+          Example.default, // note - using .default here as this is how the global is set up
           {
             children: 'TIMELINE CONTENT HERE',
             className: 'timeline-content'
