@@ -34,5 +34,11 @@
   "prettier": {
     "singleQuote": true,
     "trailingComma": "all"
+  },
+  "dependencies": {
+    "classnames": "^2.2.6",
+    "interactjs": "^1.7.0",
+    "moment": "^2.24.0",
+    "react-calendar-timeline": "^0.26.7"
   }
 }
