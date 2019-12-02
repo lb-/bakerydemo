@@ -13,6 +13,7 @@ module.exports = {
           'arrow-parens': ['error', 'as-needed'],
           'function-paren-newline': 'off',
           'implicit-arrow-linebreak': 'off',
+          'react/jsx-props-no-spreading': 'off',
         },
       },
     }),
