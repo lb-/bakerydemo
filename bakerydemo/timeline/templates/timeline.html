@@ -15,12 +15,12 @@
   <script src="{% static 'Timeline.js' %}"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
+      const props = { className: 'inner timeline-content', initialSearchValue: '{{ query_string }}', searchFormId: 'id_q' };
+
       ReactDOM.render(
         React.createElement(
           Timeline.default, // note - using .default here as this is how the global is set up
-          {
-            className: 'timeline-content'
-          }
+          props
         ), document.getElementById('timeline'));
     });
   </script>
