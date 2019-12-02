@@ -179,3 +179,5 @@ WAGTAILSEARCH_BACKENDS = {
 
 # Wagtail settings
 WAGTAIL_SITE_NAME = "bakerydemo"
+
+WAGTAILAPI_LIMIT_MAX = 100
