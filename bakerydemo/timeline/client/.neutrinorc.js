@@ -8,7 +8,13 @@ module.exports = {
   },
   use: [
     airbnb(),
-    reactComponents(),
+    reactComponents({
+      /** Change options related to starting a webpack-dev-server
+       * https://webpack.js.org/configuration/dev-server/#devserverproxy
+       * Proxy requests to /api to Wagtail local Django server
+       */
+      devServer: { proxy: { '/api': 'http://localhost:8000' } },
+    }),
     jest(),
     /**
      * Ensure that react is read from global - and webpack-node-externals is NOT used.
