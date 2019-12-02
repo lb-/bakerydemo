@@ -13,10 +13,15 @@ render(
             <h1 className="icon icon-">Timeline</h1>
           </div>
         </div>
-        <div className="right" />
+        <div className="right">
+          <label htmlFor="id_q">
+            Search term:
+            <input type="text" name="q" id="id_q" placeholder="Search" />
+          </label>
+        </div>
       </div>
     </header>
-    <Timeline className="additional-class" />
+    <Timeline className="additional-class" searchFormId="id_q" />
   </main>,
   document.getElementById('root'),
 );
