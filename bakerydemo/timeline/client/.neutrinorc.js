@@ -7,7 +7,15 @@ module.exports = {
     root: __dirname,
   },
   use: [
-    airbnb(),
+    airbnb({
+      eslint: {
+        rules: {
+          'arrow-parens': ['error', 'as-needed'],
+          'function-paren-newline': 'off',
+          'implicit-arrow-linebreak': 'off',
+        },
+      },
+    }),
     reactComponents({
       /** Change options related to starting a webpack-dev-server
        * https://webpack.js.org/configuration/dev-server/#devserverproxy
