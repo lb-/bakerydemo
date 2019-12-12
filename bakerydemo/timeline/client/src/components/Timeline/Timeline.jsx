@@ -125,10 +125,10 @@ class Timeline extends PureComponent {
                 {({ getRootProps }) => (
                   <div {...getRootProps()}>
                     {searchValue && (
-                      <p className="search">
+                      <div className="search">
                         <strong className="search-label">Search: </strong>
                         <span className="search-value">{searchValue}</span>
-                      </p>
+                      </div>
                     )}
                   </div>
                 )}
