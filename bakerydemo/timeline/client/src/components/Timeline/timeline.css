@@ -1,4 +1,20 @@
 /* timeline/client/src/components/Timeline/timeline.css */
-.timeline {
-  background: lightblue;
+.timeline .react-calendar-timeline .rct-header-root {
+  background: #007d7e; /* wagtail teal */
+  position: sticky;
+  top: 0;
+  z-index: 90;
+}
+
+.timeline .search {
+  align-items: center;
+  color: white;
+  display: flex;
+  height: 100%;
+  padding: 1rem;
+}
+
+.timeline .search .search-label {
+  text-transform: uppercase;
+  padding-right: 0.25rem;
 }
