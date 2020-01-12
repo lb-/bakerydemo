@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load wagtailimages_tags %}
+
+{% block content %}
+    {% include "base/include/header.html" %}
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-7">
+                <ul>
+                {% for childpage in page.get_children %}
+                  <li>PAGE: <a href="{{ page.url }}{{ childpage.url }}">{{ childpage.title }}</a></li>
+                {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

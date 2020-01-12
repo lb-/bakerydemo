@@ -14,7 +14,7 @@ from wagtail.admin.edit_handlers import (
     StreamFieldPanel,
 )
 from wagtail.core.fields import RichTextField, StreamField
-from wagtail.core.models import Collection, Page
+from wagtail.core.models import Collection, Orderable, Page
 from wagtail.contrib.forms.models import AbstractEmailForm, AbstractFormField
 from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail.search import index
@@ -369,3 +369,64 @@ class FormPage(AbstractEmailForm):
             FieldPanel('subject'),
         ], "Email"),
     ]
+
+class ArticlePage(Page):
+
+    content_panels = Page.content_panels
+
+    subpage_types = [] # no sub-pages allowed
+
+
+# The abstract model for related links, complete with panels
+class RelatedArticle(models.Model):
+    # http://docs.wagtail.io/en/v2.7.1/reference/pages/panels.html#inline-panels
+    article_page = models.ForeignKey(
+        'wagtailcore.Page',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='+',
+    )
+
+    panels = [
+        PageChooserPanel('article_page', 'base.ArticlePage')
+    ]
+
+    class Meta:
+        abstract = True
+
+class ArticlePageRelatedPages(Orderable, RelatedArticle):
+    page = ParentalKey(
+        'base.AnimalPage',
+        on_delete=models.CASCADE,
+        related_name='related_articles'
+    )
+
+class AnimalsPage(Page):
+
+    content_panels = Page.content_panels
+
+    subpage_types = ['AnimalPage']
+
+
+class AnimalPage(Page):
+
+    def get_articles(self):
+        # returns a queryset (not a list) of all Pages that are linked articles
+        return Page.objects.filter(id__in=[
+            r.article_page.pk for r in self.related_articles.all()
+        ])
+
+    def get_children(self):
+        # override the method from django-treebeard
+        # can be used in the template or wherever needed for 'children'
+        # this method is also used when attempting to find child urls
+        sub_pages = super().get_children()
+        articles = self.get_articles()
+        return articles | sub_pages # merges the two querysets
+
+    content_panels = Page.content_panels + [
+        InlinePanel('related_articles', label='Related Articles'),
+    ]
+
+    subpage_types = [] # no sub-pages allowed
