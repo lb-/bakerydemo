@@ -103,7 +103,18 @@ class FooterText(models.Model):
         verbose_name_plural = 'Footer Text'
 
 
-class StandardPage(Page):
+class BasePageMixin(models.Model):
+    class Meta:
+        abstract=True
+    
+    no_index = models.BooleanField(default=False)
+    
+    # overriding panels here will not work - will need to be one on a per model basis
+
+
+
+
+class StandardPage(Page, BasePageMixin):
     """
     A generic content page. On this demo site we use it for an about page but
     it could be used for any type of page content that only needs a title,
