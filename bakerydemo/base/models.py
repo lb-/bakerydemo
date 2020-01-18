@@ -102,19 +102,7 @@ class FooterText(models.Model):
     class Meta:
         verbose_name_plural = 'Footer Text'
 
-class CustomPageMixin(Page):
-    class Meta:
-        abstract=True
-    
-    no_index = models.BooleanField(default=False)
-    
-    # adding to content_panels on other pages will need to use THIS promote_panels
-    # e.g. promote_panels = CustomPageMixin.promote_panels + [...]
-    promote_panels = Page.promote_panels + [
-        FieldPanel('no_index'),
-    ]
-
-class StandardPage(CustomPageMixin):
+class StandardPage(Page):
     """
     A generic content page. On this demo site we use it for an about page but
     it could be used for any type of page content that only needs a title,
@@ -142,7 +130,7 @@ class StandardPage(CustomPageMixin):
     ]
 
 
-class HomePage(CustomPageMixin):
+class HomePage(Page):
     """
     The Home Page. This looks slightly more complicated than it is. You can
     see if you visit your site and edit the homepage that it is split between
@@ -298,7 +286,7 @@ class HomePage(CustomPageMixin):
         return self.title
 
 
-class GalleryPage(CustomPageMixin):
+class GalleryPage(Page):
     """
     This is a page to list locations from the selected Collection. We use a Q
     object to list any Collection created (/admin/collections/) even if they
