@@ -1,67 +1,29 @@
+from django.conf.urls import url
+from django.http import HttpResponse
+from django.urls import reverse
 from django.utils.html import format_html
+from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_exempt
 
-from wagtail.contrib.modeladmin.options import (
-    ModelAdmin, ModelAdminGroup, modeladmin_register)
 from wagtail.admin.widgets import PageListingButton
 from wagtail.core import hooks
 
-from bakerydemo.breads.models import Country, BreadIngredient, BreadType
-from bakerydemo.base.models import People, FooterText
 
-'''
-N.B. To see what icons are available for use in Wagtail menus and StreamField block types,
-enable the styleguide in settings:
+@csrf_exempt # not recommended - but helpful to get to the POC stage
+@require_http_methods(["POST"])
+def regnerate_admin_features(request):
+    page_pk = request.GET.get('id', '')
+    # do whatever you need here with the PK to process the action
 
-INSTALLED_APPS = (
-   ...
-   'wagtail.contrib.styleguide',
-   ...
-)
+    return HttpResponse(
+        "Success/Error handling goes here",
+        content_type="text/plain")
 
-or see http://kave.github.io/general/2015/12/06/wagtail-streamfield-icons.html
-
-This demo project includes the full font-awesome set via CDN in base.html, so the entire
-font-awesome icon set is available to you. Options are at http://fontawesome.io/icons/.
-'''
-
-
-class BreadIngredientAdmin(ModelAdmin):
-    # These stub classes allow us to put various models into the custom "Wagtail Bakery" menu item
-    # rather than under the default Snippets section.
-    model = BreadIngredient
-
-
-class BreadTypeAdmin(ModelAdmin):
-    model = BreadType
-
-
-class BreadCountryAdmin(ModelAdmin):
-    model = Country
-
-
-class BreadModelAdminGroup(ModelAdminGroup):
-    menu_label = 'Bread Categories'
-    menu_icon = 'fa-suitcase'  # change as required
-    menu_order = 200  # will put in 3rd place (000 being 1st, 100 2nd)
-    items = (BreadIngredientAdmin, BreadTypeAdmin, BreadCountryAdmin)
-
-
-class PeopleModelAdmin(ModelAdmin):
-    model = People
-    menu_label = 'People'  # ditch this to use verbose_name_plural from model
-    menu_icon = 'fa-users'  # change as required
-    list_display = ('first_name', 'last_name', 'job_title', 'thumb_image')
-
-
-class FooterTextAdmin(ModelAdmin):
-    model = FooterText
-
-
-class BakeryModelAdminGroup(ModelAdminGroup):
-    menu_label = 'Bakery Misc'
-    menu_icon = 'fa-cutlery'  # change as required
-    menu_order = 300  # will put in 4th place (000 being 1st, 100 2nd)
-    items = (PeopleModelAdmin, FooterTextAdmin)
+@hooks.register('register_admin_urls')
+def urlconf_time():
+  return [
+    url(r'^regenerate_geo_features/$', regnerate_admin_features, name='regenerate_geo_features'),
+  ]
 
 @hooks.register('register_page_listing_buttons')
 def page_listing_buttons(page, page_perms, is_parent=False):
@@ -72,7 +34,7 @@ def page_listing_buttons(page, page_perms, is_parent=False):
 
     yield PageListingButton(
         'Regenerate Geo Features',
-        '#',
+        reverse('regenerate_geo_features'),
         attrs=attrs,
         classes=["action-regenerate-geo-features"],
         priority=100
@@ -80,12 +42,18 @@ def page_listing_buttons(page, page_perms, is_parent=False):
 
 @hooks.register('insert_global_admin_js')
 def global_admin_js():
+    # note - this is very rough, no error, loading or sucess messaging
+    # reminder - using format_html means all `{` must be written as `{{`
     return format_html(
         """
         <script>
         const onClickHandler = function(event) {{
             event.preventDefault(); // ensure the hash does not change
-            console.log('clicked', event.target.dataset.id);
+            const url = event.target.href + '?id=' + event.target.dataset.id;
+            console.log('button clicked - about to POST to URL:', url);
+            fetch(url, {{
+                method: 'POST', // or 'PUT'
+            }})
         }};
 
         window.addEventListener('DOMContentLoaded', function(event) {{
@@ -98,8 +66,3 @@ def global_admin_js():
         </script>
         """,
     )
-
-# When using a ModelAdminGroup class to group several ModelAdmin classes together,
-# you only need to register the ModelAdminGroup class with Wagtail:
-modeladmin_register(BreadModelAdminGroup)
-modeladmin_register(BakeryModelAdminGroup)
