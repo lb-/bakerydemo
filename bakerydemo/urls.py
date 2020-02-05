@@ -9,10 +9,12 @@ from wagtail.core import urls as wagtail_urls
 
 from bakerydemo.search import views as search_views
 from .api import api_router
+from myapp.base import views as base_views  # added
 
 urlpatterns = [
     url(r'^django-admin/', admin.site.urls),
 
+    url(r'^admin/pages/(\d+)/copy/$', base_views.customCopy, name='copy'),  # added
     url(r'^admin/', include(wagtailadmin_urls)),
     url(r'^documents/', include(wagtaildocs_urls)),
 

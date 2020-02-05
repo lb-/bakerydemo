@@ -217,3 +217,7 @@ class BlogIndexPage(RoutablePageMixin, Page):
             tags += post.get_tags
         tags = sorted(set(tags))
         return tags
+
+    def can_copy_check(self):
+
+        return False
