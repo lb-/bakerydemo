@@ -11,6 +11,7 @@ from taggit.models import Tag, TaggedItemBase
 
 from wagtail.contrib.routable_page.models import RoutablePageMixin, route
 from wagtail.admin.edit_handlers import FieldPanel, InlinePanel, StreamFieldPanel
+from wagtail.admin.forms import WagtailAdminPageForm
 from wagtail.core.fields import StreamField
 from wagtail.core.models import Page, Orderable
 from wagtail.images.edit_handlers import ImageChooserPanel
@@ -46,6 +47,41 @@ class BlogPageTag(TaggedItemBase):
     http://docs.wagtail.io/en/latest/reference/pages/model_recipes.html#tagging
     """
     content_object = ParentalKey('BlogPage', related_name='tagged_items', on_delete=models.CASCADE)
+
+
+class BlogPageForm(WagtailAdminPageForm):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        instance = getattr(self, 'instance', None)
+        if not instance.pk:
+            # this is a NEW blog entry form - only allow title to be enabled
+            self.fields['introduction'].widget.attrs['readonly'] = True
+        if instance.pk:
+            # assume title has been entered and saved at this point (required for a new post)
+            # disable the title field
+            # self.fields['title'].widget.attrs['readonly'] = True
+            pass
+
+    def clean(self):
+        cleaned_data = super().clean()
+        instance = getattr(self, 'instance', None)
+
+        title = cleaned_data['title']
+        introduction = cleaned_data['introduction']
+        if not instance.pk:
+            # this is a NEW blog entry, check that only the title has been entered
+            if not title:
+                self.add_error('title', 'title must be edited before all other fields')
+                return cleaned_data
+            if introduction:
+                self.add_error('introduction', 'introduction cannot be entered until title has been completed')
+
+        if instance.pk:
+            # an existing blog entry, do not allow title to be changed
+            print('title', instance.title, title)
+            if instance.title != title:
+                self.add_error('title', 'title cannot be edited after the initial save')
 
 
 class BlogPage(Page):
@@ -128,6 +164,8 @@ class BlogPage(Page):
     # Specifies what content types can exist as children of BlogPage.
     # Empty list means that no child content types are allowed.
     subpage_types = []
+
+    base_form_class = BlogPageForm
 
 
 class BlogIndexPage(RoutablePageMixin, Page):
