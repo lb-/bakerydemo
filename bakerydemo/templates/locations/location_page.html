@@ -31,6 +31,14 @@
         </div>
 
         <div class="container">
+            <div>
+                {% if page.get_tags %}
+                    Tagged with:<br />
+                    {% for tag in page.get_tags  %}
+                        <a href="{{ tag.url }}" class="btn btn-sm">{{ tag }}</a>
+                    {% endfor %}
+                {% endif %}
+            </div>
             <div class="row">
                 <div class="col-md-7">
                     <div class="row">

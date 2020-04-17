@@ -1,4 +1,5 @@
 from datetime import datetime
+from itertools import chain
 
 from django import forms
 from django.conf import settings
@@ -11,6 +12,7 @@ from wagtail.core.blocks import (
     CharBlock, FieldBlock, PageChooserBlock, StructValue, StructBlock, TextBlock, RichTextBlock, URLBlock)
 from wagtail.core.fields import StreamField
 from wagtail.admin.edit_handlers import FieldPanel, InlinePanel, StreamFieldPanel
+from wagtail.admin.widgets import AdminTagWidget
 from wagtail.core.models import Orderable, Page
 from wagtail.search import index
 from wagtail.images.edit_handlers import ImageChooserPanel
@@ -128,15 +130,24 @@ class LocationsIndexPage(Page):
 
 
 class IPAddressBlock(FieldBlock):
-    def __init__(self, required=True, help_text=None, **kwargs):
-        self.field = forms.GenericIPAddressField(required=required, help_text=help_text)
+    # looks like we need to keep this as removing it breaks previous migrations
+    pass
+
+class TagsBlock(FieldBlock):
+    """
+    Basic Stream Block that will use the Wagtail tags system.
+    Stores the tags as simple strings only.
+    """
+
+    def __init__(self, required=False, help_text=None, **kwargs):
+        self.field = forms.CharField(widget=AdminTagWidget)
         super().__init__(**kwargs)
 
 
 class MapBlock(StructBlock):
-    title = CharBlock(label="Title", required=True)
+    title = CharBlock(label="Title", required=False)
     content = RichTextBlock(label="Content", required=False)
-    ip_address = IPAddressBlock(label="IP Address", required=False)
+    tags = TagsBlock(label="Tags", required=False)
 
     class Meta:
         icon = 'globe'
@@ -174,9 +185,23 @@ class LocationPage(Page):
         ]
     )
 
-    test_a = StreamField([
-        ('Map', MapBlock())
-    ])
+    map_info = StreamField([
+        ('Map', MapBlock(required=False))
+    ], blank=True)
+
+    @property
+    def get_tags(self):
+        """
+        Helpful property to pull out the tags saved inside the struct value
+        Important: makes some hard assumptions about the names & structure
+        Does not get the id of the tag, only the strings as a list
+        """
+
+        tags_all = [block.value.get('tags', '').split(',') for block in self.test_b]
+
+        tags = list(chain.from_iterable(tags_all))
+
+        return tags
 
     # Search index configuration
     search_fields = Page.search_fields + [
@@ -187,7 +212,7 @@ class LocationPage(Page):
     # Fields to show to the editor in the admin view
     content_panels = [
         FieldPanel('title', classname="full"),
-        StreamFieldPanel('test_a'),
+        StreamFieldPanel('map_info'),
         FieldPanel('introduction', classname="full"),
         ImageChooserPanel('image'),
         StreamFieldPanel('body'),
