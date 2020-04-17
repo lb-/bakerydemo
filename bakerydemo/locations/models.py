@@ -1,11 +1,14 @@
 from datetime import datetime
 
+from django import forms
 from django.conf import settings
 from django.core.validators import RegexValidator
 from django.db import models
 
 from modelcluster.fields import ParentalKey
 
+from wagtail.core.blocks import (
+    CharBlock, FieldBlock, PageChooserBlock, StructValue, StructBlock, TextBlock, RichTextBlock, URLBlock)
 from wagtail.core.fields import StreamField
 from wagtail.admin.edit_handlers import FieldPanel, InlinePanel, StreamFieldPanel
 from wagtail.core.models import Orderable, Page
@@ -124,6 +127,21 @@ class LocationsIndexPage(Page):
     ]
 
 
+class IPAddressBlock(FieldBlock):
+    def __init__(self, required=True, help_text=None, **kwargs):
+        self.field = forms.GenericIPAddressField(required=required, help_text=help_text)
+        super().__init__(**kwargs)
+
+
+class MapBlock(StructBlock):
+    title = CharBlock(label="Title", required=True)
+    content = RichTextBlock(label="Content", required=False)
+    ip_address = IPAddressBlock(label="IP Address", required=False)
+
+    class Meta:
+        icon = 'globe'
+
+
 class LocationPage(Page):
     """
     Detail for a specific bakery location.
@@ -156,6 +174,10 @@ class LocationPage(Page):
         ]
     )
 
+    test_a = StreamField([
+        ('Map', MapBlock())
+    ])
+
     # Search index configuration
     search_fields = Page.search_fields + [
         index.SearchField('address'),
@@ -165,6 +187,7 @@ class LocationPage(Page):
     # Fields to show to the editor in the admin view
     content_panels = [
         FieldPanel('title', classname="full"),
+        StreamFieldPanel('test_a'),
         FieldPanel('introduction', classname="full"),
         ImageChooserPanel('image'),
         StreamFieldPanel('body'),
