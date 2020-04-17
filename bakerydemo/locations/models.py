@@ -185,23 +185,23 @@ class LocationPage(Page):
         ]
     )
 
-    map_info = StreamField([
-        ('Map', MapBlock(required=False))
-    ], blank=True)
+    # map_info = StreamField([
+    #     ('Map', MapBlock(required=False))
+    # ], blank=True)
 
-    @property
-    def get_tags(self):
-        """
-        Helpful property to pull out the tags saved inside the struct value
-        Important: makes some hard assumptions about the names & structure
-        Does not get the id of the tag, only the strings as a list
-        """
+    # @property
+    # def get_tags(self):
+    #     """
+    #     Helpful property to pull out the tags saved inside the struct value
+    #     Important: makes some hard assumptions about the names & structure
+    #     Does not get the id of the tag, only the strings as a list
+    #     """
 
-        tags_all = [block.value.get('tags', '').split(',') for block in self.test_b]
+    #     tags_all = [block.value.get('tags', '').split(',') for block in self.test_b]
 
-        tags = list(chain.from_iterable(tags_all))
+    #     tags = list(chain.from_iterable(tags_all))
 
-        return tags
+    #     return tags
 
     # Search index configuration
     search_fields = Page.search_fields + [
@@ -212,7 +212,7 @@ class LocationPage(Page):
     # Fields to show to the editor in the admin view
     content_panels = [
         FieldPanel('title', classname="full"),
-        StreamFieldPanel('map_info'),
+        # StreamFieldPanel('map_info'),
         FieldPanel('introduction', classname="full"),
         ImageChooserPanel('image'),
         StreamFieldPanel('body'),
