@@ -19,8 +19,9 @@ from wagtail.admin.edit_handlers import (
 )
 from wagtail.core.fields import RichTextField, StreamField
 from wagtail.core.models import Collection, Page
-from wagtail.contrib.forms.models import AbstractEmailForm, AbstractFormField, FormSubmission, FORM_FIELD_CHOICES
+from wagtail.contrib.forms.models import AbstractEmailForm, AbstractFormField, AbstractFormSubmission, FORM_FIELD_CHOICES
 from wagtail.contrib.forms.forms import FormBuilder
+from wagtail.contrib.forms.views import SubmissionsListView
 from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail.search import index
 from wagtail.snippets.models import register_snippet
@@ -360,13 +361,41 @@ class CustomFormBuilder(FormBuilder):
         return forms.FileField(**options)
 
 
+class CustomFormSubmission(AbstractFormSubmission):
+    # important - adding this custom model will make existing submissions unavailable
+    # can be resolved with a custom migration
+
+    def get_data(self):
+        """
+        Here we hook in to the data representation that the form submission returns
+        Note: there is another way to do this with a custom SubmissionsListView
+        However, this gives a bit more granular control
+        """
+
+        file_form_fields = [
+            field.clean_name for field in self.page.specific.get_form_fields()
+            if field.field_type == 'fileupload'
+        ]
+
+        data = super().get_data()
+
+        for field_name, field_vale in data.items():
+            if field_name in file_form_fields:
+                # now we can update the 'representation' of this value
+                # we could query the FormUploadedFile based on field_vale (pk)
+                # then return the filename etc.
+                pass
+
+        return data
+
+
 class FormUploadedFile(models.Model):
     file = models.FileField(upload_to="files/%Y/%m/%d")
 
     field_name = models.CharField(blank=True, max_length=254)
 
     form_submission = models.ForeignKey(
-        FormSubmission,  # using ForeignKey connected to the built in FormSubmission model
+        CustomFormSubmission,
         on_delete=models.CASCADE,
         related_name='files',
         blank=True,
@@ -375,7 +404,7 @@ class FormUploadedFile(models.Model):
 
 
 class FormPage(AbstractEmailForm):
-    # base_form_class = CustomWagtailAdminFormPageForm
+
     form_builder = CustomFormBuilder
 
     image = models.ForeignKey(
@@ -404,6 +433,16 @@ class FormPage(AbstractEmailForm):
         ], "Email"),
     ]
 
+    def get_submission_class(self):
+        """
+        Returns submission class.
+
+        You can override this method to provide custom submission class.
+        Your class must be inherited from AbstractFormSubmission.
+        """
+
+        return CustomFormSubmission
+
     def process_form_submission(self, form):
         """
         Accepts form instance with submitted data, user and page.
@@ -415,7 +454,7 @@ class FormPage(AbstractEmailForm):
 
         file_form_fields = [field.clean_name for field in self.get_form_fields() if field.field_type == 'fileupload']
 
-        files = []
+        file_ids = []
 
         for (field_name, field_value) in form.cleaned_data.items():
             if field_name in file_form_fields:
@@ -424,7 +463,7 @@ class FormPage(AbstractEmailForm):
                     field_name=field_name
                 )
 
-                files + [uploaded_file]  # save for later to update the relation after
+                file_ids + [uploaded_file.pk]  # save for later to update the relation after
                 form.cleaned_data[field_name] = uploaded_file.pk  # store a reference to the pk
 
         form_submission = self.get_submission_class().objects.create(
@@ -432,7 +471,7 @@ class FormPage(AbstractEmailForm):
             page=self,
         )
 
-        for file in files:
-            file.update(form_submission=form_submission)
+        # note - this is not working currently but essentially we want to update the files added to be linked to submission
+        FormUploadedFile.objects.filter(id__in=file_ids).update(form_submission=form_submission)
 
         return form_submission
