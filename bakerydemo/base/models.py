@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 from django.db import models
+from django import forms
 
 from modelcluster.fields import ParentalKey
 from modelcluster.models import ClusterableModel
@@ -15,7 +16,8 @@ from wagtail.admin.edit_handlers import (
 )
 from wagtail.core.fields import RichTextField, StreamField
 from wagtail.core.models import Collection, Page
-from wagtail.contrib.forms.models import AbstractEmailForm, AbstractFormField
+from wagtail.contrib.forms.models import AbstractEmailForm, AbstractFormField, FORM_FIELD_CHOICES
+from wagtail.contrib.forms.forms import FormBuilder
 from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail.search import index
 from wagtail.snippets.models import register_snippet
@@ -342,8 +344,21 @@ class FormField(AbstractFormField):
     """
     page = ParentalKey('FormPage', related_name='form_fields', on_delete=models.CASCADE)
 
+    field_type = models.CharField(
+        verbose_name='field type',
+        max_length=16,
+        choices=FORM_FIELD_CHOICES + (('fileupload', 'File Upload'),)
+    )
+
+class CustomFormBuilder(FormBuilder):
+
+    def create_fileupload_field(self, field, options):
+        return forms.FileField(**options)
+
 
 class FormPage(AbstractEmailForm):
+    form_builder = CustomFormBuilder
+
     image = models.ForeignKey(
         'wagtailimages.Image',
         null=True,
