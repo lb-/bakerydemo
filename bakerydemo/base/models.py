@@ -360,18 +360,18 @@ class CustomFormBuilder(FormBuilder):
         return forms.FileField(**options)
 
 
-# class CustomAbstractFormSubmission(AbstractFormSubmission):
-#     """
-#     important: changing the form submission model used will mean all previous
-#     submissions will not be accessible (can be fixed with a manual migration)
-#     """
-
-#     pass
-
-
 class FormUploadedFile(models.Model):
     file = models.FileField(upload_to="files/%Y/%m/%d")
-    # form_submission = models.ForeignKey(FormSubmission, on_delete=models.CASCADE, related_name='files')
+
+    field_name = models.CharField(blank=True, max_length=254)
+
+    form_submission = models.ForeignKey(
+        FormSubmission,  # using ForeignKey connected to the built in FormSubmission model
+        on_delete=models.CASCADE,
+        related_name='files',
+        blank=True,
+        null=True
+    )
 
 
 class FormPage(AbstractEmailForm):
@@ -404,16 +404,6 @@ class FormPage(AbstractEmailForm):
         ], "Email"),
     ]
 
-    # def get_submission_class(self):
-    #     """
-    #     Returns submission class.
-
-    #     You can override this method to provide custom submission class.
-    #     Your class must be inherited from AbstractFormSubmission.
-    #     """
-
-    #     return CustomAbstractFormSubmission
-
     def process_form_submission(self, form):
         """
         Accepts form instance with submitted data, user and page.
@@ -425,20 +415,24 @@ class FormPage(AbstractEmailForm):
 
         file_form_fields = [field.clean_name for field in self.get_form_fields() if field.field_type == 'fileupload']
 
-        print('form', form.cleaned_data, file_form_fields)
-
         files = []
 
         for (field_name, field_value) in form.cleaned_data.items():
             if field_name in file_form_fields:
-                uploaded_file = FormUploadedFile.objects.create(file=field_value)
-                
-                print('uploaded_file', uploaded_file)
-                print('FOUND', field_name, field_value)
+                uploaded_file = FormUploadedFile.objects.create(
+                    file=field_value,
+                    field_name=field_name
+                )
 
-                form.cleaned_data[field_name] = uploaded_file.pk
+                files + [uploaded_file]  # save for later to update the relation after
+                form.cleaned_data[field_name] = uploaded_file.pk  # store a reference to the pk
 
-        return self.get_submission_class().objects.create(
+        form_submission = self.get_submission_class().objects.create(
             form_data=json.dumps(form.cleaned_data, cls=DjangoJSONEncoder),
             page=self,
         )
+
+        for file in files:
+            file.update(form_submission=form_submission)
+
+        return form_submission
