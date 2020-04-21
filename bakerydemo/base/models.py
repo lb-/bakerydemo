@@ -1,5 +1,8 @@
 from __future__ import unicode_literals
 
+import json
+
+from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
 from django import forms
 
@@ -16,7 +19,7 @@ from wagtail.admin.edit_handlers import (
 )
 from wagtail.core.fields import RichTextField, StreamField
 from wagtail.core.models import Collection, Page
-from wagtail.contrib.forms.models import AbstractEmailForm, AbstractFormField, FORM_FIELD_CHOICES
+from wagtail.contrib.forms.models import AbstractEmailForm, AbstractFormField, FormSubmission, FORM_FIELD_CHOICES
 from wagtail.contrib.forms.forms import FormBuilder
 from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail.search import index
@@ -350,13 +353,29 @@ class FormField(AbstractFormField):
         choices=FORM_FIELD_CHOICES + (('fileupload', 'File Upload'),)
     )
 
+
 class CustomFormBuilder(FormBuilder):
 
     def create_fileupload_field(self, field, options):
         return forms.FileField(**options)
 
 
+# class CustomAbstractFormSubmission(AbstractFormSubmission):
+#     """
+#     important: changing the form submission model used will mean all previous
+#     submissions will not be accessible (can be fixed with a manual migration)
+#     """
+
+#     pass
+
+
+class FormUploadedFile(models.Model):
+    file = models.FileField(upload_to="files/%Y/%m/%d")
+    # form_submission = models.ForeignKey(FormSubmission, on_delete=models.CASCADE, related_name='files')
+
+
 class FormPage(AbstractEmailForm):
+    # base_form_class = CustomWagtailAdminFormPageForm
     form_builder = CustomFormBuilder
 
     image = models.ForeignKey(
@@ -384,3 +403,42 @@ class FormPage(AbstractEmailForm):
             FieldPanel('subject'),
         ], "Email"),
     ]
+
+    # def get_submission_class(self):
+    #     """
+    #     Returns submission class.
+
+    #     You can override this method to provide custom submission class.
+    #     Your class must be inherited from AbstractFormSubmission.
+    #     """
+
+    #     return CustomAbstractFormSubmission
+
+    def process_form_submission(self, form):
+        """
+        Accepts form instance with submitted data, user and page.
+        Creates submission instance.
+
+        You can override this method if you want to have custom creation logic.
+        For example, if you want to save reference to a user.
+        """
+
+        file_form_fields = [field.clean_name for field in self.get_form_fields() if field.field_type == 'fileupload']
+
+        print('form', form.cleaned_data, file_form_fields)
+
+        files = []
+
+        for (field_name, field_value) in form.cleaned_data.items():
+            if field_name in file_form_fields:
+                uploaded_file = FormUploadedFile.objects.create(file=field_value)
+                
+                print('uploaded_file', uploaded_file)
+                print('FOUND', field_name, field_value)
+
+                form.cleaned_data[field_name] = uploaded_file.pk
+
+        return self.get_submission_class().objects.create(
+            form_data=json.dumps(form.cleaned_data, cls=DjangoJSONEncoder),
+            page=self,
+        )
