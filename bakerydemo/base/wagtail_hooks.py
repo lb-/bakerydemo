@@ -1,5 +1,9 @@
+from django.urls import reverse
+from wagtail.core import hooks
+
 from wagtail.contrib.modeladmin.options import (
     ModelAdmin, ModelAdminGroup, modeladmin_register)
+from wagtail.admin.search import SearchArea
 
 from bakerydemo.breads.models import Country, BreadIngredient, BreadType
 from bakerydemo.base.models import People, FooterText
@@ -70,3 +74,27 @@ class BakeryModelAdminGroup(ModelAdminGroup):
 # you only need to register the ModelAdminGroup class with Wagtail:
 modeladmin_register(BreadModelAdminGroup)
 modeladmin_register(BakeryModelAdminGroup)
+
+
+@hooks.register('register_admin_search_area')
+def register_model_admin_search_area():
+    # PeopleModelAdmin is a ModelAdmin also in the same hooks file
+    index_url = PeopleModelAdmin().url_helper.index_url
+    return SearchArea(
+        'People ModelAdmin',
+        index_url,
+        classnames='icon icon-user',
+        order=10000
+    )
+
+
+@hooks.register('register_admin_search_area')
+def register_snippets_search_area():
+    url = reverse('wagtailsnippets:list', args=('base', 'people'))
+    return SearchArea(
+        'People Snippets',
+        url,
+        classnames='icon icon-user',
+        order=10000
+    )
+
