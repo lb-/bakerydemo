@@ -1,3 +1,4 @@
+from wagtail.core import hooks
 from wagtail.contrib.modeladmin.options import (
     ModelAdmin, ModelAdminGroup, modeladmin_register)
 
@@ -70,3 +71,13 @@ class BakeryModelAdminGroup(ModelAdminGroup):
 # you only need to register the ModelAdminGroup class with Wagtail:
 modeladmin_register(BreadModelAdminGroup)
 modeladmin_register(BakeryModelAdminGroup)
+
+@hooks.register('construct_page_chooser_queryset')
+def order_pages_in_chooser(pages, request):
+    if "choose-page" in request.path:
+        # showing page in a page chooser modal
+        return pages.order_by('?')  # order randomly
+    
+    # search results shown in admin/pages/search - return in default order
+
+    return pages
