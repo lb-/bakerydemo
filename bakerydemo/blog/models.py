@@ -17,7 +17,7 @@ from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail.search import index
 from wagtail.snippets.edit_handlers import SnippetChooserPanel
 
-from bakerydemo.base.blocks import BaseStreamBlock, PrivacyBlock
+from bakerydemo.base.blocks import BaseStreamBlock
 
 
 class BlogPeopleRelationship(Orderable, models.Model):
@@ -70,12 +70,7 @@ class BlogPage(Page):
     body = StreamField(
         BaseStreamBlock(), verbose_name="Page body", blank=True
     )
-    test_a = StreamField([
-        ('privacy', PrivacyBlock(blank=True))
-    ])
-
     subtitle = models.CharField(blank=True, max_length=255)
-
     tags = ClusterTaggableManager(through=BlogPageTag, blank=True)
     date_published = models.DateField(
         "Date article published", blank=True, null=True
@@ -86,7 +81,6 @@ class BlogPage(Page):
         FieldPanel('introduction', classname="full"),
         ImageChooserPanel('image'),
         StreamFieldPanel('body'),
-        StreamFieldPanel('test_a'),
         FieldPanel('date_published'),
         InlinePanel(
             'blog_person_relationship', label="Author(s)",
