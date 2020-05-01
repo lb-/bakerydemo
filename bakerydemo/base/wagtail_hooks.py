@@ -1,3 +1,4 @@
+from wagtail.core import hooks
 from wagtail.contrib.modeladmin.options import (
     ModelAdmin, ModelAdminGroup, modeladmin_register)
 
@@ -70,3 +71,13 @@ class BakeryModelAdminGroup(ModelAdminGroup):
 # you only need to register the ModelAdminGroup class with Wagtail:
 modeladmin_register(BreadModelAdminGroup)
 modeladmin_register(BakeryModelAdminGroup)
+
+
+
+@hooks.register('construct_image_chooser_queryset')
+def show_my_uploaded_images_only(images, request):
+    print('show_my_uploaded_images_only', images, request)
+    # Only show uploaded images
+    images = images.filter(uploaded_by_user=request.user)
+
+    return images
