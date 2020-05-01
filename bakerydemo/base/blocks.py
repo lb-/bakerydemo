@@ -1,8 +1,12 @@
+from django.contrib.auth.models import Group
+from django.utils.functional import cached_property
 from wagtail.images.blocks import ImageChooserBlock
 from wagtail.embeds.blocks import EmbedBlock
 from wagtail.core.blocks import (
+    ListBlock, ChooserBlock,
     CharBlock, ChoiceBlock, RichTextBlock, StreamBlock, StructBlock, TextBlock,
 )
+from wagtail.snippets.blocks import SnippetChooserBlock
 
 
 class ImageBlock(StructBlock):
@@ -65,3 +69,44 @@ class BaseStreamBlock(StreamBlock):
         help_text='Insert an embed URL e.g https://www.youtube.com/embed/SGJFWirQ3ks',
         icon="fa-s15",
         template="blocks/embed_block.html")
+
+
+# class AuthGroupBlock(ChooserBlock):
+
+#     @cached_property
+#     def target_model(self):
+#         from django.contrib.auth.models import Group
+#         return Group
+
+#     @cached_property
+#     def widget(self):
+#         # from wagtail.snippets.widgets import AdminSnippetChooser
+#         from wagtail.admin.widgets import AdminChooser
+#         return AdminChooser(self.target_model)
+
+
+# class PrivacyBlock(StructBlock):
+#     visible_groups = ListBlock(
+#         AuthGroupBlock(
+#             label='Limit view to groups',
+#             required=False,
+#             blank=True
+#         )
+#     )
+
+#     class Meta:
+#         icon = "user"
+
+
+class PrivacyBlock(StructBlock):
+    visible_groups = ListBlock(
+        SnippetChooserBlock(
+            Group,
+            label='Limit view to groups',
+            required=False,
+            blank=True
+        )
+    )
+
+    class Meta:
+        icon = "user"

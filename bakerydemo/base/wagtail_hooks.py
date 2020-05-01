@@ -1,3 +1,6 @@
+from django.contrib.auth.models import Group
+from wagtail.snippets.models import register_snippet
+
 from wagtail.contrib.modeladmin.options import (
     ModelAdmin, ModelAdminGroup, modeladmin_register)
 
@@ -70,3 +73,6 @@ class BakeryModelAdminGroup(ModelAdminGroup):
 # you only need to register the ModelAdminGroup class with Wagtail:
 modeladmin_register(BreadModelAdminGroup)
 modeladmin_register(BakeryModelAdminGroup)
+
+
+register_snippet(Group)
