@@ -73,11 +73,10 @@ modeladmin_register(BreadModelAdminGroup)
 modeladmin_register(BakeryModelAdminGroup)
 
 
-
 @hooks.register('construct_image_chooser_queryset')
 def show_my_uploaded_images_only(images, request):
-    print('show_my_uploaded_images_only', images, request)
-    # Only show uploaded images
+    # Example: Only show uploaded images based on current user
+    # actual filtering will need to be based on the collection's linked user group
     images = images.filter(uploaded_by_user=request.user)
 
     return images

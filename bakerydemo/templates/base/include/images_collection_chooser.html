@@ -1,0 +1,8 @@
+{% load filter_with_permissions %}
+
+{% with images=None %}
+    {% with collections=collections|filter_with_permissions:user %}
+      Images Only Collection Template:
+      {% include "wagtailadmin/shared/collection_chooser.html" %}
+    {% endwith %}
+{% endwith %}
