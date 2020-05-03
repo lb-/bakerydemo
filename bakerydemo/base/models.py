@@ -24,33 +24,33 @@ from wagtail.snippets.models import register_snippet
 from .blocks import BaseStreamBlock
 
 
-@register_setting
-class ImportantPages(BaseSetting):
+# @register_setting
+# class ImportantPages(BaseSetting):
 
-    # Fetch these pages when looking up ImportantPages for or a site
-    select_related = ["donate_page", "sign_up_page"]
+#     # Fetch these pages when looking up ImportantPages for or a site
+#     select_related = ["donate_page", "sign_up_page"]
 
-    donate_page = models.ForeignKey(
-        'wagtailcore.Page', null=True, on_delete=models.SET_NULL, related_name='+')
-    sign_up_page = models.ForeignKey(
-        'wagtailcore.Page', null=True, on_delete=models.SET_NULL, related_name='+')
+#     donate_page = models.ForeignKey(
+#         'wagtailcore.Page', null=True, on_delete=models.SET_NULL, related_name='+')
+#     sign_up_page = models.ForeignKey(
+#         'wagtailcore.Page', null=True, on_delete=models.SET_NULL, related_name='+')
 
-    panels = [
-        PageChooserPanel('donate_page'),
-        PageChooserPanel('sign_up_page'),
-    ]
+#     panels = [
+#         PageChooserPanel('donate_page'),
+#         PageChooserPanel('sign_up_page'),
+#     ]
 
 
-@register_setting
-class SocialMediaSettings(BaseSetting):
-    facebook = models.URLField(
-        help_text='Your Facebook page URL')
-    instagram = models.CharField(
-        max_length=255, help_text='Your Instagram username, without the @')
-    trip_advisor = models.URLField(
-        help_text='Your Trip Advisor page URL')
-    youtube = models.URLField(
-        help_text='Your YouTube channel or user account URL')
+# @register_setting
+# class SocialMediaSettings(BaseSetting):
+#     facebook = models.URLField(
+#         help_text='Your Facebook page URL')
+#     instagram = models.CharField(
+#         max_length=255, help_text='Your Instagram username, without the @')
+#     trip_advisor = models.URLField(
+#         help_text='Your Trip Advisor page URL')
+#     youtube = models.URLField(
+#         help_text='Your YouTube channel or user account URL')
 
 
 @register_snippet
