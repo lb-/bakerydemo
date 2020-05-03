@@ -1,6 +1,3 @@
-from django.http import HttpResponse
-
-from wagtail.core import hooks
 from wagtail.contrib.modeladmin.options import (
     ModelAdmin, ModelAdminGroup, modeladmin_register)
 
@@ -73,25 +70,3 @@ class BakeryModelAdminGroup(ModelAdminGroup):
 # you only need to register the ModelAdminGroup class with Wagtail:
 modeladmin_register(BreadModelAdminGroup)
 modeladmin_register(BakeryModelAdminGroup)
-
-
-@hooks.register('before_unpublish_page')
-def before_unpublish_page(request, page):
-    print('before_unpublish_page', request, page)
-
-
-@hooks.register('after_unpublish_page')
-def after_unpublish_page(request, page):
-    print('after_unpublish_page', request, page)
-    return HttpResponse("Congrats on unpublishin", content_type="text/plain")
-
-
-@hooks.register('before_publish_page')
-def before_publish_page(request, page):
-    print('before_publish_page', request, page)
-
-
-@hooks.register('after_publish_page')
-def after_publish_page(request, page):
-    print('after_publish_page', request, page)
-    return HttpResponse("Congrats on publishin!", content_type="text/plain")
