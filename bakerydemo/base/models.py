@@ -16,11 +16,24 @@ from wagtail.admin.edit_handlers import (
 from wagtail.core.fields import RichTextField, StreamField
 from wagtail.core.models import Collection, Page
 from wagtail.contrib.forms.models import AbstractEmailForm, AbstractFormField
+from wagtail.contrib.settings.models import BaseSetting, register_setting
 from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail.search import index
 from wagtail.snippets.models import register_snippet
 
 from .blocks import BaseStreamBlock
+
+
+@register_setting
+class SocialMediaSettings(BaseSetting):
+    facebook = models.URLField(
+        help_text='Your Facebook page URL')
+    instagram = models.CharField(
+        max_length=255, help_text='Your Instagram username, without the @')
+    trip_advisor = models.URLField(
+        help_text='Your Trip Advisor page URL')
+    youtube = models.URLField(
+        help_text='Your YouTube channel or user account URL')
 
 
 @register_snippet
