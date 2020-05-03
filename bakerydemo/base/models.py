@@ -25,6 +25,23 @@ from .blocks import BaseStreamBlock
 
 
 @register_setting
+class ImportantPages(BaseSetting):
+
+    # Fetch these pages when looking up ImportantPages for or a site
+    select_related = ["donate_page", "sign_up_page"]
+
+    donate_page = models.ForeignKey(
+        'wagtailcore.Page', null=True, on_delete=models.SET_NULL, related_name='+')
+    sign_up_page = models.ForeignKey(
+        'wagtailcore.Page', null=True, on_delete=models.SET_NULL, related_name='+')
+
+    panels = [
+        PageChooserPanel('donate_page'),
+        PageChooserPanel('sign_up_page'),
+    ]
+
+
+@register_setting
 class SocialMediaSettings(BaseSetting):
     facebook = models.URLField(
         help_text='Your Facebook page URL')

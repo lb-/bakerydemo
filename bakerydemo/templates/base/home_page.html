@@ -25,6 +25,10 @@
 </div>
 
 <div class="container">
+    <p>
+        <strong>Donate page: {% pageurl settings.base.ImportantPages.donate_page %}</strong>
+        <strong>Sign Up page: {{ settings.base.ImportantPages.page_url.sign_up_page }}</strong>
+    </p>
     <div class="row promo-row">
         <div class="col-sm-5 promo">
             {% if page.promo_image or page.promo_title or page.promo_text %}
