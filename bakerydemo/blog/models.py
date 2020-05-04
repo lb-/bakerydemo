@@ -17,6 +17,11 @@ from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail.search import index
 from wagtail.snippets.edit_handlers import SnippetChooserPanel
 
+from wagtail.core.blocks import (
+    ListBlock,
+    CharBlock, ChoiceBlock, RichTextBlock, StreamBlock, StructBlock, TextBlock,
+)
+
 from bakerydemo.base.blocks import BaseStreamBlock
 
 
@@ -76,10 +81,22 @@ class BlogPage(Page):
         "Date article published", blank=True, null=True
     )
 
+    ingredients = StreamField([
+        ('ingredients_list', ListBlock(
+            StructBlock([
+                ('ingredient', CharBlock()),
+                ('amount', CharBlock(required=False)),
+            ]),
+            form_classname='my-ingredients-list',
+            blank=True,
+        ))
+    ])
+
     content_panels = Page.content_panels + [
         FieldPanel('subtitle', classname="full"),
         FieldPanel('introduction', classname="full"),
         ImageChooserPanel('image'),
+        StreamFieldPanel('ingredients'),
         StreamFieldPanel('body'),
         FieldPanel('date_published'),
         InlinePanel(
