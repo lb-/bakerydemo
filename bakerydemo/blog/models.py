@@ -81,22 +81,22 @@ class BlogPage(Page):
         "Date article published", blank=True, null=True
     )
 
-    ingredients = StreamField([
-        ('ingredients_list', ListBlock(
-            StructBlock([
-                ('ingredient', CharBlock()),
-                ('amount', CharBlock(required=False)),
-            ]),
-            form_classname='my-ingredients-list',
-            blank=True,
-        ))
-    ])
+    # ingredients = StreamField([
+    #     ('ingredients_list', ListBlock(
+    #         StructBlock([
+    #             ('ingredient', CharBlock()),
+    #             ('amount', CharBlock(required=False)),
+    #         ]),
+    #         form_classname='my-ingredients-list',
+    #         blank=True,
+    #     ))
+    # ])
 
     content_panels = Page.content_panels + [
         FieldPanel('subtitle', classname="full"),
         FieldPanel('introduction', classname="full"),
         ImageChooserPanel('image'),
-        StreamFieldPanel('ingredients'),
+        # StreamFieldPanel('ingredients'),
         StreamFieldPanel('body'),
         FieldPanel('date_published'),
         InlinePanel(
