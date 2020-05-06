@@ -121,4 +121,9 @@
     </div>
 </div>
 </div>
+
+{% if page.modal_form_page %}
+    {% include "includes/form_modal.html" with form=form form_page=page.modal_form_page.specific %}
+{% endif %}
+
 {% endblock content %}

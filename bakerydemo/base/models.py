@@ -252,6 +252,14 @@ class HomePage(Page):
         verbose_name='Featured section 3'
     )
 
+    # def get_context(self, request):
+    #     # Update context to related form
+    #     context = super().get_context(request)
+    #     form_page = self.modal_form_page.specific
+    #     form = form_page.get_form(page=form_page, user=request.user)
+    #     context['form'] = form
+    #     return context
+
     content_panels = Page.content_panels + [
         MultiFieldPanel([
             ImageChooserPanel('image'),
@@ -280,7 +288,7 @@ class HomePage(Page):
                 FieldPanel('featured_section_3_title'),
                 PageChooserPanel('featured_section_3'),
             ]),
-        ], heading="Featured homepage sections", classname="collapsible")
+        ], heading="Featured homepage sections", classname="collapsible"),
     ]
 
     def __str__(self):
