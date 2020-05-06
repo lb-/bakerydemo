@@ -1,4 +1,4 @@
-{% load navigation_tags static wagtailuserbar %}
+{% load navigation_tags static wagtailuserbar modal_tags %}
 
 {% block head %}
     {% include "includes/head.html" %}
@@ -34,6 +34,7 @@
 
     <!-- Footer -->
     <footer>
+        {% form_modal %}
         {% include "includes/footer.html" %}
     </footer>
 
@@ -41,6 +42,14 @@
     {% load static %}
     <script src="{% static 'js/jquery-1.12.4.min.js' %}"></script>
     <script src="{% static 'js/bootstrap.min.js' %}"></script>
+
+<!-- Modal JS -->
+<script src="https://unpkg.com/micromodal/dist/micromodal.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        MicroModal.init();
+    });
+</script>
 
 </body>
 

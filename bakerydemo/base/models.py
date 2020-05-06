@@ -4,7 +4,7 @@ from django.db import models
 
 from modelcluster.fields import ParentalKey
 from modelcluster.models import ClusterableModel
-
+from wagtail.contrib.settings.models import BaseSetting, register_setting
 from wagtail.admin.edit_handlers import (
     FieldPanel,
     FieldRowPanel,
@@ -376,4 +376,22 @@ class FormPage(AbstractEmailForm):
             ]),
             FieldPanel('subject'),
         ], "Email"),
+    ]
+
+
+
+@register_setting
+class MyAppSettings(BaseSetting):
+
+    modal_form_page = models.ForeignKey(
+        'wagtailcore.Page',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='+',
+        verbose_name='Modal Form'
+    )
+
+    panels = [
+        PageChooserPanel('modal_form_page', page_type='base.FormPage')
     ]
