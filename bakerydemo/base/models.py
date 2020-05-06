@@ -380,18 +380,18 @@ class FormPage(AbstractEmailForm):
 
 
 
-@register_setting
-class MyAppSettings(BaseSetting):
+# @register_setting
+# class MyAppSettings(BaseSetting):
 
-    modal_form_page = models.ForeignKey(
-        'wagtailcore.Page',
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        related_name='+',
-        verbose_name='Modal Form'
-    )
+#     modal_form_page = models.ForeignKey(
+#         'wagtailcore.Page',
+#         null=True,
+#         blank=True,
+#         on_delete=models.SET_NULL,
+#         related_name='+',
+#         verbose_name='Modal Form'
+#     )
 
-    panels = [
-        PageChooserPanel('modal_form_page', page_type='base.FormPage')
-    ]
+#     panels = [
+#         PageChooserPanel('modal_form_page', page_type='base.FormPage')
+#     ]
