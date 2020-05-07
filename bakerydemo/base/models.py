@@ -379,7 +379,6 @@ class FormPage(AbstractEmailForm):
     ]
 
 
-
 @register_setting
 class MyAppSettings(BaseSetting):
 

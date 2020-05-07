@@ -1,6 +1,8 @@
 {% comment %} e.g. my-app/templates/tags/form_modal.html {% endcomment %}
 {% load wagtailcore_tags %}
 
+{% if form %}
+
 <button data-micromodal-trigger="modal-1">Open {{ page.title }} Modal</button>
 
 <div class="modal micromodal-slide" id="modal-1" aria-hidden="true">
@@ -25,3 +27,5 @@
     </div>
   </div>
 </div>
+
+{% endif %}
