@@ -1,4 +1,6 @@
 from __future__ import unicode_literals
+from django.template.response import TemplateResponse
+from django.shortcuts import redirect
 
 from django.db import models
 
@@ -377,6 +379,17 @@ class FormPage(AbstractEmailForm):
             FieldPanel('subject'),
         ], "Email"),
     ]
+
+    def render_landing_page(self, request, form_submission=None, *args, **kwargs):
+        source_page_id = request.POST.get('source-page-id')
+        source_page = Page.objects.get(pk=source_page_id)
+
+        if source_page:
+            request.session['form_page_success'] = True
+            return redirect(source_page.url, permanent=False)
+
+        # if no source_page is set, render default landing page
+        return super().render_landing_page(request, form_submission, *args, **kwargs)
 
 
 @register_setting

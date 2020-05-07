@@ -1,23 +1,31 @@
 {% comment %} e.g. my-app/templates/tags/form_modal.html {% endcomment %}
 {% load wagtailcore_tags %}
 
+{% if request.session.form_page_success %}
+  Thanks for submitting the form!
+{% endif %}
+
 {% if form %}
 
-<button data-micromodal-trigger="modal-1">Open {{ page.title }} Modal</button>
+<button data-micromodal-trigger="modal-1">Open {{ form_page.title }} Modal</button>
 
 <div class="modal micromodal-slide" id="modal-1" aria-hidden="true">
   <div class="modal__overlay" tabindex="-1" data-micromodal-close>
     <div class="modal__container" role="dialog" aria-modal="true" aria-labelledby="modal-1-title">
       <header class="modal__header">
         <h2 class="modal__title" id="modal-1-title">
-          {{ page.title }}
+          {{ form_page.title }}
         </h2>
         <button class="modal__close" aria-label="Close modal" data-micromodal-close></button>
       </header>
-      <form action="{% pageurl page %}" method="POST" role="form">
+      <form action="{% pageurl form_page %}" method="POST" role="form">
         <main class="modal__content" id="modal-1-content">
           {% csrf_token %}
           {{ form.as_p }}
+          {% if page.pk != form_page.pk %}
+          {% comment %} only provide the source page if not on the actual form page {% endcomment %}
+          <input name="source-page-id" type="hidden" value="{{ page.pk }}">
+          {% endif %}
         </main>
         <footer class="modal__footer">
           <input class="modal__btn modal__btn-primary" type="submit">
