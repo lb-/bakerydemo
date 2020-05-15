@@ -3,6 +3,7 @@ from wagtail.contrib.modeladmin.options import (
 
 from bakerydemo.breads.models import Country, BreadIngredient, BreadType
 from bakerydemo.base.models import People, FooterText
+from .views import KanbanView
 
 '''
 N.B. To see what icons are available for use in Wagtail menus and StreamField block types,
@@ -46,6 +47,7 @@ class BreadModelAdminGroup(ModelAdminGroup):
 
 
 class PeopleModelAdmin(ModelAdmin):
+    index_view_class = KanbanView
     model = People
     menu_label = 'People'  # ditch this to use verbose_name_plural from model
     menu_icon = 'fa-users'  # change as required
