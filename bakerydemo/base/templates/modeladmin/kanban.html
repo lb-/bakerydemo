@@ -1,8 +1,45 @@
 {% extends "modeladmin/index.html" %}
 {% comment %} my-app/modeladmin/kanban.html {% endcomment %}
 
+{% block css %}
+    {{ block.super }}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jkanban@1.2.1/dist/jkanban.min.css">
+{% endblock %}
+
+{% block extra_js %}
+  {{ block.super }}
+  <script src="https://cdn.jsdelivr.net/npm/jkanban@1.2.1/dist/jkanban.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var kanban = new jKanban({
+        boards: [
+          {
+            "id"    : "column-id-1",
+            "title" : "Column A",
+          },
+          {
+            "id"    : "column-id-2",
+            "title" : "Column B",
+          },
+          {
+            "id"    : "column-id-3",
+            "title" : "Column C",
+          },
+          {
+            "id"    : "column-id-4",
+            "title" : "Column D",
+          }
+        ],
+        element: '#kanban',
+      });
+    });
+  </script>
+{% endblock %}
+
 {% block result_list %}
-  KANBAN!
+  <div class="kanban-wrapper listing">
+    <div id="kanban"></div>
+  </div>
 {% endblock %}
 
 {% block pagination %}
