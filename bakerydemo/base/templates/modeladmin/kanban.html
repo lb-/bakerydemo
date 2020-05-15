@@ -5,13 +5,22 @@
     {{ block.super }}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jkanban@1.2.1/dist/jkanban.min.css">
     <style>
-      .kanban-item .actions {
-        visibility: visible;
-      }
       .kanban-wrapper {
         margin-top: 1rem;
         overflow-x: auto;
         width: 100%;
+      }
+
+      .kanban-item {
+        min-height: 4rem;
+      }
+
+      .kanban-item:hover .actions {
+        visibility: visible;
+      }
+
+      .kanban-column-title .count {
+        float: right;
       }
     </style>
 {% endblock %}
