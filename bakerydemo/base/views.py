@@ -26,43 +26,36 @@ class KanbanView(IndexView):
 
         return render_to_string(template, context, request=self.request,)
 
-    def get_kanban_data(self):
-        
+    def get_kanban_data(self, context):
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        # prepare data used throughout based on context
 
+        result_data = result_list(context)
+        object_list = context["object_list"]
+        values = result_data["results"]
+        headers = result_data["result_headers"]
+
+        # prepare column data
         column_field = self.model_admin.get_kanban_column_field()
         column_name_default = self.model_admin.get_kanban_column_name_default()
 
         column_key = "__column_name"
 
-        # replace object_list in context as we do not want it to be paginated
-        queryset = self.queryset.annotate(
+        queryset = object_list.annotate(
             __column_name=F(column_field)
             if column_field
             else Value(column_name_default, output_field=CharField())
         )
-        context["object_list"] = queryset
 
-        result_data = result_list(context)
-        values = result_data["results"]
-        headers = result_data["result_headers"]
+        order = F(column_key).asc(nulls_first=True) if column_field else column_key
 
-        
+        cols = queryset.values(column_key).order_by(order).annotate(count=Count("pk"))
 
-        columns = (
-            queryset.values(column_key)
-            .order_by(
-                F(column_key).asc(nulls_first=True) if column_field else column_key
-            )
-            .annotate(count=Count("pk"))  # must be pk as value could be blank
-        )
-
+        # set up items (for ALL columns)
         items = [
             {
                 "column": getattr(obj, column_key),
-                "id": f"item-id-{obj.pk}",
+                "id": "item-id-%s" % obj.pk,
                 "title": self.render_kanban_item_html(
                     context,
                     obj,
@@ -70,17 +63,15 @@ class KanbanView(IndexView):
                         {"label": label, "value": values[index][idx]}
                         for idx, label in enumerate(headers)
                     ],
-                    headers=headers,
-                    index=index,
-                    values=values[index],
                 ),
             }
             for index, obj in enumerate(queryset)
         ]
 
-        boards = [
+        # set up columns (aka boards) with sets of filtered items inside
+        columns = [
             {
-                "id": f"column-id-{index}",
+                "id": "column-id-%s" % index,
                 "item": [
                     item for item in items if item["column"] == column[column_key]
                 ],
@@ -91,21 +82,28 @@ class KanbanView(IndexView):
                     or column_name_default,
                 ),
             }
-            for index, column in enumerate(columns)
+            for index, column in enumerate(cols)
         ]
 
-        kanban_element_id = "kanban"
+        return columns
 
-        kanban_options = {
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # replace object_list in context as we do not want it to be paginated
+        context["object_list"] = self.queryset
+
+        boards = self.get_kanban_data(context)
+
+        # add kanban data to context
+        context["kanban_options"] = {
             "addItemButton": False,
             "boards": boards,
             "dragBoards": False,
             "dragItems": False,
-            "element": f"#{kanban_element_id}",
+            "element": "#kanban",
         }
 
-        # add kanban data to context
-        context["kanban_options"] = kanban_options
-        context["kanban_element_id"] = kanban_element_id
+        context["kanban_element_id"] = "kanban"
 
         return context
