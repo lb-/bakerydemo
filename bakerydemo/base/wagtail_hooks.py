@@ -12,6 +12,21 @@ from .views import KanbanView
 class KanbanMixin:
     index_view_class = KanbanView
 
+    def get_index_template(self):
+        return self.index_template_name or self.get_templates("kanban")
+
+    def get_kanban_item_template(self):
+        return getattr(
+            self, "kanban_item_template_name", self.get_templates("kanban_item")
+        )
+
+    def get_kanban_column_title_template(self):
+        return getattr(
+            self,
+            "kanban_column_title_template_name",
+            self.get_templates("kanban_column_title"),
+        )
+
     def get_kanban_column_field(self):
         return getattr(self, "kanban_column_field", None)
 

@@ -14,17 +14,20 @@ class KanbanView(IndexView):
 
         context.update(**kwargs)
 
-        return render_to_string(
-            "modeladmin/kanban_item.html", context, request=self.request,
-        )
+        template = self.model_admin.get_kanban_item_template()
+
+        return render_to_string(template, context, request=self.request,)
 
     def render_kanban_column_title_html(self, context, **kwargs):
 
         context.update(**kwargs)
 
-        return render_to_string(
-            "modeladmin/kanban_column_title.html", context, request=self.request,
-        )
+        template = self.model_admin.get_kanban_column_title_template()
+
+        return render_to_string(template, context, request=self.request,)
+
+    def get_kanban_data(self):
+        
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -46,7 +49,7 @@ class KanbanView(IndexView):
         values = result_data["results"]
         headers = result_data["result_headers"]
 
-        kanban_element_id = "kanban"
+        
 
         columns = (
             queryset.values(column_key)
@@ -91,6 +94,8 @@ class KanbanView(IndexView):
             for index, column in enumerate(columns)
         ]
 
+        kanban_element_id = "kanban"
+
         kanban_options = {
             "addItemButton": False,
             "boards": boards,
@@ -104,6 +109,3 @@ class KanbanView(IndexView):
         context["kanban_element_id"] = kanban_element_id
 
         return context
-
-    def get_template_names(self):
-        return self.model_admin.get_templates("kanban")
