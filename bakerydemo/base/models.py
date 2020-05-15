@@ -39,7 +39,7 @@ class People(index.Indexed, ClusterableModel):
     """
     first_name = models.CharField("First name", max_length=254)
     last_name = models.CharField("Last name", max_length=254)
-    job_title = models.CharField("Job title", max_length=254)
+    job_title = models.CharField("Job title", max_length=254, blank=True, null=True)
 
     image = models.ForeignKey(
         'wagtailimages.Image',
