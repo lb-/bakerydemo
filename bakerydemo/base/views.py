@@ -18,6 +18,14 @@ class KanbanView(IndexView):
             "modeladmin/kanban_item.html", context, request=self.request,
         )
 
+    def render_kanban_column_title_html(self, context, **kwargs):
+
+        context.update(**kwargs)
+
+        return render_to_string(
+            "modeladmin/kanban_column_title.html", context, request=self.request,
+        )
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         column_field = getattr(self.model_admin, "kanban_column_field", None)
@@ -74,13 +82,11 @@ class KanbanView(IndexView):
                 "item": [
                     item for item in items if item["column"] == column[column_key]
                 ],
-                # make into html?
-                "title": "{column} ({count})".format(
-                    **{
-                        "count": column["count"],
-                        "column": column.get(column_key, column_name_default)
-                        or column_name_default,
-                    }
+                "title": self.render_kanban_column_title_html(
+                    context,
+                    count=column["count"],
+                    name=column.get(column_key, column_name_default)
+                    or column_name_default,
                 ),
             }
             for index, column in enumerate(columns)
