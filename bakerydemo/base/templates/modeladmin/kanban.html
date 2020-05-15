@@ -4,6 +4,11 @@
 {% block css %}
     {{ block.super }}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jkanban@1.2.1/dist/jkanban.min.css">
+    <style>
+      .kanban-item .actions {
+        visibility: visible;
+      }
+    </style>
 {% endblock %}
 
 {% block extra_js %}
@@ -12,9 +17,20 @@
   {{ kanban_options|json_script:"kanban-options" }}
   <script>
     // https://docs.djangoproject.com/en/3.0/ref/templates/builtins/#json-script
-    document.addEventListener('DOMContentLoaded', function() {  
+    document.addEventListener('DOMContentLoaded', function() {
+      // load the options from server
       var options = JSON.parse(document.getElementById('kanban-options').textContent);
-      var kanban = new jKanban(options);
+
+      // build the kanban board
+      var kanban = new jKanban(Object.assign({}, options));
+
+      // ensure that the built in click event is not used
+      document.querySelectorAll('.kanban-item-content').forEach(function(contentElement) {
+        contentElement.addEventListener('click', function(event) {
+          event.stopPropagation();
+        });
+      });
+
     });
   </script>
 {% endblock %}
