@@ -8,6 +8,11 @@
       .kanban-item .actions {
         visibility: visible;
       }
+      .kanban-wrapper {
+        margin-top: 1rem;
+        overflow-x: auto;
+        width: 100%;
+      }
     </style>
 {% endblock %}
 
@@ -35,12 +40,8 @@
   </script>
 {% endblock %}
 
-{% block result_list %}
+{% block content_main %}
   <div class="kanban-wrapper listing">
     <div id="{{ kanban_element_id }}"></div>
   </div>
-{% endblock %}
-
-{% block pagination %}
-  {% comment %} empty - not applicable to kanban view {% endcomment %}
 {% endblock %}
