@@ -28,10 +28,9 @@ class KanbanView(IndexView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        column_field = getattr(self.model_admin, "kanban_column_field", None)
-        column_name_default = getattr(
-            self.model_admin, "kanban_column_name_default", "Other"
-        )
+
+        column_field = self.model_admin.get_kanban_column_field()
+        column_name_default = self.model_admin.get_kanban_column_name_default()
 
         column_key = "__column_name"
 

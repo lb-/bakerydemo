@@ -5,7 +5,18 @@ from bakerydemo.breads.models import Country, BreadIngredient, BreadType
 from bakerydemo.base.models import People, FooterText
 from .views import KanbanView
 
-'''
+
+class KanbanMixin:
+    index_view_class = KanbanView
+
+    def get_kanban_column_field(self):
+        return getattr(self, "kanban_column_field", None)
+
+    def get_kanban_column_name_default(self):
+        return getattr(self, "kanban_column_name_default", "Other")
+
+
+"""
 N.B. To see what icons are available for use in Wagtail menus and StreamField block types,
 enable the styleguide in settings:
 
@@ -22,14 +33,15 @@ font-awesome icon set is available to you. Options are at http://fontawesome.io/
 '''
 
 
-class BreadIngredientAdmin(ModelAdmin):
+class BreadIngredientAdmin(KanbanMixin, ModelAdmin):
     # These stub classes allow us to put various models into the custom "Wagtail Bakery" menu item
     # rather than under the default Snippets section.
+    kanban_column_name_default = "Blah"
     model = BreadIngredient
     search_fields = ('name', )
 
 
-class BreadTypeAdmin(ModelAdmin):
+class BreadTypeAdmin(KanbanMixin, ModelAdmin):
     model = BreadType
     search_fields = ('title', )
 
@@ -46,8 +58,9 @@ class BreadModelAdminGroup(ModelAdminGroup):
     items = (BreadIngredientAdmin, BreadTypeAdmin, BreadCountryAdmin)
 
 
-class PeopleModelAdmin(ModelAdmin):
-    index_view_class = KanbanView
+class PeopleModelAdmin(KanbanMixin, ModelAdmin):
+    kanban_column_field = "job_title"
+    kanban_column_name_default = "No Job"
     model = People
     menu_label = 'People'  # ditch this to use verbose_name_plural from model
     menu_icon = 'fa-users'  # change as required
