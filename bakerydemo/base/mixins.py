@@ -24,11 +24,9 @@ class KanbanMixin:
 
     def get_kanban_column_field(self):
         # return a field to use to determine which column the item will be shown in
-        field = getattr(self, "kanban_column_field", None)
-        if not field:
-            # pull in the first value from list_filder if no specific column set
-            list_filter = getattr(self, "list_filter", [])
-            field = list_filter[0] if list_filter else None
+        # pull in the first value from list_filder if no specific column set
+        list_filter = getattr(self, "list_filter", [])
+        field = list_filter[0] if list_filter else None
         return field
 
     def get_kanban_column_name_default(self):
