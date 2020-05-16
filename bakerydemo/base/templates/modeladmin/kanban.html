@@ -1,13 +1,22 @@
 {% extends "modeladmin/index.html" %}
 {% comment %} my-app/modeladmin/kanban.html {% endcomment %}
 
+{% comment %}
+  Load the kanban library css
+  Ensure we load any parent css via block.super
+  Add some specific styling
+{% endcomment %}
 {% block css %}
     {{ block.super }}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jkanban@1.2.1/dist/jkanban.min.css">
     <style>
+      .kanban-container {
+        margin-bottom: 1rem;
+      }
+
       .kanban-wrapper {
         margin-top: 1rem;
-        overflow-x: auto;
+        overflow-x: auto; /* add horizontal scrolling for wide boards */
         width: 100%;
       }
 
@@ -16,27 +25,75 @@
       }
 
       .kanban-item:hover .actions {
-        visibility: visible;
+        visibility: visible; /* show action buttons on item hover, similar to row hover behaviour in index listing */
+      }
+
+      .kanban-item.gu-mirror .actions {
+        display: none; /* when dragging, hide the action buttons */
       }
 
       .kanban-column-title .count {
-        float: right;
+        float: right; /* column count - move to right */
+      }
+
+      /* hide the save button by default, allowing us to show it with .active added */
+      .action-save {
+        
+        margin-right: 1rem;
+        visibility: hidden;
+      }
+
+      .action-save.active {
+        visibility: visible;
       }
     </style>
 {% endblock %}
 
+{% comment %}
+  Load the kanban library js
+  Ensure we load any parent js via block.super
+  add the server data / options via json_script - see: https://docs.djangoproject.com/en/3.0/ref/templates/builtins/#json-script
+{% endcomment %}
 {% block extra_js %}
   {{ block.super }}
   <script src="https://cdn.jsdelivr.net/npm/jkanban@1.2.1/dist/jkanban.min.js"></script>
   {{ kanban_options|json_script:"kanban-options" }}
   <script>
-    // https://docs.djangoproject.com/en/3.0/ref/templates/builtins/#json-script
+    /**
+    * handler to collect and store the updated changes in our hidden input once an item
+    * moves between columns. Note: code is basic and doed not handle errors.
+    **/
+    function handleDrop(itemElement, toColumnElement, fromColumElement) {
+      // get data on the elements
+      var key = itemElement.dataset.eid;
+      var from = fromColumElement.parentElement.dataset.id;      
+      var to = toColumnElement.parentElement.dataset.id;
+
+      // make the button visible as there has now been a change
+      var button = document.getElementById('kanban-submit');
+      button.classList.add('active');
+
+      // get input field and submit button elements
+      // pull out the existing value and update it with this latest change
+      // using an object means new changes on the same item will override old ones
+      var input = document.getElementById('kanban-changes');    
+      var currentChanges = JSON.parse(input.value || '{}');
+      var newChanges = Object.assign(currentChanges, { [key]: [from, to]});
+      input.value = JSON.stringify(newChanges);
+    }
+
+    /**
+    * once the content has loaded, pull in the data from the server 'json_script' options
+    * set up an event listener so that buttons INSIDE items can be clicked
+    **/
+    // 
     document.addEventListener('DOMContentLoaded', function() {
       // load the options from server
       var options = JSON.parse(document.getElementById('kanban-options').textContent);
 
-      // build the kanban board
-      var kanban = new jKanban(Object.assign({}, options));
+      // build the kanban board with supplied options
+      // see: https://github.com/riktar/jkanban#var-kanban--new-jkanbanoptions
+      var kanban = new jKanban(Object.assign({}, options, {element: '#kanban-mount', dropEl: handleDrop}));
 
       // ensure that the built in click event is not used
       document.querySelectorAll('.kanban-item-content').forEach(function(contentElement) {
@@ -44,13 +101,31 @@
           event.stopPropagation();
         });
       });
-
     });
   </script>
 {% endblock %}
 
+{% comment %}
+  Add a small form to the header to allow for submitting changes
+  Provies a simple way to send JSON to a POST request
+{% endcomment %}
+{% block header_extra %}
+  {{ block.super }}
+  <div class="right">
+    <form action="{{ view.index_url }}" id="kanban-form" method="POST" novalidate>
+      {% csrf_token %}
+      <input id="kanban-changes" name="changes" value="{}" type="hidden" />
+      <button class="button action-save" id="kanban-submit" type="submit">Save</button>
+    </form>
+  </div>
+{% endblock %}
+
+{% comment %}
+  Add our kanban-wrapper (.listing adds some nice model-admin styling)
+  Create the div that will be used for the kanban board
+{% endcomment %}
 {% block content_main %}
   <div class="kanban-wrapper listing">
-    <div id="{{ kanban_element_id }}"></div>
+    <div id="kanban-mount"></div>
   </div>
 {% endblock %}

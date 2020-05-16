@@ -6,33 +6,7 @@ from wagtail.contrib.modeladmin.options import (
 
 from bakerydemo.breads.models import Country, BreadIngredient, BreadType
 from bakerydemo.base.models import People, FooterText
-from .views import KanbanView
-
-
-class KanbanMixin:
-    index_view_class = KanbanView
-
-    def get_index_template(self):
-        return self.index_template_name or self.get_templates("kanban")
-
-    def get_kanban_item_template(self):
-        return getattr(
-            self, "kanban_item_template_name", self.get_templates("kanban_item")
-        )
-
-    def get_kanban_column_title_template(self):
-        return getattr(
-            self,
-            "kanban_column_title_template_name",
-            self.get_templates("kanban_column_title"),
-        )
-
-    def get_kanban_column_field(self):
-        return getattr(self, "kanban_column_field", None)
-
-    def get_kanban_column_name_default(self):
-        return getattr(self, "kanban_column_name_default", "Other")
-
+from .mixins import KanbanMixin
 
 """
 N.B. To see what icons are available for use in Wagtail menus and StreamField block types,
@@ -77,14 +51,18 @@ class BreadModelAdminGroup(ModelAdminGroup):
 
 
 class PeopleModelAdmin(KanbanMixin, ModelAdmin):
-    kanban_column_field = "job_title"
-    kanban_column_name_default = "No Job"
+    kanban_column_name_default = "No Title"
     model = People
     menu_label = "People"  # ditch this to use verbose_name_plural from model
     menu_icon = "fa-users"  # change as required
     list_display = ("first_name", "last_name", "job_title", "thumb_image")
     list_filter = ("job_title",)
     search_fields = ("first_name", "last_name", "job_title")
+
+    def handle_kanban_column_change(self, request, pk, field, value):
+        instance = self.model.objects.get(pk=pk)
+        setattr(instance, field, value)
+        instance.save()
 
 
 class FooterTextAdmin(ModelAdmin):
