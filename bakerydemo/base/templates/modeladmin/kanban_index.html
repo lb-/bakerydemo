@@ -1,0 +1,52 @@
+{% extends "modeladmin/index.html" %}
+{% comment %} templates/modeladmin/kanban_index.html {% endcomment %}
+
+{% block extra_css %}
+    {{ block.super }}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jkanban@1/dist/jkanban.min.css">
+    <style>
+      .kanban-wrapper {
+        width: 100%;
+        overflow-x: auto; /* add horizontal scrolling for wide boards */
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .kanban-item {
+        min-height: 4rem;
+      }
+    </style>
+{% endblock %}
+
+{% block extra_js %}
+  {{ block.super }}
+  <script src="https://cdn.jsdelivr.net/npm/jkanban@1/dist/jkanban.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var options = {
+        boards: [
+          {
+            id: 'column-0',
+            title: 'Column A',
+            item: [{ id: 'item-1', title: 'Item 1'}, { id: 'item-2', title: 'Item 2'}, { id: 'item-1', title: 'Item 3'}]}
+          ,
+          {
+            id: 'column-1',
+            title: 'Column B',
+            item: [{ id: 'item-4', title: 'Item 4'}, { id: 'item-5', title: 'Item 4'}, { id: 'item-5', title: 'Item 6'}]
+          }
+        ]
+      };
+
+      // build the kanban board with supplied options
+      // see: https://github.com/riktar/jkanban#var-kanban--new-jkanbanoptions
+      var kanban = new jKanban(Object.assign({}, options, {element: '#kanban-mount'}));
+    });
+  </script>
+{% endblock %}
+
+{% block content_main %}
+  <div class="kanban-wrapper listing">
+    <div id="kanban-mount"></div>
+  </div>
+{% endblock %}
