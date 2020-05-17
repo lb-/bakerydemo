@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load wagtailcore_tags wagtailimages_tags %}
+
+{% block content %}
+  {% image page.main_image fill-1920x600 as image %}
+  <img src="{{ image.url }}" width="{{ image.width }}" height="{{ image.height }}" alt="{{ image.alt }}" />
+
+  <div class="container">
+    <div class="row">
+      <div class="col-md-8">
+        <p>{{ page.byline }}</p>
+        {% if page.preamble %}
+          <p class="intro">{{ page.preamble|richtext }}</p>
+        {% endif %}
+
+        {{ page.reports }}
+
+        <ul>
+          {% for launch in page.related_launches.all %}
+            <li>{{ launch.date }} - {{ launch.details }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+{% endblock content %}
