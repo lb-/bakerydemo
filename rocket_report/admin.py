@@ -1,9 +1,12 @@
 from wagtail.contrib.modeladmin.options import ModelAdmin
 
+from .views import KanbanView
 from .models import RocketReport
 
 
 class KanbanMixin:
+    index_view_class = KanbanView
+
     def get_index_template(self):
         # leverage the get_template to allow individual override on a per model basis
         return self.index_template_name or self.get_templates("kanban_index")

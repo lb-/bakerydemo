@@ -21,22 +21,12 @@
 {% block extra_js %}
   {{ block.super }}
   <script src="https://cdn.jsdelivr.net/npm/jkanban@1/dist/jkanban.js"></script>
+  {{ kanban_options|json_script:"kanban-options" }}
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      var options = {
-        boards: [
-          {
-            id: 'column-0',
-            title: 'Column A',
-            item: [{ id: 'item-1', title: 'Item 1'}, { id: 'item-2', title: 'Item 2'}, { id: 'item-1', title: 'Item 3'}]}
-          ,
-          {
-            id: 'column-1',
-            title: 'Column B',
-            item: [{ id: 'item-4', title: 'Item 4'}, { id: 'item-5', title: 'Item 4'}, { id: 'item-5', title: 'Item 6'}]
-          }
-        ]
-      };
+      // load the options from server
+      var options = JSON.parse(document.getElementById('kanban-options').textContent);
+      console.log('loaded', { options })
 
       // build the kanban board with supplied options
       // see: https://github.com/riktar/jkanban#var-kanban--new-jkanbanoptions
