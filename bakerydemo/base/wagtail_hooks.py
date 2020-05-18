@@ -1,6 +1,8 @@
+from django.utils.safestring import mark_safe
+
 from wagtail.contrib.modeladmin.options import (
     ModelAdmin, ModelAdminGroup, modeladmin_register)
-
+from wagtail.core import hooks
 from bakerydemo.breads.models import Country, BreadIngredient, BreadType
 from bakerydemo.base.models import People, FooterText
 
@@ -70,3 +72,20 @@ class BakeryModelAdminGroup(ModelAdminGroup):
 # you only need to register the ModelAdminGroup class with Wagtail:
 modeladmin_register(BreadModelAdminGroup)
 modeladmin_register(BakeryModelAdminGroup)
+
+
+
+class WelcomePanel:
+    order = 110
+
+    def render(self):
+        return mark_safe("""
+        <section class="panel summary nice-padding">
+          <h3>Dashboard Panel Section Title</h3>
+          <button data-modal-trigger="some-param">Open Modal</button>
+        </section>
+        """)
+
+@hooks.register('construct_homepage_panels')
+def add_another_welcome_panel(request, panels):
+    panels.append(WelcomePanel())

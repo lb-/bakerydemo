@@ -9,10 +9,13 @@ from wagtail.core import urls as wagtail_urls
 
 from bakerydemo.search import views as search_views
 from .api import api_router
+from .views import modal_view
+
 
 urlpatterns = [
     url(r'^django-admin/', admin.site.urls),
 
+    url(r'^admin/modal/', modal_view, name='modal'),
     url(r'^admin/', include(wagtailadmin_urls)),
     url(r'^documents/', include(wagtaildocs_urls)),
 
