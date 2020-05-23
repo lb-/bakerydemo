@@ -46,10 +46,11 @@ class BreadModelAdminGroup(ModelAdminGroup):
 
 
 class PeopleModelAdmin(ModelAdmin):
+    index_view_extra_css = ('css/modeladmin-index.css',)
     model = People
     menu_label = 'People'  # ditch this to use verbose_name_plural from model
     menu_icon = 'fa-users'  # change as required
-    list_display = ('first_name', 'last_name', 'job_title', 'thumb_image')
+    list_display = ('first_name', 'last_name', 'job_title', 'thumb_image', 'first_name', 'last_name', 'job_title', 'thumb_image', 'first_name', 'last_name', 'job_title', 'thumb_image')
     list_filter = ('job_title', )
     search_fields = ('first_name', 'last_name', 'job_title')
 
