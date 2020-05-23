@@ -1,0 +1,23 @@
+{% extends 'modeladmin/index.html' %}
+{% load i18n modeladmin_tags %}
+
+{% block header_extra %}
+
+  {% if view.has_filters and all_count %}
+    <div {{ self.attrs }} class="c-dropdown" data-dropdown>
+      <a href="javascript:void(0)" class="c-dropdown__button u-btn-current">
+        <strong>{% trans 'Filter' %}</strong>
+        <div data-dropdown-toggle="" class="o-icon c-dropdown__toggle [ icon icon-arrow-down ]"></div>
+      </a>
+      <div class="c-dropdown__menu u-toggle u-arrow u-arrow--tl u-background">
+        {% for spec in view.filter_specs %}{% admin_list_filter view spec %}{% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
+  {{ block.super }}
+{% endblock %}
+
+{% block filters %}
+  {% comment %} make content blank {% endcomment %}
+{% endblock %}
