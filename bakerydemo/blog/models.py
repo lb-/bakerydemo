@@ -122,6 +122,11 @@ class BlogPage(Page):
             ])
         return tags
 
+    @classmethod
+    def get_image_collection(cls):
+        return 4
+
+
     # Specifies parent to BlogPage as being BlogIndexPages
     parent_page_types = ['BlogIndexPage']
 
