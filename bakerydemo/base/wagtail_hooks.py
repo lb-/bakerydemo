@@ -4,6 +4,9 @@ from wagtail.contrib.modeladmin.options import (
 from bakerydemo.breads.models import Country, BreadIngredient, BreadType
 from bakerydemo.base.models import People, FooterText
 
+from .signal_handlers import register_signal_handlers
+
+
 '''
 N.B. To see what icons are available for use in Wagtail menus and StreamField block types,
 enable the styleguide in settings:
@@ -70,3 +73,5 @@ class BakeryModelAdminGroup(ModelAdminGroup):
 # you only need to register the ModelAdminGroup class with Wagtail:
 modeladmin_register(BreadModelAdminGroup)
 modeladmin_register(BakeryModelAdminGroup)
+
+register_signal_handlers()
