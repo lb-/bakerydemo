@@ -359,6 +359,9 @@ class FormField(AbstractFormField):
 
 
 class FormPage(AbstractEmailForm):
+
+    form_builder = CustomFormBuilder
+
     image = models.ForeignKey(
         'wagtailimages.Image',
         null=True,
