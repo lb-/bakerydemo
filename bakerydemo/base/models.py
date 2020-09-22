@@ -372,6 +372,13 @@ class FormPage(AbstractEmailForm):
     body = StreamField(BaseStreamBlock())
     thank_you_text = RichTextField(blank=True)
 
+    uploaded_image_collection = models.ForeignKey(
+        'wagtailcore.Collection',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+    )
+
     # Note how we include the FormField object via an InlinePanel using the
     # related_name value
     content_panels = AbstractEmailForm.content_panels + [
@@ -387,3 +394,16 @@ class FormPage(AbstractEmailForm):
             FieldPanel('subject'),
         ], "Email"),
     ]
+
+    settings_panels = AbstractEmailForm.settings_panels + [
+        FieldPanel('uploaded_image_collection')
+    ]
+
+    def get_uploaded_image_collection(self):
+        """
+        Returns a Wagtail Collection, using this form's saved value if present,
+        otherwise returns the 'Root' Collection.
+        """
+        collection = self.uploaded_image_collection
+
+        return collection or Collection.get_first_root_node()
