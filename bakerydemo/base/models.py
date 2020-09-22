@@ -15,7 +15,7 @@ from wagtail.admin.edit_handlers import (
 )
 from wagtail.core.fields import RichTextField, StreamField
 from wagtail.core.models import Collection, Page
-from wagtail.contrib.forms.models import AbstractEmailForm, AbstractFormField
+from wagtail.contrib.forms.models import AbstractEmailForm, AbstractFormField, FORM_FIELD_CHOICES
 from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail.search import index
 from wagtail.snippets.models import register_snippet
@@ -340,6 +340,13 @@ class FormField(AbstractFormField):
     can read more about Wagtail forms at:
     http://docs.wagtail.io/en/latest/reference/contrib/forms/index.html
     """
+
+    field_type = models.CharField(
+        verbose_name='field type',
+        max_length=16,
+        choices=list(FORM_FIELD_CHOICES) + [('image', 'Upload Image')]
+    )
+
     page = ParentalKey('FormPage', related_name='form_fields', on_delete=models.CASCADE)
 
 
