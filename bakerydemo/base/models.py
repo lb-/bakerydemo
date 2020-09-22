@@ -15,8 +15,10 @@ from wagtail.admin.edit_handlers import (
 )
 from wagtail.core.fields import RichTextField, StreamField
 from wagtail.core.models import Collection, Page
+from wagtail.contrib.forms.forms import FormBuilder
 from wagtail.contrib.forms.models import AbstractEmailForm, AbstractFormField, FORM_FIELD_CHOICES
 from wagtail.images.edit_handlers import ImageChooserPanel
+from wagtail.images.fields import WagtailImageField
 from wagtail.search import index
 from wagtail.snippets.models import register_snippet
 
@@ -329,6 +331,12 @@ class GalleryPage(Page):
     # Defining what content type can sit under the parent. Since it's a blank
     # array no subpage can be added
     subpage_types = []
+
+
+class CustomFormBuilder(FormBuilder):
+
+    def create_image_field(self, field, options):
+        return WagtailImageField(**options)
 
 
 class FormField(AbstractFormField):
