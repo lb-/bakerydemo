@@ -1,0 +1,19 @@
+{% load modeladmin_tags %}
+
+<div class="kanban-item-content">
+  <div class="description">
+    {% for field in fields %}
+      <div class="item-value">
+        {{ field.value }}<br/>
+        <sup>{{ field.label.text }}</sup>
+      </div>
+    {% endfor %}
+  </div>
+  <ul class="actions">
+    {% for button in action_buttons %}
+      <li class="action">
+        {% include 'modeladmin/includes/button.html' %}
+      </li>
+    {% endfor %}
+  </ul>
+</div>
