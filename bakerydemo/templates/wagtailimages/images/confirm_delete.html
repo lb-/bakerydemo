@@ -1,0 +1,7 @@
+{% extends "wagtailimages/images/confirm_delete.html" %}
+
+
+{% block content %}
+    {{ block.super }}
+    <strong>Warning: Image is also linked to A, B, C</strong>
+{% endblock %}
