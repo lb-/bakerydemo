@@ -1,0 +1,10 @@
+{% extends "wagtailadmin/shared/menu_submenu_item.html" %}
+{% load wagtailcore_tags %}
+
+{% block menu_footer %}
+    <div class="nav-submenu__list">
+        {% if help_article %}
+        <a href="{{ help_article_url }}">{{ help_article.title }}</a>
+        {% endif %}
+    </div>
+{% endblock %}
