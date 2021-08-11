@@ -4,9 +4,8 @@ from wagtail.core.fields import RichTextField
 from wagtail.admin.edit_handlers import FieldPanel
 
 
-# class HelpUrlName(models.Model):
-#     name = models.CharField(max_length=255)
-
+class HelpCore(models.Model):
+    pass
 
 class HelpArticle(models.Model):
     title = models.CharField(max_length=255)

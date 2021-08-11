@@ -2,9 +2,12 @@
 {% load wagtailcore_tags %}
 
 {% block menu_footer %}
-    <div class="nav-submenu__list">
+    <div class="nav-submenu__list" data-current-url-name="{{ current_url_name }}">
+        <h4>Articles</h4>
         {% if help_article %}
         <a href="{{ help_article_url }}">{{ help_article.title }}</a>
-        {% endif %}
+        {% else %}
+        None available
+        {% endif%}
     </div>
 {% endblock %}

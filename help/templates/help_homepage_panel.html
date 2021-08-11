@@ -1,0 +1,84 @@
+<section class="panel summary nice-padding">
+  <h3>No, but seriously -- welcome to the admin homepage.</h3>
+  <div>
+    <button id="start-tour">Start Tour</button>
+  </div>
+</section>
+
+<script>
+
+  const options = {
+    defaultStepOptions: {
+      cancelIcon: { enabled: true },
+      canClickTarget: false,
+      classes: '',
+      scrollTo: { behavior: 'smooth', block: 'center' },
+    },
+    steps: [
+      {
+        title: 'Dashboard',
+        text: 'Clicking the logo returns you to your Dashboard',
+        attachTo: { element: 'a.logo' },
+      },
+      {
+        title: 'Search',
+        text: 'Search through to find any Pages, Documents, or Images',
+        attachTo: { element: '.nav-search' }
+      },
+      {
+        title: 'Explorer Menu (Pages)',
+        text: 'Click the Pages button in the sidebar to open the explorer. This allows you to navigate through the sections of the site.',
+        attachTo: { element: '.menu-item[data-explorer-menu-item]' },
+      },
+      {
+        title: 'Done',
+        text: 'Last step, should ensure we just show close.',
+        buttons: [
+          {
+            action() {
+              return this.back();
+            },
+            classes: 'button button-small button-secondary',
+            secondary: true,
+            text: 'Back'
+          },
+          {
+            action() {
+              return this.next();
+            },
+            classes: 'button button-small',
+            text: 'Finished'
+          }
+        ]
+      }
+    ],
+    useModalOverlay: true,
+  };
+
+  window.addEventListener('DOMContentLoaded', () => {
+    const tour = new Shepherd.Tour({
+      ...options, defaultStepOptions: {
+        ...options.defaultStepOptions, buttons: [
+          {
+            action() {
+              return this.back();
+            },
+            classes: 'button button-small button-secondary',
+            secondary: true,
+            text: 'Back'
+          },
+          {
+            action() {
+              return this.next();
+            },
+            classes: 'button button-small',
+            text: 'Next'
+          }
+        ]
+      }
+    });
+    document.getElementById('start-tour').addEventListener('click', () => {
+      tour.start();
+    });
+  });
+</script>
