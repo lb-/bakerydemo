@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load navigation_tags wagtailimages_tags %}
+{% load wagtailcore_tags navigation_tags wagtailimages_tags %}
 
 {% block content %}
 
@@ -41,4 +41,14 @@
             </div>
         </div>
     </div>
+    <form action="{% pageurl page %}" method="POST" role="form">
+        {% csrf_token %}
+        <input type="hidden" name="like" value="true">
+        <input type="submit" value="LIKE">
+    </form>
+    <form action="{% pageurl page %}" method="POST" role="form">
+        {% csrf_token %}
+        <input type="hidden" name="dislike" value="true">
+        <input type="submit" value="DISLIKE">
+    </form>
 {% endblock content %}

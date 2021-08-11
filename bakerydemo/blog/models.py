@@ -76,6 +76,8 @@ class BlogPage(Page):
         "Date article published", blank=True, null=True
     )
 
+    total_likes = models.IntegerField(blank=False, default=0)
+
     content_panels = Page.content_panels + [
         FieldPanel('subtitle', classname="full"),
         FieldPanel('introduction', classname="full"),
@@ -88,9 +90,33 @@ class BlogPage(Page):
         FieldPanel('tags'),
     ]
 
+    settings_panels = Page.settings_panels + [
+        FieldPanel('total_likes'),
+    ]
+
     search_fields = Page.search_fields + [
         index.SearchField('body'),
     ]
+
+    def likePost(self):
+        self.total_likes += 1
+        self.save()
+
+    def dislikePost(self):
+        self.total_likes -= 1
+        self.save()
+
+    def serve(self, request):
+        if request.method == 'POST':
+            if request.POST.get('like'):
+                self.likePost()
+                # a form POST has been submitted with a value for 'like'
+            if request.POST.get('dislike'):
+                # a form POST has been submitted with a value for 'dislike'
+                self.dislikePost()
+        
+        # ensure we call the super's serve method so that the page loads correctly
+        return super(BlogPage, self).serve(request)
 
     def authors(self):
         """
