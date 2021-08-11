@@ -182,3 +182,5 @@ WAGTAILSEARCH_BACKENDS = {
 
 # Wagtail settings
 WAGTAIL_SITE_NAME = "bakerydemo"
+
+WAGTAILADMIN_USER_LOGIN_FORM = 'bakerydemo.base.forms.CustomLoginForm'
