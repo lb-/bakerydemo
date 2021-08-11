@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 
-from django.db import models
+from django.db import models, transaction
 
 from modelcluster.fields import ParentalKey
 from modelcluster.models import ClusterableModel
@@ -14,13 +14,38 @@ from wagtail.admin.edit_handlers import (
     StreamFieldPanel,
 )
 from wagtail.core.fields import RichTextField, StreamField
-from wagtail.core.models import Collection, Page
+from wagtail.core.models import Collection, GroupApprovalTask, Page, Site, Task
 from wagtail.contrib.forms.models import AbstractEmailForm, AbstractFormField
 from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail.search import index
 from wagtail.snippets.models import register_snippet
 
 from .blocks import BaseStreamBlock
+
+
+class PublishSiteTask(GroupApprovalTask):
+    site = models.OneToOneField(Site, on_delete=models.CASCADE)
+
+    admin_form_fields = ['site'] + GroupApprovalTask.admin_form_fields
+
+    @transaction.atomic
+    def on_action(self, task_state, user, action_name, **kwargs):
+        """Performs an action on a task state determined by the ``action_name`` string passed"""
+        if action_name == 'approve':
+            # get the page that this action is referring to via the task_state.page_revision
+            page = task_state.page_revision.as_page_object()
+
+            # find the new parent target at this task's site
+            # how this is done depends on the site/page structure
+            new_parent_target = self.site.root_page 
+
+            # move the page to a new location
+            # note: this will actually move it from its current tree, you may want to make a copy first
+            page.move(new_parent_target)
+
+        # be sure to preserve any existing task behaviour
+        super().on_action(task_state, user, action_name, **kwargs)
+
 
 
 @register_snippet
