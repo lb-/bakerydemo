@@ -1,0 +1,7 @@
+{% extends "wagtailadmin/admin_base.html" %}
+
+{% block css %}
+    {# extend the admin_base template so that shepherd styles can be first and Wagtail styles will override #}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shepherd.js@8/dist/css/shepherd.css">
+    {{ block.super }}
+{% endblock %}
