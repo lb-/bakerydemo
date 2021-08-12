@@ -7,6 +7,7 @@ from wagtail.contrib.modeladmin.menus import ModelAdminMenuItem
 from .models import Guide
 
 class GuideAdminMenuItem(ModelAdminMenuItem):
+    template = 'guide/menu_item.html'
 
     def get_context(self, request):
         context = super().get_context(request)

@@ -1,0 +1,87 @@
+{% load wagtailadmin_tags %}
+
+{{ guide_options|json_script:"guide-options" }}
+
+<li class="menu-item{% if active %} menu-active{% endif %}">
+    <a href="{{ url }}"
+       class="{{ classnames }}"
+       {{ attr_string }}>
+        {% if icon_name %}{% icon icon_name 'icon--menuitem' %}{% endif %}
+        {{ label }}
+    </a>
+</li>
+
+<style>
+  .menu-item .help-available::after {
+    content: '*';
+  }
+</style>
+
+<script>
+  const { steps = [] } = JSON.parse(document.getElementById('guide-options').textContent);
+
+  const options = {
+    defaultStepOptions: {
+      arrow: false,
+      cancelIcon: { enabled: true },
+      canClickTarget: false,
+      classes: '',
+      scrollTo: { behavior: 'smooth', block: 'center' },
+    },
+    steps: steps.map(({ element, ...step }, index) => ({
+      ...step,
+      ...(element ? { attachTo: { element } } : {}),
+      ...(index === steps.length - 1 ? {
+        buttons: [
+          ...(steps.length === 1 ? [] : [
+            {
+              action() { return this.back(); },
+              classes: 'button button-small button-secondary',
+              secondary: true,
+              text: 'Back'
+            },
+          ]),
+          {
+            action() { return this.next(); },
+            classes: 'button button-small',
+            text: 'Finished'
+          }
+        ]
+      } : {})
+    })),
+    useModalOverlay: true,
+  };
+
+
+  window.addEventListener('DOMContentLoaded', () => {
+    const tour = new Shepherd.Tour({
+      ...options, defaultStepOptions: {
+        ...options.defaultStepOptions, buttons: [
+          {
+            action() {
+              return this.back();
+            },
+            classes: 'button button-small button-secondary',
+            secondary: true,
+            text: 'Back'
+          },
+          {
+            action() {
+              return this.next();
+            },
+            classes: 'button button-small',
+            text: 'Next'
+          }
+        ]
+      }
+    });
+
+    const link = document.getElementById('start-tour');
+
+    link && link.addEventListener('click', (event) => {
+      event.preventDefault();
+      console.log('start tour');
+      tour.start();
+    });
+  });
+</script>
