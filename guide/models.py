@@ -1,3 +1,6 @@
+import json
+import re
+
 from django.db import models
 
 from modelcluster.fields import ParentalKey
@@ -68,3 +71,36 @@ class Guide(ClusterableModel):
             ObjectList(settings_panels, heading="Settings"),
         ]
     )
+
+    @classmethod
+    def get_data_for_request(cls, request):
+        """
+        Returns a dict with data to be sent to the client (for the shepherd.js library)
+        """
+
+        path_to_match = re.sub("[\d]+", "#", request.path)
+
+        guide = cls.objects.filter(url_path=path_to_match).first()
+
+        if guide:
+            steps = [
+                {
+                    "title": step.title,
+                    "text": step.text,
+                    "element": step.element,
+                }
+                for step in guide.steps.all()
+            ]
+
+            data = {"steps": steps, "title": guide.title}
+
+            value_json = json.dumps(
+                data,
+                separators=(",", ":"),
+            )
+
+            data["value_json"] = value_json
+
+            return data
+
+        return None
