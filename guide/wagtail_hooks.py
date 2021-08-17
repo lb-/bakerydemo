@@ -26,6 +26,37 @@ class GuideAdmin(ModelAdmin):
         return GuideAdminMenuItem(self, order or self.get_menu_order())
 
 
+class GuidePanel:
+    order = 500
+
+    def __init__(self, request):
+        self.request = request
+
+    def render(self):
+        data = Guide.get_data_for_request(self.request)
+
+        if data:
+            return format_html(
+                """
+            <section class="panel summary nice-padding">
+                <h2>Guide</h2>
+                <div>
+                    <button class="button button-secondary help-available" data-help="{}">Show {} Guide</button>
+                </div>
+            </section>
+            """,
+                data["value_json"],
+                data["title"],
+            )
+
+        return ""
+
+
+@hooks.register("construct_homepage_panels")
+def add_guide_panel(request, panels):
+    panels.append(GuidePanel(request))
+
+
 @hooks.register("insert_global_admin_js")
 def global_admin_js():
     """
