@@ -1,6 +1,7 @@
 from django import forms
 from django.db import models
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.forms import widgets
 
 from modelcluster.fields import ParentalManyToManyField
 
@@ -125,7 +126,7 @@ class BreadPage(Page):
         COMPLETED = "C", "Komplett"
         ABORTED = "A", "Abgebrochen"
 
-    status = models.CharField(
+    status = models.TextField(
         max_length=1,
         choices=ThesisStatus.choices,
         default=ThesisStatus.OPEN,
@@ -133,7 +134,7 @@ class BreadPage(Page):
 
     content_panels = Page.content_panels + [
         FieldPanel("introduction", classname="full"),
-        FieldPanel("status"),
+        FieldPanel("status", widget=forms.Select),
         ImageChooserPanel("image"),
         StreamFieldPanel("body"),
         FieldPanel("origin"),
