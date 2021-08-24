@@ -47,6 +47,19 @@ class HeadingBlock(StructBlock):
         template = "blocks/heading_block.html"
 
 
+class ProjectBlock(StructBlock):
+    name = TextBlock()
+    email = CharBlock(blank=True, required=False, label="e.g. joe@email.co")
+    company = TextBlock()
+    timespan = CharBlock(blank=True, required=False, label="e.g. 7 decades")
+    budget = CharBlock(blank=True, required=False, label="$$$")
+
+    class Meta:
+        form_classname = "struct-block column-layout"
+        icon = "fa-file"
+        template = "blocks/blockquote.html"
+
+
 class BlockQuote(StructBlock):
     """
     Custom `StructBlock` that allows the user to attribute a quote to the author
@@ -72,6 +85,7 @@ class BaseStreamBlock(StreamBlock):
     )
     image_block = ImageBlock()
     block_quote = BlockQuote()
+    project_block = ProjectBlock()
     embed_block = EmbedBlock(
         help_text="Insert an embed URL e.g https://www.youtube.com/embed/SGJFWirQ3ks",
         icon="fa-s15",

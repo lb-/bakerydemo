@@ -1,8 +1,12 @@
+from django.templatetags.static import static
+from django.utils.html import format_html
+
 from wagtail.contrib.modeladmin.options import (
     ModelAdmin,
     ModelAdminGroup,
     modeladmin_register,
 )
+from wagtail.core import hooks
 
 from bakerydemo.breads.models import Country, BreadIngredient, BreadType
 from bakerydemo.base.models import People, FooterText
@@ -23,6 +27,11 @@ or see http://kave.github.io/general/2015/12/06/wagtail-streamfield-icons.html
 This demo project includes the full font-awesome set via CDN in base.html, so the entire
 font-awesome icon set is available to you. Options are at http://fontawesome.io/icons/.
 """
+
+
+@hooks.register("insert_editor_css")
+def editor_css():
+    return format_html('<link rel="stylesheet" href="{}">', static("css/admin.css"))
 
 
 class BreadIngredientAdmin(ModelAdmin):
