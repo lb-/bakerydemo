@@ -16,9 +16,11 @@ from wagtail.admin.edit_handlers import (
 from wagtail.core.fields import RichTextField, StreamField
 from wagtail.core.models import Collection, Page
 from wagtail.contrib.forms.models import AbstractEmailForm, AbstractFormField
+from wagtail.contrib.forms.forms import FormBuilder
 from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail.search import index
 from wagtail.snippets.models import register_snippet
+
 
 from .blocks import BaseStreamBlock
 
@@ -343,21 +345,43 @@ class GalleryPage(Page):
 
 
 class FormField(AbstractFormField):
-    """
-    Wagtailforms is a module to introduce simple forms on a Wagtail site. It
-    isn't intended as a replacement to Django's form support but as a quick way
-    to generate a general purpose data-collection form or contact form
-    without having to write code. We use it on the site for a contact form. You
-    can read more about Wagtail forms at:
-    http://docs.wagtail.io/en/latest/reference/contrib/forms/index.html
-    """
 
-    # form_classname =
+    # add custom fields to FormField model
+    field_classname = models.CharField("Field classes", max_length=254, blank=True)
 
     page = ParentalKey("FormPage", related_name="form_fields", on_delete=models.CASCADE)
 
+    # revise panels so that the field can be edited in the admin UI
+    panels = AbstractFormField.panels + [
+        FieldPanel("field_classname"),
+    ]
+
+
+class CustomFormBuilder(FormBuilder):
+    def get_create_field_function(self, type):
+        """
+        Override the method to prepare a wrapped function that will call the original
+        function (which returns a field) and update the widget's attrs with a custom
+        value that can be used within the template when rendering each field.
+        """
+
+        create_field_function = super().get_create_field_function(type)
+
+        def wrapped_create_field_function(field, options):
+
+            created_field = create_field_function(field, options)
+            created_field.widget.attrs.update(
+                {"field_classname": field.field_classname}
+            )
+
+            return created_field
+
+        return wrapped_create_field_function
+
 
 class FormPage(AbstractEmailForm):
+    form_builder = CustomFormBuilder  # use custom form builder to override behaviour
+
     image = models.ForeignKey(
         "wagtailimages.Image",
         null=True,
