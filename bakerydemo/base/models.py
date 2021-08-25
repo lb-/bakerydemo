@@ -37,32 +37,38 @@ class People(index.Indexed, ClusterableModel):
     to the database.
     https://github.com/wagtail/django-modelcluster
     """
+
     first_name = models.CharField("First name", max_length=254)
     last_name = models.CharField("Last name", max_length=254)
     job_title = models.CharField("Job title", max_length=254)
 
     image = models.ForeignKey(
-        'wagtailimages.Image',
+        "wagtailimages.Image",
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
-        related_name='+'
+        related_name="+",
     )
 
     panels = [
-        MultiFieldPanel([
-            FieldRowPanel([
-                FieldPanel('first_name', classname="col6"),
-                FieldPanel('last_name', classname="col6"),
-            ])
-        ], "Name"),
-        FieldPanel('job_title'),
-        ImageChooserPanel('image')
+        MultiFieldPanel(
+            [
+                FieldRowPanel(
+                    [
+                        FieldPanel("first_name", classname="col6"),
+                        FieldPanel("last_name", classname="col6"),
+                    ]
+                )
+            ],
+            "Name",
+        ),
+        FieldPanel("job_title"),
+        ImageChooserPanel("image"),
     ]
 
     search_fields = [
-        index.SearchField('first_name'),
-        index.SearchField('last_name'),
+        index.SearchField("first_name"),
+        index.SearchField("last_name"),
     ]
 
     @property
@@ -70,16 +76,16 @@ class People(index.Indexed, ClusterableModel):
         # Returns an empty string if there is no profile pic or the rendition
         # file can't be found.
         try:
-            return self.image.get_rendition('fill-50x50').img_tag()
+            return self.image.get_rendition("fill-50x50").img_tag()
         except:  # noqa: E722 FIXME: remove bare 'except:'
-            return ''
+            return ""
 
     def __str__(self):
-        return '{} {}'.format(self.first_name, self.last_name)
+        return "{} {}".format(self.first_name, self.last_name)
 
     class Meta:
-        verbose_name = 'Person'
-        verbose_name_plural = 'People'
+        verbose_name = "Person"
+        verbose_name_plural = "People"
 
 
 @register_snippet
@@ -90,17 +96,18 @@ class FooterText(models.Model):
     accessible on the template via a template tag defined in base/templatetags/
     navigation_tags.py
     """
+
     body = RichTextField()
 
     panels = [
-        FieldPanel('body'),
+        FieldPanel("body"),
     ]
 
     def __str__(self):
         return "Footer text"
 
     class Meta:
-        verbose_name_plural = 'Footer Text'
+        verbose_name_plural = "Footer Text"
 
 
 class StandardPage(Page):
@@ -110,24 +117,20 @@ class StandardPage(Page):
     image, introduction and body field
     """
 
-    introduction = models.TextField(
-        help_text='Text to describe the page',
-        blank=True)
+    introduction = models.TextField(help_text="Text to describe the page", blank=True)
     image = models.ForeignKey(
-        'wagtailimages.Image',
+        "wagtailimages.Image",
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
-        related_name='+',
-        help_text='Landscape mode only; horizontal width between 1000px and 3000px.'
+        related_name="+",
+        help_text="Landscape mode only; horizontal width between 1000px and 3000px.",
     )
-    body = StreamField(
-        BaseStreamBlock(), verbose_name="Page body", blank=True
-    )
+    body = StreamField(BaseStreamBlock(), verbose_name="Page body", blank=True)
     content_panels = Page.content_panels + [
-        FieldPanel('introduction', classname="full"),
-        StreamFieldPanel('body'),
-        ImageChooserPanel('image'),
+        FieldPanel("introduction", classname="full"),
+        StreamFieldPanel("body"),
+        ImageChooserPanel("image"),
     ]
 
 
@@ -144,56 +147,51 @@ class HomePage(Page):
 
     # Hero section of HomePage
     image = models.ForeignKey(
-        'wagtailimages.Image',
+        "wagtailimages.Image",
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
-        related_name='+',
-        help_text='Homepage image'
+        related_name="+",
+        help_text="Homepage image",
     )
     hero_text = models.CharField(
-        max_length=255,
-        help_text='Write an introduction for the bakery'
+        max_length=255, help_text="Write an introduction for the bakery"
     )
     hero_cta = models.CharField(
-        verbose_name='Hero CTA',
+        verbose_name="Hero CTA",
         max_length=255,
-        help_text='Text to display on Call to Action'
+        help_text="Text to display on Call to Action",
     )
     hero_cta_link = models.ForeignKey(
-        'wagtailcore.Page',
+        "wagtailcore.Page",
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
-        related_name='+',
-        verbose_name='Hero CTA link',
-        help_text='Choose a page to link to for the Call to Action'
+        related_name="+",
+        verbose_name="Hero CTA link",
+        help_text="Choose a page to link to for the Call to Action",
     )
 
     # Body section of the HomePage
-    body = StreamField(
-        BaseStreamBlock(), verbose_name="Home content block", blank=True
-    )
+    body = StreamField(BaseStreamBlock(), verbose_name="Home content block", blank=True)
 
     # Promo section of the HomePage
     promo_image = models.ForeignKey(
-        'wagtailimages.Image',
+        "wagtailimages.Image",
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
-        related_name='+',
-        help_text='Promo image'
+        related_name="+",
+        help_text="Promo image",
     )
     promo_title = models.CharField(
         null=True,
         blank=True,
         max_length=255,
-        help_text='Title to display above the promo copy'
+        help_text="Title to display above the promo copy",
     )
     promo_text = RichTextField(
-        null=True,
-        blank=True,
-        help_text='Write some promotional copy'
+        null=True, blank=True, help_text="Write some promotional copy"
     )
 
     # Featured sections on the HomePage
@@ -205,82 +203,100 @@ class HomePage(Page):
         null=True,
         blank=True,
         max_length=255,
-        help_text='Title to display above the promo copy'
+        help_text="Title to display above the promo copy",
     )
     featured_section_1 = models.ForeignKey(
-        'wagtailcore.Page',
+        "wagtailcore.Page",
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
-        related_name='+',
-        help_text='First featured section for the homepage. Will display up to '
-        'three child items.',
-        verbose_name='Featured section 1'
+        related_name="+",
+        help_text="First featured section for the homepage. Will display up to "
+        "three child items.",
+        verbose_name="Featured section 1",
     )
 
     featured_section_2_title = models.CharField(
         null=True,
         blank=True,
         max_length=255,
-        help_text='Title to display above the promo copy'
+        help_text="Title to display above the promo copy",
     )
     featured_section_2 = models.ForeignKey(
-        'wagtailcore.Page',
+        "wagtailcore.Page",
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
-        related_name='+',
-        help_text='Second featured section for the homepage. Will display up to '
-        'three child items.',
-        verbose_name='Featured section 2'
+        related_name="+",
+        help_text="Second featured section for the homepage. Will display up to "
+        "three child items.",
+        verbose_name="Featured section 2",
     )
 
     featured_section_3_title = models.CharField(
         null=True,
         blank=True,
         max_length=255,
-        help_text='Title to display above the promo copy'
+        help_text="Title to display above the promo copy",
     )
     featured_section_3 = models.ForeignKey(
-        'wagtailcore.Page',
+        "wagtailcore.Page",
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
-        related_name='+',
-        help_text='Third featured section for the homepage. Will display up to '
-        'six child items.',
-        verbose_name='Featured section 3'
+        related_name="+",
+        help_text="Third featured section for the homepage. Will display up to "
+        "six child items.",
+        verbose_name="Featured section 3",
     )
 
     content_panels = Page.content_panels + [
-        MultiFieldPanel([
-            ImageChooserPanel('image'),
-            FieldPanel('hero_text', classname="full"),
-            MultiFieldPanel([
-                FieldPanel('hero_cta'),
-                PageChooserPanel('hero_cta_link'),
-            ]),
-        ], heading="Hero section"),
-        MultiFieldPanel([
-            ImageChooserPanel('promo_image'),
-            FieldPanel('promo_title'),
-            FieldPanel('promo_text'),
-        ], heading="Promo section"),
-        StreamFieldPanel('body'),
-        MultiFieldPanel([
-            MultiFieldPanel([
-                FieldPanel('featured_section_1_title'),
-                PageChooserPanel('featured_section_1'),
-            ]),
-            MultiFieldPanel([
-                FieldPanel('featured_section_2_title'),
-                PageChooserPanel('featured_section_2'),
-            ]),
-            MultiFieldPanel([
-                FieldPanel('featured_section_3_title'),
-                PageChooserPanel('featured_section_3'),
-            ]),
-        ], heading="Featured homepage sections", classname="collapsible")
+        MultiFieldPanel(
+            [
+                ImageChooserPanel("image"),
+                FieldPanel("hero_text", classname="full"),
+                MultiFieldPanel(
+                    [
+                        FieldPanel("hero_cta"),
+                        PageChooserPanel("hero_cta_link"),
+                    ]
+                ),
+            ],
+            heading="Hero section",
+        ),
+        MultiFieldPanel(
+            [
+                ImageChooserPanel("promo_image"),
+                FieldPanel("promo_title"),
+                FieldPanel("promo_text"),
+            ],
+            heading="Promo section",
+        ),
+        StreamFieldPanel("body"),
+        MultiFieldPanel(
+            [
+                MultiFieldPanel(
+                    [
+                        FieldPanel("featured_section_1_title"),
+                        PageChooserPanel("featured_section_1"),
+                    ]
+                ),
+                MultiFieldPanel(
+                    [
+                        FieldPanel("featured_section_2_title"),
+                        PageChooserPanel("featured_section_2"),
+                    ]
+                ),
+                MultiFieldPanel(
+                    [
+                        FieldPanel("featured_section_3_title"),
+                        PageChooserPanel("featured_section_3"),
+                    ]
+                ),
+            ],
+            heading="Featured homepage sections",
+            classname="collapsible",
+        ),
     ]
 
     def __str__(self):
@@ -295,35 +311,30 @@ class GalleryPage(Page):
     and is intended to show the extensibility of this aspect of Wagtail
     """
 
-    introduction = models.TextField(
-        help_text='Text to describe the page',
-        blank=True)
+    introduction = models.TextField(help_text="Text to describe the page", blank=True)
     image = models.ForeignKey(
-        'wagtailimages.Image',
+        "wagtailimages.Image",
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
-        related_name='+',
-        help_text='Landscape mode only; horizontal width between 1000px and '
-        '3000px.'
+        related_name="+",
+        help_text="Landscape mode only; horizontal width between 1000px and " "3000px.",
     )
-    body = StreamField(
-        BaseStreamBlock(), verbose_name="Page body", blank=True
-    )
+    body = StreamField(BaseStreamBlock(), verbose_name="Page body", blank=True)
     collection = models.ForeignKey(
         Collection,
-        limit_choices_to=~models.Q(name__in=['Root']),
+        limit_choices_to=~models.Q(name__in=["Root"]),
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
-        help_text='Select the image collection for this gallery.'
+        help_text="Select the image collection for this gallery.",
     )
 
     content_panels = Page.content_panels + [
-        FieldPanel('introduction', classname="full"),
-        StreamFieldPanel('body'),
-        ImageChooserPanel('image'),
-        FieldPanel('collection'),
+        FieldPanel("introduction", classname="full"),
+        StreamFieldPanel("body"),
+        ImageChooserPanel("image"),
+        FieldPanel("collection"),
     ]
 
     # Defining what content type can sit under the parent. Since it's a blank
@@ -340,16 +351,19 @@ class FormField(AbstractFormField):
     can read more about Wagtail forms at:
     http://docs.wagtail.io/en/latest/reference/contrib/forms/index.html
     """
-    page = ParentalKey('FormPage', related_name='form_fields', on_delete=models.CASCADE)
+
+    # form_classname =
+
+    page = ParentalKey("FormPage", related_name="form_fields", on_delete=models.CASCADE)
 
 
 class FormPage(AbstractEmailForm):
     image = models.ForeignKey(
-        'wagtailimages.Image',
+        "wagtailimages.Image",
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
-        related_name='+'
+        related_name="+",
     )
     body = StreamField(BaseStreamBlock())
     thank_you_text = RichTextField(blank=True)
@@ -357,15 +371,20 @@ class FormPage(AbstractEmailForm):
     # Note how we include the FormField object via an InlinePanel using the
     # related_name value
     content_panels = AbstractEmailForm.content_panels + [
-        ImageChooserPanel('image'),
-        StreamFieldPanel('body'),
-        InlinePanel('form_fields', label="Form fields"),
-        FieldPanel('thank_you_text', classname="full"),
-        MultiFieldPanel([
-            FieldRowPanel([
-                FieldPanel('from_address', classname="col6"),
-                FieldPanel('to_address', classname="col6"),
-            ]),
-            FieldPanel('subject'),
-        ], "Email"),
+        ImageChooserPanel("image"),
+        StreamFieldPanel("body"),
+        InlinePanel("form_fields", label="Form fields"),
+        FieldPanel("thank_you_text", classname="full"),
+        MultiFieldPanel(
+            [
+                FieldRowPanel(
+                    [
+                        FieldPanel("from_address", classname="col6"),
+                        FieldPanel("to_address", classname="col6"),
+                    ]
+                ),
+                FieldPanel("subject"),
+            ],
+            "Email",
+        ),
     ]
