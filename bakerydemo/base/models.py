@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
 
+from django import forms
+from django.core.exceptions import ValidationError
 from django.db import models
 
 from modelcluster.fields import ParentalKey
@@ -14,13 +16,128 @@ from wagtail.admin.edit_handlers import (
     StreamFieldPanel,
 )
 from wagtail.core.fields import RichTextField, StreamField
-from wagtail.core.models import Collection, Page
+from wagtail.core.models import Collection, GroupApprovalTask, Page
+from wagtail.core.forms import TaskStateCommentForm
 from wagtail.contrib.forms.models import AbstractEmailForm, AbstractFormField
 from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail.search import index
 from wagtail.snippets.models import register_snippet
 
 from .blocks import BaseStreamBlock
+
+
+class MultipleChoiceFieldRequired(forms.MultipleChoiceField):
+    def clean(self, value):
+        """
+        Customised version of the Django MultipleChoiceField where each
+        value will be required to be checked.
+        """
+
+        value = super().clean(value)
+
+        if len(value) != len(self.choices):
+            raise ValidationError("Please check all items.")
+
+        return value
+
+
+class TaskStateChecklistForm(TaskStateCommentForm):
+    def __init__(self, *args, checklist_choices=[], **kwargs):
+        """
+        Dynamically add a checklist field based on the `checklist_choices` kwarg.
+        This will create an additional field where each value is required.
+        """
+
+        super().__init__(*args, **kwargs)
+
+        self.checklist_choices = checklist_choices
+
+        self.fields["checklist"] = MultipleChoiceFieldRequired(
+            label="Checklist",
+            choices=checklist_choices,
+            required=True,
+            widget=forms.CheckboxSelectMultiple(attrs={"required": "required"}),
+        )
+
+    def clean(self):
+        """
+        When this form's clean method is processed (on a POST), ensure we do not pass
+        the 'checklist' data any further as no handling of this data is built.
+        """
+
+        cleaned_data = super().clean()
+
+        if "checklist" in cleaned_data:
+
+            del cleaned_data["checklist"]
+
+        return cleaned_data
+
+
+class CrosscheckApprovalTask(GroupApprovalTask):
+    """
+    Custom task type where all the features of the GroupApprovalTask will exist but
+    with the ability to define a custom checklist that is required to be checked for
+    Approval of this step.
+    Checklist field will be a multi-line field, each line being one checklist item
+    and will be required.
+    """
+
+    # already has 'groups' field
+
+    checklist = models.TextField(
+        "Checklist", help_text="Each line will become a checklist item."
+    )
+
+    admin_form_fields = GroupApprovalTask.admin_form_fields + ["checklist"]
+
+    def get_actions(self, page, user):
+        """
+        Customise the actions returned to have a reject and only one approve.
+        The approve will have a third value as True which indicates a form is
+        required.
+        """
+
+        if self.groups.filter(id__in=user.groups.all()).exists() or user.is_superuser:
+            return [
+                ("reject", "Request changes", True),
+                (
+                    "approve",
+                    "Approve",
+                    True,  # important: third item in tuple indicates 'more info'
+                ),
+            ]
+
+        return []
+
+    def generate_form(self, *args):
+        """
+        Custom method on this class where we generate a list of tuples at the time
+        of Form creation based on the checklist value currently in the DB for this
+        Task instance.
+        """
+
+        checklist_choices = [
+            (index, label) for index, label in enumerate(self.checklist.splitlines())
+        ]
+
+        return TaskStateChecklistForm(*args, checklist_choices=checklist_choices)
+
+    def get_form_for_action(self, action):
+        """
+        If the action is approve, return a function (instead of a class)
+        so that we can dynamically generate the form class based on the data saved
+        against this model's instance
+        """
+
+        if action == "approve":
+
+            return self.generate_form
+        return super().get_form_for_action(action)
+
+    @classmethod
+    def get_description(cls):
+        return "Members of the chosen User Groups can approve this task with a required checklist."
 
 
 @register_snippet
