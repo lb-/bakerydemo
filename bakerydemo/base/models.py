@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 from django.db import models
+from django.forms import CharField, ValidationError
 
 from modelcluster.fields import ParentalKey
 from modelcluster.models import ClusterableModel
@@ -14,13 +15,46 @@ from wagtail.admin.edit_handlers import (
     StreamFieldPanel,
 )
 from wagtail.core.fields import RichTextField, StreamField
-from wagtail.core.models import Collection, Page
+from wagtail.core.forms import TaskStateCommentForm
+from wagtail.core.models import Collection, Page, Task
 from wagtail.contrib.forms.models import AbstractEmailForm, AbstractFormField
 from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail.search import index
 from wagtail.snippets.models import register_snippet
 
 from .blocks import BaseStreamBlock
+
+
+class ApprovalConfirmationForm(TaskStateCommentForm):
+
+    confirmation_agreement = CharField(
+        label="Agreement",
+        help_text="Type in 'I AGREE'",
+        required=True,
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        if "confirmation_agreement" in cleaned_data:
+            if cleaned_data["confirmation_agreement"] != "I AGREE":
+                # ValidationError should  appear in non_field_errors
+                raise ValidationError('Must enter "I AGREE"')
+
+            del cleaned_data["confirmation_agreement"]
+
+        return cleaned_data
+
+
+class RequiredApprovalTask(Task):
+    def get_actions(self, page, user):
+
+        return [
+            ("approve", "Approve", True),
+        ]
+
+    def get_form_for_action(self, action):
+        return ApprovalConfirmationForm
 
 
 @register_snippet
