@@ -1,8 +1,13 @@
+from django.db.models import Q
+
 from wagtail.contrib.modeladmin.options import (
     ModelAdmin,
     ModelAdminGroup,
     modeladmin_register,
 )
+from wagtail.core import hooks
+from wagtail.core.telepath import register as telepath_register
+from wagtail.documents.widgets import AdminDocumentChooser, DocumentChooserAdapter
 
 from bakerydemo.breads.models import Country, BreadIngredient, BreadType
 from bakerydemo.base.models import People, FooterText
@@ -73,3 +78,37 @@ class BakeryModelAdminGroup(ModelAdminGroup):
 # you only need to register the ModelAdminGroup class with Wagtail:
 modeladmin_register(BreadModelAdminGroup)
 modeladmin_register(BakeryModelAdminGroup)
+
+
+@hooks.register("construct_document_chooser_queryset")
+def show_accepted_documents_only(documents, request):
+    accept = request.GET.get("accept")
+
+    if accept:
+        accepted_files = accept.split(",")
+
+        queries = [Q(file__iendswith=f".{value}") for value in accepted_files]
+
+        query = queries.pop()
+        for item in queries:
+            query |= item
+
+        documents = documents.filter(query)
+
+    return documents
+
+
+class CustomDocumentChooserAdapter(DocumentChooserAdapter):
+    def js_args(self, widget):
+        return [
+            widget.render_html(
+                # this line is changed, allocate any widget.attrs to the attrs passed to render_html
+                "__NAME__",
+                None,
+                attrs={**widget.attrs, "id": "__ID__"},
+            ),
+            widget.id_for_label("__ID__"),
+        ]
+
+
+telepath_register(CustomDocumentChooserAdapter(), AdminDocumentChooser)

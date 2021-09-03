@@ -8,6 +8,7 @@ from wagtail.core.blocks import (
     StructBlock,
     TextBlock,
 )
+from wagtail.documents.blocks import DocumentChooserBlock
 
 
 class ImageBlock(StructBlock):
@@ -60,12 +61,26 @@ class BlockQuote(StructBlock):
         template = "blocks/blockquote.html"
 
 
+class SpecificDocumentChooserBlock(DocumentChooserBlock):
+    """
+    Existing DocumentChooserBlock with the ability to add widget attrs based on the
+    accept kwarg, anything on self.widget.attrs will be added to the hidden
+    input field (so be careful what key is used).
+    """
+
+    def __init__(self, accept=None, **kwargs):
+        super().__init__(**kwargs)
+
+        self.widget.attrs["accept"] = accept
+
+
 # StreamBlocks
 class BaseStreamBlock(StreamBlock):
     """
     Define the custom blocks that `StreamField` will utilize
     """
 
+    doc_block = SpecificDocumentChooserBlock(accept="svg,md")  # uses accept kwarg
     heading_block = HeadingBlock()
     paragraph_block = RichTextBlock(
         icon="fa-paragraph", template="blocks/paragraph_block.html"

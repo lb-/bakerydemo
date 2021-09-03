@@ -1,0 +1,9 @@
+{% extends "wagtaildocs/widgets/document_chooser.html" %}
+{% comment %}
+  This template overrides the Wagtail default chooser field, this is not the modal but
+  the button / selected value shown in the page editor.
+  chooser_attributes are the attributes that are used by the modal trigger, we will
+  override the 'data-chooser-url' value with a url param
+{% endcomment %}
+
+{% block chooser_attributes %}data-chooser-url="{% url "wagtaildocs:chooser" %}{% if attrs.accept %}?accept={{ attrs.accept }}{% endif %}"{% endblock %}
