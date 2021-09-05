@@ -1,8 +1,13 @@
+from django.utils.html import format_html
+from django.templatetags.static import static
+
 from wagtail.contrib.modeladmin.options import (
     ModelAdmin,
     ModelAdminGroup,
     modeladmin_register,
 )
+
+from wagtail.core import hooks
 
 from bakerydemo.breads.models import Country, BreadIngredient, BreadType
 from bakerydemo.base.models import People, FooterText
@@ -73,3 +78,19 @@ class BakeryModelAdminGroup(ModelAdminGroup):
 # you only need to register the ModelAdminGroup class with Wagtail:
 modeladmin_register(BreadModelAdminGroup)
 modeladmin_register(BakeryModelAdminGroup)
+
+
+@hooks.register("insert_global_admin_css")
+def global_admin_zen_mode_multi_field_panel_css():
+    return format_html(
+        '<link rel="stylesheet" href="{}">',
+        static("css/zen-mode-multi-field-panel.css"),
+    )
+
+
+@hooks.register("insert_global_admin_js")
+def global_adminzen_mode_multi_field_panel__js():
+    return format_html(
+        '<script src="{}"></script>',
+        static("js/zen-mode-multi-field-panel.js"),
+    )

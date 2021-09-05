@@ -1,0 +1,10 @@
+.object.multi-field.zen-mode-panel .button.zen-mode {
+  position: absolute;
+  right: 4rem;
+  z-index: 100;
+  top: 0.5rem;
+}
+
+.object.multi-field.zen-mode-panel .button.zen-mode.hidden {
+  display: none;
+}
