@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
 
+from django import forms
+from django.contrib.auth.models import Group
 from django.db import models
 
 from modelcluster.fields import ParentalKey
@@ -14,13 +16,64 @@ from wagtail.admin.edit_handlers import (
     StreamFieldPanel,
 )
 from wagtail.core.fields import RichTextField, StreamField
-from wagtail.core.models import Collection, Page
+from wagtail.core.models import Collection, GroupApprovalTask, Page, Task
 from wagtail.contrib.forms.models import AbstractEmailForm, AbstractFormField
 from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail.search import index
 from wagtail.snippets.models import register_snippet
 
 from .blocks import BaseStreamBlock
+
+
+class SplitGroupApprovalTask(Task):
+
+    groups_a = models.ManyToManyField(
+        Group,
+        help_text="Pages at this step in a workflow will be moderated or approved by these groups of users",
+        related_name="split_task_group_a",
+    )
+    groups_b = models.ManyToManyField(
+        Group,
+        help_text="Pages at this step in a workflow will be moderated or approved by these groups of users",
+        related_name="split_task_group_b",
+    )
+
+    admin_form_fields = Task.admin_form_fields + ["groups_a", "groups_b"]
+    admin_form_widgets = {
+        "groups_a": forms.CheckboxSelectMultiple,
+        "groups_b": forms.CheckboxSelectMultiple,
+    }
+
+    def get_approval_group(self, page):
+
+        approval_group = page.specific.get_approval_group()
+
+        if approval_group == "a":
+            return self.group_a
+
+        return self.group_b
+
+    # def start(self, ...etc)
+    # def user_can_access_editor(self, ...etc)
+    # def page_locked_for_user(self, ...etc)
+    # def user_can_lock(self, ...etc)
+    # def user_can_unlock(self, ...etc)
+    # def get_task_states_user_can_moderate(self, ...etc)
+
+    def get_actions(self, page, user):
+        approval_group = self.get_approval_group(page)
+
+        if (
+            approval_group.filter(id__in=user.groups.all()).exists()
+            or user.is_superuser
+        ):
+            return [
+                ("reject", "Request changes", True),
+                ("approve", "Approve", False),
+                ("approve", "Approve with comment", True),
+            ]
+
+        return super().get_actions(page, user)
 
 
 @register_snippet
