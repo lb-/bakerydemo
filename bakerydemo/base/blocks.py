@@ -14,6 +14,10 @@ from wagtail.documents.blocks import DocumentChooserBlock
 
 
 class RestrictedDocumentChooserBlock(ChooserBlock):
+    def __init__(self, **kwargs):
+        self.accept = kwargs.pop("accept")
+        super().__init__(**kwargs)
+
     @cached_property
     def target_model(self):
         from wagtail.documents.models import Document
@@ -24,7 +28,7 @@ class RestrictedDocumentChooserBlock(ChooserBlock):
     def widget(self):
         from .widgets import RestrictedDocumentChooser
 
-        return RestrictedDocumentChooser()
+        return RestrictedDocumentChooser(accept=self.accept)
 
     def get_form_state(self, value):
         return self.widget.get_value_data(value)
