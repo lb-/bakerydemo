@@ -1,4 +1,6 @@
-from wagtail.images.blocks import ImageChooserBlock
+from django.utils.functional import cached_property
+
+from wagtail.images.blocks import ChooserBlock, ImageChooserBlock
 from wagtail.embeds.blocks import EmbedBlock
 from wagtail.core.blocks import (
     CharBlock,
@@ -9,6 +11,23 @@ from wagtail.core.blocks import (
     TextBlock,
 )
 from wagtail.documents.blocks import DocumentChooserBlock
+
+
+class RestrictedDocumentChooserBlock(ChooserBlock):
+    @cached_property
+    def target_model(self):
+        from wagtail.documents.models import Document
+
+        return Document
+
+    @cached_property
+    def widget(self):
+        from .widgets import RestrictedDocumentChooser
+
+        return RestrictedDocumentChooser()
+
+    def get_form_state(self, value):
+        return self.widget.get_value_data(value)
 
 
 class ImageBlock(StructBlock):
@@ -61,26 +80,13 @@ class BlockQuote(StructBlock):
         template = "blocks/blockquote.html"
 
 
-class SpecificDocumentChooserBlock(DocumentChooserBlock):
-    """
-    Existing DocumentChooserBlock with the ability to add widget attrs based on the
-    accept kwarg, anything on self.widget.attrs will be added to the hidden
-    input field (so be careful what key is used).
-    """
-
-    def __init__(self, accept=None, **kwargs):
-        super().__init__(**kwargs)
-
-        self.widget.attrs["accept"] = accept
-
-
 # StreamBlocks
 class BaseStreamBlock(StreamBlock):
     """
     Define the custom blocks that `StreamField` will utilize
     """
 
-    doc_block = SpecificDocumentChooserBlock(accept="svg,md")  # uses accept kwarg
+    doc_block = RestrictedDocumentChooserBlock(accept="svg,md")  # uses accept kwarg
     heading_block = HeadingBlock()
     paragraph_block = RichTextBlock(
         icon="fa-paragraph", template="blocks/paragraph_block.html"

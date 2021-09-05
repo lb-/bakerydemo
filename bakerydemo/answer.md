@@ -1,0 +1,2 @@
+- Run: `pip install wagtail-generic-chooser`
+- Then add `generic_chooser` to your project's `INSTALLED_APPS`.
