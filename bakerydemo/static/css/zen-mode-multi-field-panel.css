@@ -1,0 +1,24 @@
+.object.multi-field.zen-mode-panel .button.zen-mode {
+  position: absolute;
+  right: 4rem;
+  z-index: 100;
+  top: 0.5rem;
+  margin-top: 0;
+}
+
+.object.multi-field.zen-mode-panel .button.zen-mode.hidden {
+  display: none;
+}
+
+.object.multi-field.zen-mode-panel.fullscreen-active {
+  background-color: white;
+}
+
+.object.multi-field.zen-mode-panel.fullscreen-active fieldset {
+  /* ensure that scrolling within content still works */
+  max-width: none;
+  max-height: calc(100vh - 6rem);
+  overflow: scroll;
+  padding-right: 1rem;
+  padding-bottom: 2rem;
+}
