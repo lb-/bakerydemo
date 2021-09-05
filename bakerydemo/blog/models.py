@@ -18,6 +18,7 @@ from wagtail.search import index
 from wagtail.snippets.edit_handlers import SnippetChooserPanel
 
 from bakerydemo.base.blocks import BaseStreamBlock
+from bakerydemo.base.edit_handlers import ZenModeMultiFieldPanel
 
 
 class BlogPeopleRelationship(Orderable, models.Model):
@@ -75,9 +76,11 @@ class BlogPage(Page):
 
     content_panels = Page.content_panels + [
         FieldPanel("subtitle", classname="full"),
-        FieldPanel("introduction", classname="full"),
         ImageChooserPanel("image"),
-        StreamFieldPanel("body"),
+        ZenModeMultiFieldPanel(
+            [FieldPanel("introduction", classname="full"), StreamFieldPanel("body")],
+            heading="Content",
+        ),
         FieldPanel("date_published"),
         InlinePanel(
             "blog_person_relationship", label="Author(s)", panels=None, min_num=1
