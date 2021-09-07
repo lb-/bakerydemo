@@ -4,9 +4,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from modelcluster.fields import ParentalManyToManyField
 
-from wagtail.admin.edit_handlers import (
-    FieldPanel, MultiFieldPanel, StreamFieldPanel
-)
+from wagtail.admin.edit_handlers import FieldPanel, MultiFieldPanel, StreamFieldPanel
 from wagtail.core.fields import StreamField
 from wagtail.core.models import Page
 from wagtail.search import index
@@ -46,17 +44,18 @@ class BreadIngredient(models.Model):
     model to display this. The Wagtail Docs give a slightly more detailed example
     http://docs.wagtail.io/en/latest/getting_started/tutorial.html#categories
     """
+
     name = models.CharField(max_length=255)
 
     panels = [
-        FieldPanel('name'),
+        FieldPanel("name"),
     ]
 
     def __str__(self):
         return self.name
 
     class Meta:
-        verbose_name_plural = 'Bread ingredients'
+        verbose_name_plural = "Bread ingredients"
 
 
 @register_snippet
@@ -73,7 +72,7 @@ class BreadType(models.Model):
     title = models.CharField(max_length=255)
 
     panels = [
-        FieldPanel('title'),
+        FieldPanel("title"),
     ]
 
     def __str__(self):
@@ -87,20 +86,17 @@ class BreadPage(Page):
     """
     Detail view for a specific bread
     """
-    introduction = models.TextField(
-        help_text='Text to describe the page',
-        blank=True)
+
+    introduction = models.TextField(help_text="Text to describe the page", blank=True)
     image = models.ForeignKey(
-        'wagtailimages.Image',
+        "wagtailimages.Image",
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
-        related_name='+',
-        help_text='Landscape mode only; horizontal width between 1000px and 3000px.'
+        related_name="+",
+        help_text="Landscape mode only; horizontal width between 1000px and 3000px.",
     )
-    body = StreamField(
-        BaseStreamBlock(), verbose_name="Page body", blank=True
-    )
+    body = StreamField(BaseStreamBlock(), verbose_name="Page body", blank=True)
     origin = models.ForeignKey(
         Country,
         on_delete=models.SET_NULL,
@@ -114,37 +110,37 @@ class BreadPage(Page):
     # relationship called `foopage_objects` that will throw a valueError on
     # collision.
     bread_type = models.ForeignKey(
-        'breads.BreadType',
+        "breads.BreadType",
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
-        related_name='+'
+        related_name="+",
     )
-    ingredients = ParentalManyToManyField('BreadIngredient', blank=True)
+    ingredients = ParentalManyToManyField("BreadIngredient", blank=True)
 
     content_panels = Page.content_panels + [
-        FieldPanel('introduction', classname="full"),
-        ImageChooserPanel('image'),
-        StreamFieldPanel('body'),
-        FieldPanel('origin'),
-        FieldPanel('bread_type'),
+        FieldPanel("introduction", classname="full"),
+        ImageChooserPanel("image"),
+        StreamFieldPanel("body"),
+        FieldPanel("origin"),
+        FieldPanel("bread_type"),
         MultiFieldPanel(
             [
                 FieldPanel(
-                    'ingredients',
+                    "ingredients",
                     widget=forms.CheckboxSelectMultiple,
                 ),
             ],
             heading="Additional Metadata",
-            classname="collapsible collapsed"
+            classname="collapsible collapsed",
         ),
     ]
 
     search_fields = Page.search_fields + [
-        index.SearchField('body'),
+        index.SearchField("body"),
     ]
 
-    parent_page_types = ['BreadsIndexPage']
+    parent_page_types = ["BreadsIndexPage"]
 
 
 class BreadsIndexPage(Page):
@@ -156,32 +152,30 @@ class BreadsIndexPage(Page):
     to be discrete functions to make it easier to follow
     """
 
-    introduction = models.TextField(
-        help_text='Text to describe the page',
-        blank=True)
+    introduction = models.TextField(help_text="Text to describe the page", blank=True)
     image = models.ForeignKey(
-        'wagtailimages.Image',
+        "wagtailimages.Image",
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
-        related_name='+',
-        help_text='Landscape mode only; horizontal width between 1000px and '
-        '3000px.'
+        related_name="+",
+        help_text="Landscape mode only; horizontal width between 1000px and " "3000px.",
     )
 
     content_panels = Page.content_panels + [
-        FieldPanel('introduction', classname="full"),
-        ImageChooserPanel('image'),
+        FieldPanel("introduction", classname="full"),
+        ImageChooserPanel("image"),
     ]
 
     # Can only have BreadPage children
-    subpage_types = ['BreadPage']
+    subpage_types = ["BreadPage"]
 
     # Returns a queryset of BreadPage objects that are live, that are direct
     # descendants of this index page with most recent first
     def get_breads(self):
-        return BreadPage.objects.live().descendant_of(
-            self).order_by('-first_published_at')
+        return (
+            BreadPage.objects.live().descendant_of(self).order_by("-first_published_at")
+        )
 
     # Allows child objects (e.g. BreadPage objects) to be accessible via the
     # template. We use this on the HomePage to display child items of featured
@@ -193,7 +187,7 @@ class BreadsIndexPage(Page):
     # standard Django app would, but the difference here being we have it as a
     # method on the model rather than within a view function
     def paginate(self, request, *args):
-        page = request.GET.get('page')
+        page = request.GET.get("page")
         paginator = Paginator(self.get_breads(), 12)
         try:
             pages = paginator.page(page)
@@ -211,6 +205,6 @@ class BreadsIndexPage(Page):
         # BreadPage objects (get_breads) are passed through pagination
         breads = self.paginate(request, self.get_breads())
 
-        context['breads'] = breads
+        context["breads"] = breads
 
         return context
