@@ -83,7 +83,7 @@ class BreadType(models.Model):
         verbose_name_plural = "Bread types"
 
 
-class BreadPage(Page, ArchivablePageMixin):
+class BreadPage(ArchivablePageMixin, Page):
     """
     Detail view for a specific bread
     """

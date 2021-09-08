@@ -24,16 +24,22 @@ def get_page_action_menu(menu_items, request, context):
     return menu_items
 
 
-def register_archive_hooks():
-    hooks.register("construct_page_action_menu", get_page_action_menu)
+def archive_log_actions(actions):
+    actions.register_action("archive", "Archive", "Archived")
 
-    @hooks.register("register_admin_urls")
-    def urlconf_time():
-        # question: how do I get this to be 'archive:confirm'
-        return [
-            path(
-                "archive/<str:pk>/confirm/",
-                ArchiveView.as_view(),
-                name="archive",
-            ),
-        ]
+
+def get_urls():
+    return [
+        path(
+            "archive/<str:pk>/confirm/",
+            ArchiveView.as_view(),
+            name="archive",
+        ),
+    ]
+
+
+def register_archive_hooks():
+
+    hooks.register("construct_page_action_menu", get_page_action_menu)
+    hooks.register("register_admin_urls", get_urls)
+    hooks.register("register_log_actions", archive_log_actions)

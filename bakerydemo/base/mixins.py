@@ -10,14 +10,42 @@
 
 from django.db import models
 
+from wagtail.core.models import Page, PagePermissionTester, UserPagePermissionsProxy
 
-class ArchivablePageMixin(models.Model):
+
+class ArchivePagePermissionTester(PagePermissionTester):
+    def can_unlock(self):
+        print("can_unlock", self)
+        return False
+
+
+class ArchiveUserPagePermissionsProxy(UserPagePermissionsProxy):
+    def for_page(self, page):
+        print("ArchiveUserPagePermissionsProxy for page")
+        """Return a PagePermissionTester object that can be used to query whether this user has
+        permission to perform specific tasks on the given page"""
+        return ArchivePagePermissionTester(self, page)
+
+
+class ArchivablePageMixin(Page):
 
     archived_on = models.DateTimeField(blank=True, null=True)
 
     @property
     def can_archive(self):
+        print("can_archive", self)
+        print("archived_on", self.archived_on)
+        if self.archived_on:
+            return False
         return True
+
+    def permissions_for_user(self, user):
+        """
+        Return a PagePermissionsTester object defining what actions the user can perform on this page
+        """
+        print("permissions_for_user")
+        user_perms = ArchiveUserPagePermissionsProxy(user)
+        return user_perms.for_page(self)
 
     class Meta:
         abstract = True
