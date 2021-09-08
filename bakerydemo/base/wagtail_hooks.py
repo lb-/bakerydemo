@@ -3,9 +3,12 @@ from wagtail.contrib.modeladmin.options import (
     ModelAdminGroup,
     modeladmin_register,
 )
+from wagtail.core import hooks
 
 from bakerydemo.breads.models import Country, BreadIngredient, BreadType
 from bakerydemo.base.models import People, FooterText
+from bakerydemo.base.utils import register_archive_hooks
+
 
 """
 N.B. To see what icons are available for use in Wagtail menus and StreamField block types,
@@ -22,6 +25,9 @@ or see http://kave.github.io/general/2015/12/06/wagtail-streamfield-icons.html
 This demo project includes the full font-awesome set via CDN in base.html, so the entire
 font-awesome icon set is available to you. Options are at http://fontawesome.io/icons/.
 """
+
+
+register_archive_hooks()
 
 
 class BreadIngredientAdmin(ModelAdmin):

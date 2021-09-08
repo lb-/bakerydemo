@@ -12,6 +12,7 @@ from wagtail.snippets.models import register_snippet
 from wagtail.images.edit_handlers import ImageChooserPanel
 
 from bakerydemo.base.blocks import BaseStreamBlock
+from bakerydemo.base.mixins import ArchivablePageMixin
 
 
 @register_snippet
@@ -82,7 +83,7 @@ class BreadType(models.Model):
         verbose_name_plural = "Bread types"
 
 
-class BreadPage(Page):
+class BreadPage(Page, ArchivablePageMixin):
     """
     Detail view for a specific bread
     """
