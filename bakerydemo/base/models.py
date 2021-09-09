@@ -426,6 +426,10 @@ class FieldsetSection(forms.Field):
         self.description = options["help_text"]
 
     def validate(self, value):
+        """
+        Never throw any errors, we do not need to check this field as it does not
+        contain any data.
+        """
         pass
 
 
