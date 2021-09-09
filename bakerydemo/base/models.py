@@ -14,7 +14,7 @@ from wagtail.admin.edit_handlers import (
     StreamFieldPanel,
 )
 from wagtail.core.fields import RichTextField, StreamField
-from wagtail.core.models import Collection, Page
+from wagtail.core.models import Collection, Orderable, Page
 from wagtail.contrib.forms.models import AbstractEmailForm, AbstractFormField
 from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail.search import index
@@ -355,6 +355,38 @@ class FormField(AbstractFormField):
     page = ParentalKey("FormPage", related_name="form_fields", on_delete=models.CASCADE)
 
 
+# wont work due to https://github.com/wagtail/wagtail/issues/5770
+
+
+class SectionFormField(AbstractFormField):
+    section = ParentalKey(
+        "FormPageFieldsSection",
+        related_name="section_form_fields",
+        on_delete=models.CASCADE,
+    )
+
+
+class AbstractFormPageFieldsSection(ClusterableModel):
+    title = models.CharField(max_length=255, blank=True)
+    description = models.CharField(max_length=255, blank=True)
+
+    panels = [
+        FieldPanel("title"),
+        FieldPanel("description"),
+        InlinePanel("section_form_fields", label="Form fields"),
+    ]
+
+    class Meta:
+        abstract = True
+
+
+class FormPageFieldsSection(Orderable, AbstractFormPageFieldsSection):
+
+    page = ParentalKey(
+        "FormPage", related_name="form_sections", on_delete=models.CASCADE
+    )
+
+
 class FormPage(AbstractEmailForm):
     image = models.ForeignKey(
         "wagtailimages.Image",
@@ -371,7 +403,8 @@ class FormPage(AbstractEmailForm):
     content_panels = AbstractEmailForm.content_panels + [
         ImageChooserPanel("image"),
         StreamFieldPanel("body"),
-        InlinePanel("form_fields", label="Form fields"),
+        # InlinePanel("form_fields", label="Form fields"),
+        InlinePanel("form_sections", label="Form sections"),
         FieldPanel("thank_you_text", classname="full"),
         MultiFieldPanel(
             [
@@ -386,3 +419,13 @@ class FormPage(AbstractEmailForm):
             "Email",
         ),
     ]
+
+    def get_form_fields(self):
+        """
+        Form page expects `form_fields` to be declared.
+        If you want to change backwards relation name,
+        you need to override this method.
+        """
+        print("get_form_fields", self.form_sections)
+
+        return self.form_fields.all()
