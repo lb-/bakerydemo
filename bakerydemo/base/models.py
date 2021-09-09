@@ -1,6 +1,9 @@
 from __future__ import unicode_literals
 
+from django import forms
 from django.db import models
+from django.db.models import fields
+from django.utils.html import format_html
 
 from modelcluster.fields import ParentalKey
 from modelcluster.models import ClusterableModel
@@ -15,7 +18,12 @@ from wagtail.admin.edit_handlers import (
 )
 from wagtail.core.fields import RichTextField, StreamField
 from wagtail.core.models import Collection, Page
-from wagtail.contrib.forms.models import AbstractEmailForm, AbstractFormField
+from wagtail.contrib.forms.forms import BaseForm, FormBuilder
+from wagtail.contrib.forms.models import (
+    AbstractEmailForm,
+    AbstractFormField,
+    FORM_FIELD_CHOICES,
+)
 from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail.search import index
 from wagtail.snippets.models import register_snippet
@@ -352,10 +360,86 @@ class FormField(AbstractFormField):
     http://docs.wagtail.io/en/latest/reference/contrib/forms/index.html
     """
 
+    # https://docs.wagtail.io/en/stable/reference/contrib/forms/customisation.html#adding-a-custom-field-type
+
+    CHOICES = FORM_FIELD_CHOICES + (("section", "Section"),)
+
     page = ParentalKey("FormPage", related_name="form_fields", on_delete=models.CASCADE)
+
+    field_type = models.CharField(
+        verbose_name="field type",
+        max_length=16,
+        # use the choices tuple defined above
+        choices=CHOICES,
+    )
+
+
+class CustomForm(BaseForm):
+    def fieldsets(self):
+        """
+        This code could do with a clean up, bit hard to follow.
+        Basically building up an array of fieldsets and each 'section' will create a new fieldset
+        Needs to handle NO sections in code and multiple, even at the end
+        """
+
+        fieldsets = [
+            {
+                "fields": [],
+                "fieldset": (
+                    None,
+                    None,
+                ),
+            }
+        ]
+
+        for field in self:
+            is_fieldset = getattr(field.field, "is_fieldset", False)
+
+            if is_fieldset:
+                fieldsets.append(
+                    {
+                        "fields": [],
+                        "fieldset": (field.field.legend, field.field.description),
+                    }
+                )
+            else:
+                fieldsets[-1]["fields"].append(field)
+
+        fieldsets = [
+            (
+                _["fields"],
+                _["fieldset"][0],
+                _["fieldset"][1],
+            )
+            for _ in fieldsets
+            if _["fieldset"][0] and bool(_["fields"])
+        ]
+
+        return fieldsets
+
+
+class FieldsetSection(forms.Field):
+    def __init__(self, field=None, options=None, **kwargs):
+        super().__init__(**kwargs)
+        self.is_fieldset = True
+        self.legend = options["label"]
+        self.description = options["help_text"]
+
+    def validate(self, value):
+        pass
+
+
+class CustomFormBuilder(FormBuilder):
+    def create_section_field(self, field, options):
+        return FieldsetSection(field=field, options=options)
+
+    def get_form_class(self):
+        return type(str("WagtailForm"), (CustomForm,), self.formfields)
 
 
 class FormPage(AbstractEmailForm):
+    form_builder = CustomFormBuilder
+
     image = models.ForeignKey(
         "wagtailimages.Image",
         null=True,

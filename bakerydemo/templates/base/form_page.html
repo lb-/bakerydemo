@@ -34,7 +34,11 @@
                     </ol>
                 {% endif %}
 
-                {% for field in form %}
+                {% for fields, legend, description in form.fieldsets %}
+                <fieldset>
+                    {% if legend %}<legend>{{ legend }}</legend>{% endif %}
+                    {% if description %}<div class="fieldset-description">{{ description }}</div>{% endif %}
+                    {% for field in fields %}
                     <div class="fieldWrapper" aria-required={% if field.field.required %}"true"{% else %}"false"{% endif %}>
                         
                         {{ field.label_tag }}{% if field.field.required %}<span class="required">*</span>{% endif %}
@@ -45,6 +49,8 @@
                             <p class="help">{{ field.help_text|safe }}</p>
                         {% endif %}
                     </div>
+                    {% endfor %}
+                </fieldset>
                 {% endfor %}
 
                 <input type="submit">
