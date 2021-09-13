@@ -33,9 +33,7 @@
                     {% endfor %}
                     </ol>
                 {% endif %}
-                {% for fields, label, description in form.fieldsets %}
-                    {% fieldset fields label description form=form %}
-                {% endfor %}
+                {% for item in form.fieldsets %}{% fieldset fieldset=item form=form %}{% endfor %}
                 <input type="submit">
             </form>
         </div>

@@ -1,17 +1,13 @@
 from django import template
 
-from wagtail.images.models import Image
-
 register = template.Library()
 
 
-@register.inclusion_tag("tags/form_fieldset.html", takes_context=True)
-def fieldset(context, fields, label, description, form):
-    print("fieldset tag", fields, label, description, form)
-
+@register.inclusion_tag("tags/form_fieldset.html")
+def fieldset(fieldset, form):
     return {
-        "description": description,
-        "fields": [form[field] for field in fields],
+        "description": fieldset.get("help_text", None),
+        "fields": [form[field] for field in fieldset.get("fields", [])],
         "form": form,
-        "label": label,
+        "label": fieldset.get("label", None),
     }

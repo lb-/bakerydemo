@@ -4,6 +4,7 @@ from django import forms
 from django.db import models
 from django.db.models import fields
 from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 
 from modelcluster.fields import ParentalKey
 from modelcluster.models import ClusterableModel
@@ -371,86 +372,22 @@ class FormField(AbstractFormField):
     )
 
 
-# class CustomForm(BaseForm):
-#     def __init__(self, *args, **kwargs):
-#         print("init", kwargs)
-
-#         # self.fieldsets = kwargs.pop("fieldsets", [])
-
-#         print("CustomForm init", self.fieldsets)
-
-#         super().__init__(*args, **kwargs)
-
-# def __init_subclass__(cls, fieldsets, **kwargs):
-#     super().__init_subclass__(**kwargs)
-#     cls.fieldsets = fieldsets
-
-# def fieldsets(self):
-#     """
-#     This code could do with a clean up, bit hard to follow.
-#     Basically building up an array of fieldsets and each 'section' will create a new fieldset
-#     Needs to handle NO sections in code and multiple, even at the end
-#     """
-
-#     fieldsets = [
-#         {
-#             "fields": [],
-#             "fieldset": (
-#                 None,
-#                 None,
-#             ),
-#         }
-#     ]
-
-#     for field in self:
-#         is_fieldset = getattr(field.field, "is_fieldset", False)
-
-#         if is_fieldset:
-#             fieldsets.append(
-#                 {
-#                     "fields": [],
-#                     "fieldset": (field.field.legend, field.field.description),
-#                 }
-#             )
-#         else:
-#             fieldsets[-1]["fields"].append(field)
-
-#     fieldsets = [
-#         (
-#             _["fields"],
-#             _["fieldset"][0],
-#             _["fieldset"][1],
-#         )
-#         for _ in fieldsets
-#         if _["fieldset"][0] and bool(_["fields"])
-#     ]
-
-#     return fieldsets
-
-
-# class FieldsetSection(forms.Field):
-#     def __init__(self, field=None, options=None, **kwargs):
-#         super().__init__(**kwargs)
-#         self.is_fieldset = True
-#         self.legend = options["label"]
-#         self.description = options["help_text"]
-
-#     def validate(self, value):
-#         """
-#         Never throw any errors, we do not need to check this field as it does not
-#         contain any data.
-#         """
-#         pass
-
-
-class CustomFormBuilder(FormBuilder):
+class FieldsetFormBuilder(FormBuilder):
     def __init__(self, fields):
+        """
+        Assign the `fields` as a subset of the fields, excluding fieldset types.
+        Assign the `all_fields` as the raw fields to be used when generating the
+        fieldset data.
+        """
         self.all_fields = fields
         self.fields = fields.exclude(field_type="section")
 
-    @property
-    def formfields(self):
-        formfields = super().formfields
+    def get_fieldsets(self):
+        """
+        Prepare an array of dicts where each item is a fieldset that contains
+        the data set up by get_field_options (label, help_text, etc) and
+        a `fields` array which will be an array of field.clean_name (field key).
+        """
 
         fieldsets = [[[], {}]]
 
@@ -463,20 +400,26 @@ class CustomFormBuilder(FormBuilder):
             else:
                 fieldsets[-1][0].append(field.clean_name)
 
-        formfields["fieldsets"] = [
-            (
-                _[0],  # fields (clean_name keys)
-                _[1].get("label", None),
-                _[1].get("help_text", None),
+        return [
+            dict(
+                **options,
+                fields=fields,
             )
-            for _ in fieldsets
+            for fields, options in fieldsets
+            if bool(fields) or bool(options)
         ]
+
+    @property
+    def formfields(self):
+        formfields = super().formfields
+
+        formfields["fieldsets"] = self.get_fieldsets()
 
         return formfields
 
 
 class FormPage(AbstractEmailForm):
-    form_builder = CustomFormBuilder
+    form_builder = FieldsetFormBuilder
 
     image = models.ForeignKey(
         "wagtailimages.Image",
