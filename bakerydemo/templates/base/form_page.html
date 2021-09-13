@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load wagtailcore_tags navigation_tags wagtailimages_tags %}
+{% load wagtailcore_tags navigation_tags wagtailimages_tags form_tags %}
 
 {% block content %}
 {% include "base/include/header-hero.html" %}
@@ -33,26 +33,9 @@
                     {% endfor %}
                     </ol>
                 {% endif %}
-
-                {% for fields, legend, description in form.fieldsets %}
-                <fieldset>
-                    {% if legend %}<legend>{{ legend }}</legend>{% endif %}
-                    {% if description %}<div class="fieldset-description">{{ description }}</div>{% endif %}
-                    {% for field in fields %}
-                    <div class="fieldWrapper" aria-required={% if field.field.required %}"true"{% else %}"false"{% endif %}>
-                        
-                        {{ field.label_tag }}{% if field.field.required %}<span class="required">*</span>{% endif %}
-
-                        {{ field }}
-                        
-                        {% if field.help_text %}
-                            <p class="help">{{ field.help_text|safe }}</p>
-                        {% endif %}
-                    </div>
-                    {% endfor %}
-                </fieldset>
+                {% for fields, label, description in form.fieldsets %}
+                    {% fieldset fields label description form=form %}
                 {% endfor %}
-
                 <input type="submit">
             </form>
         </div>

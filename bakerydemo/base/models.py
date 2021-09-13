@@ -367,78 +367,112 @@ class FormField(AbstractFormField):
     page = ParentalKey("FormPage", related_name="form_fields", on_delete=models.CASCADE)
 
     field_type = models.CharField(
-        verbose_name="field type",
-        max_length=16,
-        # use the choices tuple defined above
-        choices=CHOICES,
+        verbose_name="field type", max_length=16, choices=CHOICES
     )
 
 
-class CustomForm(BaseForm):
-    def fieldsets(self):
-        """
-        This code could do with a clean up, bit hard to follow.
-        Basically building up an array of fieldsets and each 'section' will create a new fieldset
-        Needs to handle NO sections in code and multiple, even at the end
-        """
+# class CustomForm(BaseForm):
+#     def __init__(self, *args, **kwargs):
+#         print("init", kwargs)
 
-        fieldsets = [
-            {
-                "fields": [],
-                "fieldset": (
-                    None,
-                    None,
-                ),
-            }
-        ]
+#         # self.fieldsets = kwargs.pop("fieldsets", [])
 
-        for field in self:
-            is_fieldset = getattr(field.field, "is_fieldset", False)
+#         print("CustomForm init", self.fieldsets)
 
-            if is_fieldset:
-                fieldsets.append(
-                    {
-                        "fields": [],
-                        "fieldset": (field.field.legend, field.field.description),
-                    }
-                )
-            else:
-                fieldsets[-1]["fields"].append(field)
+#         super().__init__(*args, **kwargs)
 
-        fieldsets = [
-            (
-                _["fields"],
-                _["fieldset"][0],
-                _["fieldset"][1],
-            )
-            for _ in fieldsets
-            if _["fieldset"][0] and bool(_["fields"])
-        ]
+# def __init_subclass__(cls, fieldsets, **kwargs):
+#     super().__init_subclass__(**kwargs)
+#     cls.fieldsets = fieldsets
 
-        return fieldsets
+# def fieldsets(self):
+#     """
+#     This code could do with a clean up, bit hard to follow.
+#     Basically building up an array of fieldsets and each 'section' will create a new fieldset
+#     Needs to handle NO sections in code and multiple, even at the end
+#     """
+
+#     fieldsets = [
+#         {
+#             "fields": [],
+#             "fieldset": (
+#                 None,
+#                 None,
+#             ),
+#         }
+#     ]
+
+#     for field in self:
+#         is_fieldset = getattr(field.field, "is_fieldset", False)
+
+#         if is_fieldset:
+#             fieldsets.append(
+#                 {
+#                     "fields": [],
+#                     "fieldset": (field.field.legend, field.field.description),
+#                 }
+#             )
+#         else:
+#             fieldsets[-1]["fields"].append(field)
+
+#     fieldsets = [
+#         (
+#             _["fields"],
+#             _["fieldset"][0],
+#             _["fieldset"][1],
+#         )
+#         for _ in fieldsets
+#         if _["fieldset"][0] and bool(_["fields"])
+#     ]
+
+#     return fieldsets
 
 
-class FieldsetSection(forms.Field):
-    def __init__(self, field=None, options=None, **kwargs):
-        super().__init__(**kwargs)
-        self.is_fieldset = True
-        self.legend = options["label"]
-        self.description = options["help_text"]
+# class FieldsetSection(forms.Field):
+#     def __init__(self, field=None, options=None, **kwargs):
+#         super().__init__(**kwargs)
+#         self.is_fieldset = True
+#         self.legend = options["label"]
+#         self.description = options["help_text"]
 
-    def validate(self, value):
-        """
-        Never throw any errors, we do not need to check this field as it does not
-        contain any data.
-        """
-        pass
+#     def validate(self, value):
+#         """
+#         Never throw any errors, we do not need to check this field as it does not
+#         contain any data.
+#         """
+#         pass
 
 
 class CustomFormBuilder(FormBuilder):
-    def create_section_field(self, field, options):
-        return FieldsetSection(field=field, options=options)
+    def __init__(self, fields):
+        self.all_fields = fields
+        self.fields = fields.exclude(field_type="section")
 
-    def get_form_class(self):
-        return type(str("WagtailForm"), (CustomForm,), self.formfields)
+    @property
+    def formfields(self):
+        formfields = super().formfields
+
+        fieldsets = [[[], {}]]
+
+        for field in self.all_fields:
+            is_section = field.field_type == "section"
+
+            if is_section:
+                options = self.get_field_options(field)
+                fieldsets.append([[], options])
+            else:
+                fieldsets[-1][0].append(field.clean_name)
+
+        formfields["fieldsets"] = [
+            (
+                _[0],  # fields (clean_name keys)
+                _[1].get("label", None),
+                _[1].get("help_text", None),
+            )
+            for _ in fieldsets
+        ]
+
+        return formfields
 
 
 class FormPage(AbstractEmailForm):
@@ -474,3 +508,15 @@ class FormPage(AbstractEmailForm):
             "Email",
         ),
     ]
+
+    def get_form_fields(self, form=False):
+        form_fields = super().get_form_fields()
+
+        if form:
+            return form_fields
+
+        return form_fields.exclude(field_type="section")
+
+    def get_form_class(self):
+        fb = self.form_builder(self.get_form_fields(form=True))
+        return fb.get_form_class()

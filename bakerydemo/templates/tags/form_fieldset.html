@@ -1,0 +1,16 @@
+<fieldset>
+    {% if label %}<legend>{{ label }}</legend>{% endif %}
+    {% if description %}<p class="fieldset-description">{{ description }}</p>{% endif %}
+    {% for field in fields %}
+        <div class="fieldWrapper" aria-required={% if field.field.required %}"true"{% else %}"false"{% endif %}>
+            
+            {{ field.label_tag }}{% if field.field.required %}<span class="required">*</span>{% endif %}
+
+            {{ field }}
+            
+            {% if field.help_text %}
+                <p class="help">{{ field.help_text|safe }}</p>
+            {% endif %}
+        </div>
+    {% endfor %}
+</fieldset>
