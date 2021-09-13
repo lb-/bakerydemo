@@ -1,10 +1,6 @@
 from __future__ import unicode_literals
 
-from django import forms
 from django.db import models
-from django.db.models import fields
-from django.utils.html import format_html
-from django.utils.safestring import mark_safe
 
 from modelcluster.fields import ParentalKey
 from modelcluster.models import ClusterableModel
@@ -382,39 +378,49 @@ class FieldsetFormBuilder(FormBuilder):
         self.all_fields = fields
         self.fields = fields.exclude(field_type="section")
 
-    def get_fieldsets(self):
+    def prepare_get_fieldsets(self, allow_empty=False, field_type="section"):
         """
-        Prepare an array of dicts where each item is a fieldset that contains
-        the data set up by get_field_options (label, help_text, etc) and
-        a `fields` array which will be an array of field.clean_name (field key).
+        Prepare a function which will have an array fieldset data that contains
+        the keys for the fields in that fieldset and the `options` + `id` for the fieldset.
+        This function will be called as an instance method on the Form and can be accessed
+        within the template as `form.get_fieldsets` which will return an array of tuples
+        where the first item is an array of fields and the second item is the fieldset data.
         """
 
         fieldsets = [[[], {}]]
 
         for field in self.all_fields:
-            is_section = field.field_type == "section"
+            is_section = field.field_type == field_type
 
             if is_section:
                 options = self.get_field_options(field)
+                options["id"] = f"fieldset-{field.clean_name}"
                 fieldsets.append([[], options])
             else:
                 fieldsets[-1][0].append(field.clean_name)
 
-        return [
-            dict(
-                **options,
-                fields=fields,
-            )
-            for fields, options in fieldsets
-            if bool(fields) or bool(options)
-        ]
+        def get_fieldsets(form):
+
+            return [
+                (
+                    [form[field] for field in fields],
+                    options,
+                )
+                for fields, options in fieldsets
+                if bool(fields) or bool(options and allow_empty)
+            ]
+
+        return get_fieldsets
 
     @property
     def formfields(self):
+        """
+        Prepare a get_fieldsets method to the generated form class so that
+        it can be used within templates and access the form for the final
+        field content.
+        """
         formfields = super().formfields
-
-        formfields["fieldsets"] = self.get_fieldsets()
-
+        formfields["get_fieldsets"] = self.prepare_get_fieldsets()
         return formfields
 
 
