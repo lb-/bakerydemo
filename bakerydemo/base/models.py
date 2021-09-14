@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+from django import forms
 from django.db import models
 
 from modelcluster.fields import ParentalKey
@@ -14,6 +15,7 @@ from wagtail.admin.edit_handlers import (
     PageChooserPanel,
     StreamFieldPanel,
 )
+from wagtail.admin.forms import WagtailAdminModelForm
 from wagtail.core.fields import RichTextField, StreamField
 from wagtail.core.models import Collection, Page
 from wagtail.contrib.forms.forms import FormBuilder
@@ -426,6 +428,18 @@ class FieldsetFormBuilder(FormBuilder):
 
 
 class CustomMultiFieldPanel(MultiFieldPanel):
+    """
+    What am I trying to do?
+    - I want to change the widgets on the form fields, some to hidden and maybe some not hidden
+    - I want this change to be based on the data passed into the form (instance)
+    - I want to be able to abstract this to the FormField class so I can define something like
+    panels = [] # default panels
+    dynamic_panels = [({field_type: 'section'}, [...different panels],)]
+    so that if the data provided matches the first item in the tuple it will use different panels
+    - I also want to be able to generate a new set of 'add XYZ' button and empty form templates
+      generated from the same dynamic_panels array
+    """
+
     def get_excluded_fields(self):
         """Added method to abstract the fields we want to hide"""
 
@@ -448,6 +462,11 @@ class CustomMultiFieldPanel(MultiFieldPanel):
 
         return required_fields
 
+    # def widget_overrides(self):
+
+    #     print("widget_overrides", self)
+    #     return super().widget_overrides()
+
     def on_form_bound(self):
 
         self.children = [
@@ -456,16 +475,46 @@ class CustomMultiFieldPanel(MultiFieldPanel):
             if child.field_name not in self.get_excluded_fields()
         ]
 
+        # print("on_form_bound before: form", self.form["field_type"].widget)
+
         super().on_form_bound()
+
+        print("on_form_bound after: form")
+        # self.form["field_type"].is_hidden = True
+
+
+class SomeForm(WagtailAdminModelForm):
+    def __init__(self, *args, **kwargs):
+
+        super().__init__(*args, **kwargs)
+
+        print("SomeForm is bound?", self.is_bound)
+        print("SomeForm Data?", self.data)
 
 
 class CustomInlinePanel(InlinePanel):
-    def get_child_edit_handler(self):
-        panels = self.get_panel_definitions()
-        child_edit_handler = CustomMultiFieldPanel(
-            panels, heading=self.heading
-        )  # this is the only part we want to change here
-        return child_edit_handler.bind_to(model=self.db_field.related_model)
+    # def get_child_edit_handler(self):
+    #     panels = self.get_panel_definitions()
+    #     child_edit_handler = CustomMultiFieldPanel(
+    #         panels, heading=self.heading
+    #     )  # this is the only part we want to change here
+    #     return child_edit_handler.bind_to(model=self.db_field.related_model)
+
+    # def on_form_bound(self):
+
+    #     self.formset = self.form.formsets[self.relation_name]
+    #     for subform in self.formset.forms:
+    #         pass
+    #         # subform.fields["field_type"].widget = forms.HiddenInput()
+    #         # print("CustomInlinePanel on_form_bound:subform", subform.fields)
+
+    #     super().on_form_bound()
+
+    def required_formsets(self):
+        required_formsets = super().required_formsets()
+        required_formsets[self.relation_name]["form"] = SomeForm
+
+        return required_formsets
 
 
 class FormPage(AbstractEmailForm):
