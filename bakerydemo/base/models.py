@@ -424,6 +424,72 @@ class FieldsetFormBuilder(FormBuilder):
         return formfields
 
 
+class CustomMultiFieldPanel(MultiFieldPanel):
+    def on_instance_bound(self):
+
+        super().on_instance_bound()
+        # print("on_instance_bound self.instance", self.instance)
+        self.classname += self.instance.field_type
+
+    def on_form_bound(self):
+        """
+        This removes the child for the 'required' field
+        """
+        super().on_form_bound()
+        if self.instance:
+            if self.instance.field_type == "section":
+                print(
+                    "on_form_bound SECTION!",
+                    (
+                        [field.field_name for field in self.children],
+                        self.instance,
+                        self.form,
+                    ),
+                )
+
+                self.children = [
+                    child
+                    for child in self.children
+                    if child.field_name not in ["choices", "default_value", "required"]
+                ]
+
+    # def required_fields(self):
+    #     required_fields = super().required_fields()
+    #     if self.instance:
+    #         if self.instance.field_type == "section":
+    #             print("required_fields & section", (required_fields, self.instance))
+    #             required_fields.remove("required")
+
+    #             print("required_fields AFTER REMOVAL", (required_fields, self.instance))
+
+    #     return required_fields
+
+    # def classes(self):
+    #     classes = super().classes()
+    #     classes.append("test")
+    #     return classes
+
+
+class DynamicInlinePanel(InlinePanel):
+    def get_child_edit_handler(self):
+        panels = self.get_panel_definitions()
+        child_edit_handler = CustomMultiFieldPanel(panels, heading=self.heading)
+        return child_edit_handler.bind_to(model=self.db_field.related_model)
+
+        # child_edit_handler = super().get_child_edit_handler()
+        # print("child_edit_handler", child_edit_handler)
+
+        # return child_edit_handler
+
+    # def on_instance_bound(self):
+    #     print("on_instance_bound self.instance", self.instance)
+    #     super().on_instance_bound()
+
+    # def on_form_bound(self):
+    #     super().on_form_bound()
+    #     print("on_form_bound", self.children)
+
+
 class FormPage(AbstractEmailForm):
     form_builder = FieldsetFormBuilder
 
@@ -442,7 +508,7 @@ class FormPage(AbstractEmailForm):
     content_panels = AbstractEmailForm.content_panels + [
         ImageChooserPanel("image"),
         StreamFieldPanel("body"),
-        InlinePanel("form_fields", label="Form fields"),
+        DynamicInlinePanel("form_fields", label="Form fields"),
         FieldPanel("thank_you_text", classname="full"),
         MultiFieldPanel(
             [
