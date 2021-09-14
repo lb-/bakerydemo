@@ -5,6 +5,7 @@ from django.db import models
 from modelcluster.fields import ParentalKey
 from modelcluster.models import ClusterableModel
 
+
 from wagtail.admin.edit_handlers import (
     FieldPanel,
     FieldRowPanel,
@@ -15,7 +16,7 @@ from wagtail.admin.edit_handlers import (
 )
 from wagtail.core.fields import RichTextField, StreamField
 from wagtail.core.models import Collection, Page
-from wagtail.contrib.forms.forms import BaseForm, FormBuilder
+from wagtail.contrib.forms.forms import FormBuilder
 from wagtail.contrib.forms.models import (
     AbstractEmailForm,
     AbstractFormField,
@@ -425,69 +426,46 @@ class FieldsetFormBuilder(FormBuilder):
 
 
 class CustomMultiFieldPanel(MultiFieldPanel):
-    def on_instance_bound(self):
+    def get_excluded_fields(self):
+        """Added method to abstract the fields we want to hide"""
 
-        super().on_instance_bound()
-        # print("on_instance_bound self.instance", self.instance)
-        self.classname += self.instance.field_type
+        is_fieldset = self.instance.field_type == "section"
+        if is_fieldset:
+            return ["required", "choices", "default_value"]
+
+        return []
+
+    def required_fields(self):
+        """
+        Returning the fields we do NOT want to show as required_fields
+        wil mean that the method render_missing_fields will ignore these
+        even though they are not in the rendered form field.
+        """
+        required_fields = super().required_fields()
+
+        if self.instance:
+            required_fields.extend(self.get_excluded_fields())
+
+        return required_fields
 
     def on_form_bound(self):
-        """
-        This removes the child for the 'required' field
-        """
+
+        self.children = [
+            child
+            for child in self.children
+            if child.field_name not in self.get_excluded_fields()
+        ]
+
         super().on_form_bound()
-        if self.instance:
-            if self.instance.field_type == "section":
-                print(
-                    "on_form_bound SECTION!",
-                    (
-                        [field.field_name for field in self.children],
-                        self.instance,
-                        self.form,
-                    ),
-                )
-
-                self.children = [
-                    child
-                    for child in self.children
-                    if child.field_name not in ["choices", "default_value", "required"]
-                ]
-
-    # def required_fields(self):
-    #     required_fields = super().required_fields()
-    #     if self.instance:
-    #         if self.instance.field_type == "section":
-    #             print("required_fields & section", (required_fields, self.instance))
-    #             required_fields.remove("required")
-
-    #             print("required_fields AFTER REMOVAL", (required_fields, self.instance))
-
-    #     return required_fields
-
-    # def classes(self):
-    #     classes = super().classes()
-    #     classes.append("test")
-    #     return classes
 
 
-class DynamicInlinePanel(InlinePanel):
+class CustomInlinePanel(InlinePanel):
     def get_child_edit_handler(self):
         panels = self.get_panel_definitions()
-        child_edit_handler = CustomMultiFieldPanel(panels, heading=self.heading)
+        child_edit_handler = CustomMultiFieldPanel(
+            panels, heading=self.heading
+        )  # this is the only part we want to change here
         return child_edit_handler.bind_to(model=self.db_field.related_model)
-
-        # child_edit_handler = super().get_child_edit_handler()
-        # print("child_edit_handler", child_edit_handler)
-
-        # return child_edit_handler
-
-    # def on_instance_bound(self):
-    #     print("on_instance_bound self.instance", self.instance)
-    #     super().on_instance_bound()
-
-    # def on_form_bound(self):
-    #     super().on_form_bound()
-    #     print("on_form_bound", self.children)
 
 
 class FormPage(AbstractEmailForm):
@@ -508,7 +486,8 @@ class FormPage(AbstractEmailForm):
     content_panels = AbstractEmailForm.content_panels + [
         ImageChooserPanel("image"),
         StreamFieldPanel("body"),
-        DynamicInlinePanel("form_fields", label="Form fields"),
+        CustomInlinePanel("form_fields", label="Form fields"),
+        # InlinePanel("form_fields", label="Form fields"),
         FieldPanel("thank_you_text", classname="full"),
         MultiFieldPanel(
             [
