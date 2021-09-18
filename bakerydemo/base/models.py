@@ -2,7 +2,6 @@ from __future__ import unicode_literals
 
 from django import forms
 from django.db import models
-from django.utils.safestring import mark_safe
 
 from modelcluster.fields import ParentalKey
 from modelcluster.models import ClusterableModel
@@ -16,7 +15,6 @@ from wagtail.admin.edit_handlers import (
     PageChooserPanel,
     StreamFieldPanel,
 )
-from wagtail.admin.forms import WagtailAdminModelForm
 from wagtail.core.fields import RichTextField, StreamField
 from wagtail.core.models import Collection, Page
 from wagtail.contrib.forms.forms import FormBuilder
@@ -371,6 +369,8 @@ class FormField(AbstractFormField):
         verbose_name="field type", max_length=16, choices=CHOICES
     )
 
+    dynamic_panels = [({"field_type": "section"}, ["label", "help_text"])]
+
 
 class FieldsetFormBuilder(FormBuilder):
     def __init__(self, fields):
@@ -428,171 +428,34 @@ class FieldsetFormBuilder(FormBuilder):
         return formfields
 
 
-class CustomMultiFieldPanel(MultiFieldPanel):
-    """
-    What am I trying to do?
-    - I want to change the widgets on the form fields, some to hidden and maybe some not hidden
-    - I want this change to be based on the data passed into the form (instance)
-    - I want to be able to abstract this to the FormField class so I can define something like
-    panels = [] # default panels
-    dynamic_panels = [({field_type: 'section'}, [...different panels],)]
-    so that if the data provided matches the first item in the tuple it will use different panels
-    - I also want to be able to generate a new set of 'add XYZ' button and empty form templates
-      generated from the same dynamic_panels array
-    """
-
-    def get_excluded_fields(self):
-        """Added method to abstract the fields we want to hide"""
-
-        is_fieldset = self.instance.field_type == "section"
-        if is_fieldset:
-            return ["required", "choices", "default_value"]
-
-        return []
-
-    def required_fields(self):
-        """
-        Returning the fields we do NOT want to show as required_fields
-        wil mean that the method render_missing_fields will ignore these
-        even though they are not in the rendered form field.
-        """
-        required_fields = super().required_fields()
-
-        if self.instance:
-            required_fields.extend(self.get_excluded_fields())
-
-        return required_fields
-
-    # def widget_overrides(self):
-
-    #     print("widget_overrides", self)
-    #     return super().widget_overrides()
-
-    def on_form_bound(self):
-
-        self.children = [
-            child
-            for child in self.children
-            if child.field_name not in self.get_excluded_fields()
-        ]
-
-        # print("on_form_bound before: form", self.form["field_type"].widget)
-
-        super().on_form_bound()
-
-        print("on_form_bound after: form")
-        # self.form["field_type"].is_hidden = True
-
-
-class SomeForm(WagtailAdminModelForm):
-    def __init__(self, *args, **kwargs):
-
-        super().__init__(*args, **kwargs)
-
-        print("SomeForm is bound?", self.is_bound)
-        print("SomeForm Data?", self.data)
-
-
-class AnotherCustomMultiFieldPanel(MultiFieldPanel):
-    # def render_form_content
-
-    # def render_as_object(self):
-    #     return mark_safe(
-    #         render_to_string(
-    #             self.object_template,
-    #             {
-    #                 "self": self,
-    #                 self.TEMPLATE_VAR: self,
-    #                 "field": self.bound_field,
-    #                 "show_add_comment_button": self.comments_enabled
-    #                 and getattr(
-    #                     self.bound_field.field.widget, "show_add_comment_button", True
-    #                 ),
-    #             },
-    #         )
-    #     )
-
-    def render_form_content(self):
-        """
-        Render this as an 'object', ensuring that all fields necessary for a valid form
-        submission are included
-        """
-
-        if self.instance.field_type == "section":
-            print(
-                "AnotherCustomMultiFieldPanel:render_form_content section!", self.form
-            )
-
-        form_content = mark_safe(self.render_as_object() + self.render_missing_fields())
-
-
-class CustomInlinePanel(InlinePanel):
+class DynamicInlinePanel(InlinePanel):
     def render(self):
 
-        excluded_fields = ["choices", "default_value", "field_type", "required"]
-
         for child in self.children:
-            if child.instance.field_type == "section":
-                # child.form["required"].widget = forms.HiddenInput()
-                # print("CustomInlinePanel form", child.form["required"].widget)
-                # this works kind of! changes the widget
-                print("CustomInlinePanel children", child.children)
+
+            for check, shown_fields in getattr(child.model, "dynamic_panels", []):
+
+                is_dynamic = True
+                for key, value in check.items():
+                    if getattr(child.instance, key, None) != value:
+                        is_dynamic = False
+
+            if is_dynamic:
 
                 for field_panel in child.children:
-                    if field_panel.field_name in excluded_fields:
+                    if field_panel.field_name not in shown_fields:
 
-                        # print(
-                        #     "field_panel form field",
-                        #     field_panel.form[field_panel.field_name].field.widget,
-                        # )
                         field_panel.form[
                             field_panel.field_name
                         ].field.widget = forms.HiddenInput()
-                    # field_panel.form[
-                    #     field_panel.field_name
-                    # ].widget = forms.HiddenInput()
 
                 child.children = [
                     field_child
                     for field_child in child.children
-                    if field_child.field_name not in excluded_fields
+                    if field_child.field_name in shown_fields
                 ]
 
         return super().render()
-
-    # def render_form_content(self):
-    #     """
-    #     Render this as an 'object', ensuring that all fields necessary for a valid form
-    #     submission are included
-    #     """
-
-    #     # if self.instance.field_type == "section":
-    #     print("AnotherCustomMultiFieldPanel:render_form_content section!", self.form)
-
-    #     form_content = mark_safe(self.render_as_object() + self.render_missing_fields())
-
-    # def get_child_edit_handler(self):
-    #     panels = self.get_panel_definitions()
-    #     child_edit_handler = CustomMultiFieldPanel(
-    #         panels, heading=self.heading
-    #     )  # this is the only part we want to change here
-    #     return child_edit_handler.bind_to(model=self.db_field.related_model)
-
-    # def on_form_bound(self):
-
-    #     self.formset = self.form.formsets[self.relation_name]
-    #     for subform in self.formset.forms:
-    #         pass
-    #         # subform.fields["field_type"].widget = forms.HiddenInput()
-    #         # print("CustomInlinePanel on_form_bound:subform", subform.fields)
-
-    #     super().on_form_bound()
-
-    # def required_formsets(self):
-    #     required_formsets = super().required_formsets()
-    #     required_formsets[self.relation_name]["form"] = SomeForm
-
-    #     return required_formsets
 
 
 class FormPage(AbstractEmailForm):
@@ -613,7 +476,7 @@ class FormPage(AbstractEmailForm):
     content_panels = AbstractEmailForm.content_panels + [
         ImageChooserPanel("image"),
         StreamFieldPanel("body"),
-        CustomInlinePanel("form_fields", label="Form fields"),
+        DynamicInlinePanel("form_fields", label="Form fields"),
         # InlinePanel("form_fields", label="Form fields"),
         FieldPanel("thank_you_text", classname="full"),
         MultiFieldPanel(
