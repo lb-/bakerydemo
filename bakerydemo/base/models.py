@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 from django import forms
 from django.db import models
+from django.utils.safestring import mark_safe
 
 from modelcluster.fields import ParentalKey
 from modelcluster.models import ClusterableModel
@@ -492,7 +493,84 @@ class SomeForm(WagtailAdminModelForm):
         print("SomeForm Data?", self.data)
 
 
+class AnotherCustomMultiFieldPanel(MultiFieldPanel):
+    # def render_form_content
+
+    # def render_as_object(self):
+    #     return mark_safe(
+    #         render_to_string(
+    #             self.object_template,
+    #             {
+    #                 "self": self,
+    #                 self.TEMPLATE_VAR: self,
+    #                 "field": self.bound_field,
+    #                 "show_add_comment_button": self.comments_enabled
+    #                 and getattr(
+    #                     self.bound_field.field.widget, "show_add_comment_button", True
+    #                 ),
+    #             },
+    #         )
+    #     )
+
+    def render_form_content(self):
+        """
+        Render this as an 'object', ensuring that all fields necessary for a valid form
+        submission are included
+        """
+
+        if self.instance.field_type == "section":
+            print(
+                "AnotherCustomMultiFieldPanel:render_form_content section!", self.form
+            )
+
+        form_content = mark_safe(self.render_as_object() + self.render_missing_fields())
+
+
 class CustomInlinePanel(InlinePanel):
+    def render(self):
+
+        excluded_fields = ["choices", "default_value", "field_type", "required"]
+
+        for child in self.children:
+            if child.instance.field_type == "section":
+                # child.form["required"].widget = forms.HiddenInput()
+                # print("CustomInlinePanel form", child.form["required"].widget)
+                # this works kind of! changes the widget
+                print("CustomInlinePanel children", child.children)
+
+                for field_panel in child.children:
+                    if field_panel.field_name in excluded_fields:
+
+                        # print(
+                        #     "field_panel form field",
+                        #     field_panel.form[field_panel.field_name].field.widget,
+                        # )
+                        field_panel.form[
+                            field_panel.field_name
+                        ].field.widget = forms.HiddenInput()
+                    # field_panel.form[
+                    #     field_panel.field_name
+                    # ].widget = forms.HiddenInput()
+
+                child.children = [
+                    field_child
+                    for field_child in child.children
+                    if field_child.field_name not in excluded_fields
+                ]
+
+        return super().render()
+
+    # def render_form_content(self):
+    #     """
+    #     Render this as an 'object', ensuring that all fields necessary for a valid form
+    #     submission are included
+    #     """
+
+    #     # if self.instance.field_type == "section":
+    #     print("AnotherCustomMultiFieldPanel:render_form_content section!", self.form)
+
+    #     form_content = mark_safe(self.render_as_object() + self.render_missing_fields())
+
     # def get_child_edit_handler(self):
     #     panels = self.get_panel_definitions()
     #     child_edit_handler = CustomMultiFieldPanel(
@@ -510,11 +588,11 @@ class CustomInlinePanel(InlinePanel):
 
     #     super().on_form_bound()
 
-    def required_formsets(self):
-        required_formsets = super().required_formsets()
-        required_formsets[self.relation_name]["form"] = SomeForm
+    # def required_formsets(self):
+    #     required_formsets = super().required_formsets()
+    #     required_formsets[self.relation_name]["form"] = SomeForm
 
-        return required_formsets
+    #     return required_formsets
 
 
 class FormPage(AbstractEmailForm):
