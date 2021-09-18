@@ -3,15 +3,21 @@
 
 {% include "wagtailadmin/edit_handlers/inline_panel.html" %}
 
-<script type="text/django-form-template" id="id_{{ self.formset.prefix }}-X-EMPTY_FORM_TEMPLATE">
+{% if self.dynamic_content %}
+{% for item in self.dynamic_content %}
+    <script type="text/django-form-template" id="id_{{ self.formset.prefix }}-{{ item.prefix }}-EMPTY_FORM_TEMPLATE">
     {% escapescript %}
-    {% include "wagtailadmin/edit_handlers/inline_panel_child.html" with child=self.empty_child %}
+    {% include "wagtailadmin/edit_handlers/inline_panel_child.html" with child=item.empty_child %}
     {% endescapescript %}
-</script>
+    </script>
+{% endfor %}
 
-<p class="add additional">
-    <button type="button" class="button bicolor button--icon" id="id_{{ self.formset.prefix }}-ADD">
-        {% icon name="plus" wrapped=1 %}
-        {% blocktrans with label=self.label|lower %}Add {{ label }} Additional{% endblocktrans %}
-    </button>
+<p class="add extra">
+    {% for item in self.dynamic_content %}
+        <button type="button" class="button button-secondary bicolor button--icon" id="id_{{ self.formset.prefix }}-{{ item.prefix }}-ADD">
+            {% icon name="plus" wrapped=1 %}
+            {% blocktrans with label=item.label|lower %}Add {{ label }} {% endblocktrans %}
+        </button>
+    {% endfor %}
 </p>
+{% endif %}

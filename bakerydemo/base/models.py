@@ -2,8 +2,7 @@ from __future__ import unicode_literals
 
 from django import forms
 from django.db import models
-from django.template.loader import render_to_string
-from django.utils.safestring import mark_safe
+from django.forms.formsets import DELETION_FIELD_NAME, ORDERING_FIELD_NAME
 
 from modelcluster.fields import ParentalKey
 from modelcluster.models import ClusterableModel
@@ -16,7 +15,6 @@ from wagtail.admin.edit_handlers import (
     MultiFieldPanel,
     PageChooserPanel,
     StreamFieldPanel,
-    widget_with_script,
 )
 from wagtail.core.fields import RichTextField, StreamField
 from wagtail.core.models import Collection, Page
@@ -372,7 +370,13 @@ class FormField(AbstractFormField):
         verbose_name="field type", max_length=16, choices=CHOICES
     )
 
-    dynamic_panels = [({"field_type": "section"}, ["label", "help_text"])]
+    dynamic_panels = [
+        (
+            ("Section", "section"),
+            {"field_type": "section"},
+            ["label", "help_text"],
+        )
+    ]
 
 
 class FieldsetFormBuilder(FormBuilder):
@@ -434,12 +438,66 @@ class FieldsetFormBuilder(FormBuilder):
 class DynamicInlinePanel(InlinePanel):
 
     template = "base/edit_handlers/dynamic_inline_panel.html"
+    js_template = "base/edit_handlers/dynamic_inline_panel.js"
+
+    def get_empty_child(self, check, shown_fields):
+
+        empty_form = self.form.formsets[self.relation_name].empty_form
+
+        empty_form.fields[DELETION_FIELD_NAME].widget = forms.HiddenInput()
+        if self.formset.can_order:
+            empty_form.fields[ORDERING_FIELD_NAME].widget = forms.HiddenInput()
+
+        empty_child = self.get_child_edit_handler()
+
+        empty_child = self.empty_child.bind_to(
+            instance=empty_form.instance, request=self.request, form=empty_form
+        )
+
+        for field_panel in empty_child.children:
+
+            if field_panel.field_name in check:
+                field_panel.form[field_panel.field_name].field.initial = check[
+                    field_panel.field_name
+                ]
+
+            if field_panel.field_name not in shown_fields:
+
+                field_panel.form[
+                    field_panel.field_name
+                ].field.widget = forms.HiddenInput()
+
+        empty_child.children = [
+            field_child
+            for field_child in empty_child.children
+            if field_child.field_name in shown_fields
+        ]
+
+        return empty_child
+
+    def set_dynamic_content(self):
+
+        dynamic_panels = getattr(self.formset.model, "dynamic_panels", [])
+
+        self.dynamic_content = []
+
+        for label, check, shown_fields in dynamic_panels:
+
+            dynamic = {}
+            dynamic["empty_child"] = self.get_empty_child(check, shown_fields)
+            dynamic["label"] = label[0]
+            dynamic["prefix"] = label[1]
+            self.dynamic_content.append(dynamic)
 
     def render(self):
 
+        self.set_dynamic_content()
+
         for child in self.children:
 
-            for check, shown_fields in getattr(child.model, "dynamic_panels", []):
+            for label, check, shown_fields in getattr(
+                child.model, "dynamic_panels", []
+            ):
 
                 is_dynamic = True
                 for key, value in check.items():
@@ -461,47 +519,7 @@ class DynamicInlinePanel(InlinePanel):
                     if field_child.field_name in shown_fields
                 ]
 
-        formset = render_to_string(
-            self.template,
-            {
-                "self": self,
-                "can_order": self.formset.can_order,
-            },
-        )
-
-        original_js = self.render_js_init()
-
-        self.formset.prefix = f"{self.formset.prefix}-X"
-        # self.empty_child.form.prefix = f"{self.empty_child.form.prefix}-X"
-        other_js = self.render_js_init()
-
-        # argh javascript!
-        # buildExpandingFormset takes a single prefix
-        # empty form is based on that
-        # including the button id is also based on that
-        # unless the empty thing is a wrapper and allows the choice of section or field
-        # initially hidden
-        # pass in an onAdd to the InlinePanel
-        # which will get called after the empty template is converted into an object
-        # I wish it were simpler!
-
-        return widget_with_script(
-            formset, " ".join([original_js, other_js, "console.log('foo');"])
-        )
-        # return super().render()
-
-    def render_js_init(self):
-        return mark_safe(
-            render_to_string(
-                self.js_template,
-                {
-                    "self": self,
-                    "can_order": self.formset.can_order,
-                },
-            )
-        )
-
-    #     return [super().render_js_init(), super.render_js_init()].join(" ")
+        return super().render()
 
 
 class FormPage(AbstractEmailForm):
