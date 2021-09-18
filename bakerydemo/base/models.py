@@ -2,6 +2,8 @@ from __future__ import unicode_literals
 
 from django import forms
 from django.db import models
+from django.template.loader import render_to_string
+from django.utils.safestring import mark_safe
 
 from modelcluster.fields import ParentalKey
 from modelcluster.models import ClusterableModel
@@ -14,6 +16,7 @@ from wagtail.admin.edit_handlers import (
     MultiFieldPanel,
     PageChooserPanel,
     StreamFieldPanel,
+    widget_with_script,
 )
 from wagtail.core.fields import RichTextField, StreamField
 from wagtail.core.models import Collection, Page
@@ -429,6 +432,9 @@ class FieldsetFormBuilder(FormBuilder):
 
 
 class DynamicInlinePanel(InlinePanel):
+
+    template = "base/edit_handlers/dynamic_inline_panel.html"
+
     def render(self):
 
         for child in self.children:
@@ -455,7 +461,47 @@ class DynamicInlinePanel(InlinePanel):
                     if field_child.field_name in shown_fields
                 ]
 
-        return super().render()
+        formset = render_to_string(
+            self.template,
+            {
+                "self": self,
+                "can_order": self.formset.can_order,
+            },
+        )
+
+        original_js = self.render_js_init()
+
+        self.formset.prefix = f"{self.formset.prefix}-X"
+        # self.empty_child.form.prefix = f"{self.empty_child.form.prefix}-X"
+        other_js = self.render_js_init()
+
+        # argh javascript!
+        # buildExpandingFormset takes a single prefix
+        # empty form is based on that
+        # including the button id is also based on that
+        # unless the empty thing is a wrapper and allows the choice of section or field
+        # initially hidden
+        # pass in an onAdd to the InlinePanel
+        # which will get called after the empty template is converted into an object
+        # I wish it were simpler!
+
+        return widget_with_script(
+            formset, " ".join([original_js, other_js, "console.log('foo');"])
+        )
+        # return super().render()
+
+    def render_js_init(self):
+        return mark_safe(
+            render_to_string(
+                self.js_template,
+                {
+                    "self": self,
+                    "can_order": self.formset.can_order,
+                },
+            )
+        )
+
+    #     return [super().render_js_init(), super.render_js_init()].join(" ")
 
 
 class FormPage(AbstractEmailForm):
