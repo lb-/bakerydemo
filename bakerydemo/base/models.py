@@ -14,13 +14,50 @@ from wagtail.admin.edit_handlers import (
     StreamFieldPanel,
 )
 from wagtail.core.fields import RichTextField, StreamField
-from wagtail.core.models import Collection, Page
+from wagtail.core.models import Collection, GroupApprovalTask, Page
 from wagtail.contrib.forms.models import AbstractEmailForm, AbstractFormField
 from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail.search import index
 from wagtail.snippets.models import register_snippet
 
 from .blocks import BaseStreamBlock
+
+
+class ChecklistApprovalTask(GroupApprovalTask):
+    """
+    Custom task type where all the features of the GroupApprovalTask will exist but
+    with the ability to define a custom checklist that may be required to be checked for
+    Approval of this step. Checklist field will be a multi-line field, each line being
+    one checklist item.
+    """
+
+    # Reminder: Already has 'groups' field as we are extending `GroupApprovalTask`
+
+    checklist = models.TextField(
+        "Checklist",
+        help_text="Each line will become a checklist item shown on the Approve step.",
+    )
+
+    is_checklist_required = models.BooleanField(
+        "Required",
+        help_text="If required, all items in the checklist must be ticked to approve.",
+        blank=True,
+    )
+
+    admin_form_fields = GroupApprovalTask.admin_form_fields + [
+        "checklist",
+        "is_checklist_required",
+    ]
+
+    @classmethod
+    def get_description(cls):
+        return (
+            "Members of the chosen User Groups can approve this task with a checklist."
+        )
+
+    class Meta:
+        verbose_name = "Checklist approval task"
+        verbose_name_plural = "Checklist approval tasks"
 
 
 @register_snippet
