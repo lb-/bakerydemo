@@ -1,6 +1,8 @@
 from __future__ import unicode_literals
 
+from django import forms
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 from modelcluster.fields import ParentalKey
 from modelcluster.models import ClusterableModel
@@ -62,6 +64,54 @@ class ChecklistApprovalTask(GroupApprovalTask):
             return [REJECT, APPROVE]
 
         return []
+
+    def get_checklist_field(self):
+        """
+        Prepare a form field that is a list of checklist boxes for each line in the
+        checklist on this Task instance.
+        """
+
+        required = self.is_checklist_required
+
+        field = dict(label=_("Checklist"), required=required)
+
+        field["choices"] = [
+            (index, label) for index, label in enumerate(self.checklist.splitlines())
+        ]
+
+        return forms.MultipleChoiceField(**field)
+
+    def get_form_for_action(self, action):
+        """
+        If the action is 'approve', return a new class (using type) that has access
+        to the checklist items as a field based on this Task's instance.
+        """
+
+        form_class = super().get_form_for_action(action)
+
+        if action == "approve":
+
+            def clean(form):
+                """
+                When this form's clean method is processed (on a POST), ensure we do not pass
+                the 'checklist' data any further as no handling of this data is built.
+                """
+                cleaned_data = super(form_class, form).clean()
+                if "checklist" in cleaned_data:
+                    del cleaned_data["checklist"]
+                return cleaned_data
+
+            return type(
+                str("ChecklistApprovalTaskForm"),
+                (form_class,),
+                dict(
+                    checklist=self.get_checklist_field(),
+                    clean=clean,
+                    field_order=["checklist", "comment"],
+                ),
+            )
+
+        return form_class
 
     @classmethod
     def get_description(cls):
