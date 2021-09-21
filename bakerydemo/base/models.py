@@ -49,6 +49,20 @@ class ChecklistApprovalTask(GroupApprovalTask):
         "is_checklist_required",
     ]
 
+    def get_actions(self, page, user):
+        """
+        Customise the actions returned to have a reject and only one approve.
+        The approve will have a third value as True which indicates a form is
+        required.
+        """
+
+        if self.groups.filter(id__in=user.groups.all()).exists() or user.is_superuser:
+            REJECT = ("reject", "Request changes", True)
+            APPROVE = ("approve", "Approve", True)
+            return [REJECT, APPROVE]
+
+        return []
+
     @classmethod
     def get_description(cls):
         return (
