@@ -1,8 +1,9 @@
 from __future__ import unicode_literals
 
 from django import forms
+from django.core.validators import MinLengthValidator
 from django.db import models
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as _, ngettext_lazy
 
 from modelcluster.fields import ParentalKey
 from modelcluster.models import ClusterableModel
@@ -78,6 +79,29 @@ class ChecklistApprovalTask(GroupApprovalTask):
         field["choices"] = [
             (index, label) for index, label in enumerate(self.checklist.splitlines())
         ]
+
+        min_length_validator = MinLengthValidator(
+            len(field["choices"]),
+            message=ngettext_lazy(
+                "Only %(show_value)d item has been checked (all %(limit_value)d are required).",
+                "Only %(show_value)d items have been checked (all %(limit_value)d are required).",
+                "show_value",
+            ),
+        )
+
+        field["help_text"] = (
+            _("Please check all items.") if required else _("Please review all items.")
+        )
+
+        field["validators"] = [min_length_validator] if required else []
+
+        field["widget"] = forms.CheckboxSelectMultiple(
+            # required attr needed as not rendered by default (even if field required)
+            # https://docs.djangoproject.com/en/3.2/ref/forms/widgets/#django.forms.CheckboxSelectMultiple
+            attrs={"required": "required"}
+            if required
+            else {}
+        )
 
         return forms.MultipleChoiceField(**field)
 
