@@ -15,7 +15,12 @@ from wagtail.admin.edit_handlers import (
 )
 from wagtail.core.fields import RichTextField, StreamField
 from wagtail.core.models import Collection, Page
-from wagtail.contrib.forms.models import AbstractEmailForm, AbstractFormField
+from wagtail.contrib.forms.forms import FormBuilder
+from wagtail.contrib.forms.models import (
+    AbstractEmailForm,
+    AbstractFormField,
+    FORM_FIELD_CHOICES,
+)
 from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail.search import index
 from wagtail.snippets.models import register_snippet
@@ -343,19 +348,78 @@ class GalleryPage(Page):
 
 
 class FormField(AbstractFormField):
-    """
-    Wagtailforms is a module to introduce simple forms on a Wagtail site. It
-    isn't intended as a replacement to Django's form support but as a quick way
-    to generate a general purpose data-collection form or contact form
-    without having to write code. We use it on the site for a contact form. You
-    can read more about Wagtail forms at:
-    https://docs.wagtail.io/en/latest/reference/contrib/forms/index.html
-    """
+    page = ParentalKey(
+        "FormPage",
+        related_name="form_fields",
+        on_delete=models.CASCADE,
+    )
 
-    page = ParentalKey("FormPage", related_name="form_fields", on_delete=models.CASCADE)
+    field_type = models.CharField(
+        verbose_name="field type",
+        max_length=16,
+        choices=FORM_FIELD_CHOICES + (("section", "Section"),),
+    )
+
+
+class FieldsetFormBuilder(FormBuilder):
+    def __init__(self, fields):
+        """
+        Assign the `fields` as a subset of the fields, excluding fieldset types.
+        Assign the `all_fields` as the raw fields to be used when generating the
+        fieldset data.
+        """
+        self.all_fields = fields
+        self.fields = fields.exclude(field_type="section")
+
+    def prepare_get_fieldsets(self, allow_empty=False, field_type="section"):
+        """
+        Prepare a function which will have an array fieldset data that contains
+        the keys for the fields in that fieldset and the `options` + `id` for the fieldset.
+        This function will be called as an instance method on the Form and can be accessed
+        within the template as `form.get_fieldsets` which will return an array of tuples
+        where the first item is an array of fields and the second item is the fieldset data.
+        """
+
+        fieldsets = [[[], {}]]
+
+        for field in self.all_fields:
+            is_section = field.field_type == field_type
+
+            if is_section:
+                options = self.get_field_options(field)
+                options["id"] = f"fieldset-{field.clean_name}"
+                fieldsets.append([[], options])
+            else:
+                fieldsets[-1][0].append(field.clean_name)
+
+        def get_fieldsets(form):
+
+            return [
+                (
+                    [form[field] for field in fields],
+                    options,
+                )
+                for fields, options in fieldsets
+                if bool(fields) or bool(options and allow_empty)
+            ]
+
+        return get_fieldsets
+
+    @property
+    def formfields(self):
+        """
+        Prepare a get_fieldsets method to the generated form class so that
+        it can be used within templates and access the form for the final
+        field content.
+        """
+        formfields = super().formfields
+        formfields["get_fieldsets"] = self.prepare_get_fieldsets()
+        return formfields
 
 
 class FormPage(AbstractEmailForm):
+    form_builder = FieldsetFormBuilder
+
     image = models.ForeignKey(
         "wagtailimages.Image",
         null=True,
@@ -386,3 +450,15 @@ class FormPage(AbstractEmailForm):
             "Email",
         ),
     ]
+
+    def get_form_fields(self, form=False):
+        form_fields = super().get_form_fields()
+
+        if form:
+            return form_fields
+
+        return form_fields.exclude(field_type="section")
+
+    def get_form_class(self):
+        fb = self.form_builder(self.get_form_fields(form=True))
+        return fb.get_form_class()
