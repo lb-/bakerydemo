@@ -3,6 +3,8 @@ from wagtail.contrib.modeladmin.options import (
     ModelAdminGroup,
     modeladmin_register,
 )
+from wagtail.core import hooks
+from wagtail.core.models import Page
 
 from bakerydemo.breads.models import Country, BreadIngredient, BreadType
 from bakerydemo.base.models import People, FooterText
@@ -73,3 +75,25 @@ class BakeryModelAdminGroup(ModelAdminGroup):
 # you only need to register the ModelAdminGroup class with Wagtail:
 modeladmin_register(BreadModelAdminGroup)
 modeladmin_register(BakeryModelAdminGroup)
+
+
+@hooks.register("construct_page_chooser_queryset")
+def blah(pages, request):
+
+    pk = request.resolver_match.kwargs.get("parent_page_id", None)
+    if pk:
+        page = Page.objects.filter(pk=pk).first()
+
+        if page:
+            # if page:
+            # breaks for search! (SO CRAP)
+            print(
+                "construct_page_chooser_queryset",
+                {"pk": pk, "page": page},
+                request.resolver_match.kwargs,
+            )
+
+            # Only show own pages
+            pages = pages.sibling_of(page)
+
+    return pages
