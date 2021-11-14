@@ -1,10 +1,16 @@
+from pprint import pprint
 from django import forms
 from django.db import models
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from modelcluster.fields import ParentalManyToManyField
 
-from wagtail.admin.edit_handlers import FieldPanel, MultiFieldPanel, StreamFieldPanel
+from wagtail.admin.edit_handlers import (
+    FieldPanel,
+    MultiFieldPanel,
+    PageChooserPanel,
+    StreamFieldPanel,
+)
 from wagtail.core.fields import StreamField
 from wagtail.core.models import Page
 from wagtail.search import index
@@ -82,10 +88,31 @@ class BreadType(models.Model):
         verbose_name_plural = "Bread types"
 
 
+class SiblingOnlyPageFieldPanel(FieldPanel):
+    def on_form_bound(self):
+        super().on_form_bound()
+        page = self.instance
+        field = self.form[self.field_name].field
+        field.queryset = field.queryset.sibling_of(page)
+
+
 class BreadPage(Page):
     """
     Detail view for a specific bread
     """
+
+    def limit_choices_to(self):
+        print("limit_choices_to", self)
+        return {}
+
+    related_bread = models.ForeignKey(
+        "wagtailcore.Page",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        # limit_choices_to=BreadPage.limit_choices_to,
+        related_name="+",
+    )
 
     introduction = models.TextField(help_text="Text to describe the page", blank=True)
     image = models.ForeignKey(
@@ -120,6 +147,7 @@ class BreadPage(Page):
 
     content_panels = Page.content_panels + [
         FieldPanel("introduction", classname="full"),
+        SiblingOnlyPageFieldPanel("related_bread"),
         ImageChooserPanel("image"),
         StreamFieldPanel("body"),
         FieldPanel("origin"),
