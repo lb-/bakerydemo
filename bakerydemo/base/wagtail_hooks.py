@@ -85,8 +85,6 @@ def blah(pages, request):
         page = Page.objects.filter(pk=pk).first()
 
         if page:
-            # if page:
-            # breaks for search! (SO CRAP)
             print(
                 "construct_page_chooser_queryset",
                 {"pk": pk, "page": page},

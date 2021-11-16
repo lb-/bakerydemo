@@ -4,15 +4,18 @@ from django.db import models
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from modelcluster.fields import ParentalManyToManyField
+from modelcluster.fields import ParentalKey
+
 
 from wagtail.admin.edit_handlers import (
     FieldPanel,
+    InlinePanel,
     MultiFieldPanel,
     PageChooserPanel,
     StreamFieldPanel,
 )
 from wagtail.core.fields import StreamField
-from wagtail.core.models import Page
+from wagtail.core.models import Page, Orderable
 from wagtail.search import index
 from wagtail.snippets.models import register_snippet
 from wagtail.images.edit_handlers import ImageChooserPanel
@@ -91,9 +94,48 @@ class BreadType(models.Model):
 class SiblingOnlyPageFieldPanel(FieldPanel):
     def on_form_bound(self):
         super().on_form_bound()
-        page = self.instance
+
+        field = self.form[self.field_name].field
+
+        # when creating a new page, check for the parent page ID & refine field queryset
+        parent_page_id = self.request.resolver_match.kwargs.get("parent_page_id", None)
+        if parent_page_id:
+            parent_page = Page.objects.filter(pk=parent_page_id).first()
+            field.queryset = field.queryset.child_of(parent_page)
+            return
+
+        # when editing a page, get the ID of the page currently being edited
+        page_id = self.request.resolver_match.kwargs.get("page_id", None)
+        if not page_id:
+            return
+
+        page = Page.objects.filter(pk=page_id).first()
+        if not page:
+            return
+
         field = self.form[self.field_name].field
         field.queryset = field.queryset.sibling_of(page)
+
+
+class StoryPathOrderable(Orderable, models.Model):
+
+    route = models.ForeignKey(
+        "breads.BreadPage",
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="next_path",
+        verbose_name="Story Path",
+    )
+
+    page = ParentalKey(
+        "breads.BreadPage",
+        related_name="story_paths",
+        on_delete=models.CASCADE,
+    )
+
+    panels = [
+        SiblingOnlyPageFieldPanel("route"),
+    ]
 
 
 class BreadPage(Page):
@@ -147,6 +189,7 @@ class BreadPage(Page):
 
     content_panels = Page.content_panels + [
         FieldPanel("introduction", classname="full"),
+        InlinePanel("story_paths"),
         SiblingOnlyPageFieldPanel("related_bread"),
         ImageChooserPanel("image"),
         StreamFieldPanel("body"),
@@ -168,7 +211,7 @@ class BreadPage(Page):
         index.SearchField("body"),
     ]
 
-    parent_page_types = ["BreadsIndexPage"]
+    parent_page_types = ["BreadsIndexPage", "locations.LocationsIndexPage"]
 
 
 class BreadsIndexPage(Page):
