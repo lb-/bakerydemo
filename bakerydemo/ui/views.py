@@ -1,3 +1,8 @@
-from django.shortcuts import render
+from wagtail.admin.ui.components import Component
 
-# Create your views here.
+class StimulusPanel(Component):
+    order = 10
+    template_name = 'ui/panels/stimulus.html'
+
+
+my_welcome_panel = StimulusPanel()
