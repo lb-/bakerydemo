@@ -44,6 +44,20 @@
 
     Stimulus.register("hello", Hello2);
 
+    Stimulus.register('keyboard-shortcut', class extends Controller {
+        static targets = [ 'element' ];
+        static values = { command: { default: '', type: String } };
+
+        connect() {
+          this.listener = document.addEventListener('keyup', (event) => {
+              if (event.key === this.commandValue) {
+                  console.log('triggering click on ', this.elementTarget);
+                  this.elementTarget.click(event);
+              }
+          })
+        }
+    });
+
     Stimulus.register("collapsible", class extends Controller {
       static classes = [ "collapsed" ];
       static targets = [ "content", "title" ];
@@ -85,8 +99,8 @@
 </script>
 <section class="panel">
     <div data-controller="hello"><span data-hello-target="other"></span></div>
-    <section class="collapsible" data-controller="collapsible" data-collapsible-collapsed-value="false">
-        <h2 class="title-wrapper" data-collapsible-target="title" data-action="click->collapsible#toggle">About Stimulus JS</h2>
+    <section class="collapsible" data-controller="collapsible keyboard-shortcut" data-collapsible-collapsed-value="false" data-keyboard-shortcut-command-value="o">
+        <h2 class="title-wrapper" data-collapsible-target="title" data-action="click->collapsible#toggle" data-keyboard-shortcut-target="element">About Stimulus JS</h2>
         <div class="content" data-collapsible-target="content">
             <p style="margin-top: 4rem;">Stimulus is a JavaScript framework with modest ambitions. It doesn’t seek to take over your entire front-end—in fact, it’s not concerned with rendering HTML at all. Instead, it’s designed to augment your HTML with just enough behavior to make it shine.</p>
         </div>
