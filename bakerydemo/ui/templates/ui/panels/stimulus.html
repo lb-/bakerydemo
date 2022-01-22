@@ -12,6 +12,18 @@
         font-weight: 400;
     }
 
+    .collapsible .content {
+        padding: 0 3rem;
+    }
+
+    .collapsible p {
+        padding-top: 1rem;
+    }
+
+    .collapsible.collapsed .content {
+        display: none;
+    }
+
     .collapsible .title-wrapper::before {
         content: "▼";
     }
@@ -49,12 +61,20 @@
         static values = { command: { default: '', type: String } };
 
         connect() {
-          this.listener = document.addEventListener('keyup', (event) => {
+          // allow for single attribute use or for declaring a separate element
+          // could be enhanced to update a 'global' register of keyboard shortcuts
+          // best to use something like key-js or mousetrap if we actually do this
+          const target = this.hasElementTarget ? this.elementTarget : this.element;
+          this.keyboardListener = (event) => {
               if (event.key === this.commandValue) {
-                  console.log('triggering click on ', this.elementTarget);
                   this.elementTarget.click(event);
               }
-          })
+          };
+          document.addEventListener('keyup', this.keyboardListener);
+        }
+
+        disconnect() {
+            document.removeEventListener('keyup', this.keyboardListener);
         }
     });
 
@@ -78,21 +98,24 @@
           // 
       }
 
+      collapsedValueChanged() {
+          console.log('collapsed value changed');
+      }
+
       toggle(event) {
         const collapsedClass = this.collapsedClassDefaulted;
 
         // toggle attributes
         this.collapsedValue = !this.collapsedValue;
-        this.collapsedValue ? this.element.classList.add(collapsedClass) : this.element.classList.remove(collapsedClass);
         this.element.setAttribute('aria-expanded', !this.collapsedValue);
 
         // animations
-        if (!this.collapsedValue) this.contentTarget.style.display = 'initial';
+        !this.collapsedValue && this.element.classList.remove(collapsedClass);
         const keyframes = { opacity: this.collapsedValue ? [1, 0] : [0, 1] };
         const animation = this.contentTarget.animate(keyframes, { duration: 500, easing: 'ease-out', fill: 'forwards' });
         animation.onfinish = () => {
+            this.collapsedValue && this.element.classList.add(collapsedClass);
             this.onAnimationComplete();
-            if (this.collapsedValue) this.contentTarget.style.display = 'none';
         };
       }
     });
@@ -102,7 +125,7 @@
     <section class="collapsible" data-controller="collapsible keyboard-shortcut" data-collapsible-collapsed-value="false" data-keyboard-shortcut-command-value="o">
         <h2 class="title-wrapper" data-collapsible-target="title" data-action="click->collapsible#toggle" data-keyboard-shortcut-target="element">About Stimulus JS</h2>
         <div class="content" data-collapsible-target="content">
-            <p style="margin-top: 4rem;">Stimulus is a JavaScript framework with modest ambitions. It doesn’t seek to take over your entire front-end—in fact, it’s not concerned with rendering HTML at all. Instead, it’s designed to augment your HTML with just enough behavior to make it shine.</p>
+            <p>Stimulus is a JavaScript framework with modest ambitions. It doesn’t seek to take over your entire front-end—in fact, it’s not concerned with rendering HTML at all. Instead, it’s designed to augment your HTML with just enough behavior to make it shine.</p>
         </div>
     </section>
 </section>
