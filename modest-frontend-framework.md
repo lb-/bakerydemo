@@ -127,14 +127,14 @@ We want to ensure that anything we adopt, not only works with the existing abstr
 - As the state is stored on the data attributes, any other code can modify these attributes to change the behaviour (for example, want to close all collapsibles, just change `data-collapsible-collapsed-value` to false with any JS and it will work), this means that Django templates can be used extensively for 'initial' data without having to write any init JS functions.
 - This library is a core part of the Rails ecosystem and built by the team at Basecamp, it is unlikely to go anywhere anytime soon.
 
-Further notes
+#### Further notes
 
 - We can avoid a lot of global functions populating Window (e.g. `window.LockUnlockAction`) by adopting Stimulus.
 - We may want to implement something similar to [Alpine.js `x-cloak` directive](https://alpinejs.dev/directives/cloak), this is quite useful when you want to wait for the JS to trigger before showing some content.
 - We may want to move to `template` elements instead of `script` for template content (e.g. expanding formset), not critical but a nicer modern approach.
 - Articles; [Stimulus 2.0 - HN comments](https://news.ycombinator.com/item?id=25305467), [Official Stimulus discussion board](https://discuss.hotwired.dev/), [Intro to Stimulus](https://www.smashingmagazine.com/2020/07/introduction-stimulusjs/), [When to use Alpine](https://lightit.io/blog/when-to-use-alpine-js/), [HTMX & Alpine in Django](https://www.saaspegasus.com/guides/modern-javascript-for-django-developers/htmx-alpine/), [The problem with web components](https://adamsilver.io/blog/the-problem-with-web-components/), [Alpine speed issues](https://github.com/alpinejs/alpine/issues/566),
 
-Case against Stimulus JS
+#### Case against Stimulus JS
 
 - **Risk** Telepath integration needs to be considered, we want to avoid having both a Telepath adapter and a Controller, we need to see how these can work together nicely.
   - Ideally the Telepath adapter keeps minimal and the 'work' is kept in the Controller and all the Telepath JS code does it convert the provided args to their relevant data attribute values and just puts something in the DOM for Stimulus to work with.
@@ -145,7 +145,7 @@ Case against Stimulus JS
 - There are solutions for writing Jest test online but none are part of the official docs (note: Alpine js also has no testing guidelines), but it is possible to write tests for.
 - [Recent 3.0](https://world.hey.com/hotwired/stimulus-3-c438d432) did have some breaking changes so some online docs are out of date (however, this is similar for Alpine js v1/v2 and lit.dev vs Polymer), welcome to the JavaScript ecosystem.
 
-Potential architecture
+#### Potential architecture
 
 - Wagtail core code would likely use the recommended [Webpack build system approach](https://stimulus.hotwired.dev/handbook/installing#using-webpack-helpers) and controller file naming conventions so that we do not need to manually load each new controller added to the Wagtail admin. This assumes we want all controllers on all page, I think this is a good assumption to make but it does add to the base JS load.
 - On every admin page, the Stimulus code is loaded with the default controllers added and an event `wagtail:stimulus-init` would be fired that other code could hook into. See https://github.com/lb-/bakerydemo/blob/ui-experiments/bakerydemo/ui/wagtail_hooks.py
