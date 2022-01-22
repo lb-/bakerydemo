@@ -38,6 +38,7 @@
 
     class Hello extends Controller {
       static targets = [ "name" ];
+      static values = { label: { default: '', type: String }, replace: { default: false, type: Boolean } };
 
       connect() {
           console.log('stimulus', this.element);
@@ -50,8 +51,12 @@
         static targets = [ ...Hello.targets, 'other' ];
 
         connect() {
-          console.log('stimulus 2', this.element);
-      }
+          console.log('stimulus 2', { element: this.element, label: this.labelValue });
+
+          if (this.replaceValue) {
+            this.element.innerText = this.labelValue;
+          }
+        }
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -124,6 +129,11 @@
       }
     });
 
+    /**
+     * Purpose is to validate the behaviour of a controller that renders a React element.
+     * That React element will also re-render when the 'values' are changed.
+     * Also test the rendering of another controller item within the React tree.
+     */
     class ReactTest extends Controller {
         static values = {
             data: { default: {}, type: Object },
@@ -148,7 +158,14 @@
             const element = createElement('div', {
                 children: [
                     createElement('strong', { children: `${this.labelValue}: ` , key: 'b' }),
-                    createElement('span', { children: data.someVar, key: 'a' }),
+                    createElement('span', {
+                        'data-controller': "hello",
+                        'data-hello-replace-value': 'true',
+                        'data-hello-label-value': data.someVar,
+                        children: `${data.someVar} (React)`,
+                        // key: 'a', using a fixed key will mean that re-renders will be React children
+                        key: data.someVar || 'a', // using a dynamic key will 're-mount' when the thing changes which will re-run the controller
+                    }),
                 ],
                 className: 'react-injected'
             });
@@ -157,11 +174,49 @@
     }
 
     Stimulus.register("react-test", ReactTest);
+
+    /**
+     * Purpose is to validate the behaviour of template tags that themselves contain other controllers
+     * Plus see how template wrangling can look.
+     */
+    class TodoController extends Controller {
+
+        static targets = [ 'addButton', 'items', 'newItemInput', 'template' ];
+
+        connect() {
+            // ensure the button disabled state gets in sync on load
+            this.updateInput();
+        }
+
+        add() {
+            const newItem = this.newItemInputTarget.value;
+            if (!newItem) return;
+            const newTodoItem = this.templateTarget.content.firstElementChild.cloneNode(true);
+            newTodoItem.innerText = newItem;
+            this.itemsTarget.appendChild(newTodoItem);
+            this.newItemInputTarget.value = ''; // reset input
+            this.updateInput(); // ensure the button disabled state gets in sync
+        }
+
+        updateInput() {
+            // toggle the 'disabled' state of the add button when input added
+            if (this.newItemInputTarget.value) {
+                this.addButtonTarget.removeAttribute('disabled');
+            } else {
+                this.addButtonTarget.setAttribute('disabled','');
+            }
+        }
+
+    }
+
+    Stimulus.register("todo", TodoController);
 </script>
 <section class="panel">
-    <div data-controller="hello"><span data-hello-target="other"></span></div>
+    <h2>Hello world</h2>
+    <div data-controller="hello"><span data-hello-target="other">Hello - second controller registered</span></div>
+    <h2>Collapsible</h2>
     <section class="collapsible" data-controller="collapsible keyboard-shortcut" data-collapsible-collapsed-value="false" data-keyboard-shortcut-command-value="o">
-        <h2 class="title-wrapper" data-collapsible-target="title" data-action="click->collapsible#toggle" data-keyboard-shortcut-target="element">About Stimulus JS</h2>
+        <h3 class="title-wrapper" data-collapsible-target="title" data-action="click->collapsible#toggle" data-keyboard-shortcut-target="element">About Stimulus JS</h3>
         <div class="content" data-collapsible-target="content">
             <p>Stimulus is a JavaScript framework with modest ambitions. It doesn’t seek to take over your entire front-end—in fact, it’s not concerned with rendering HTML at all. Instead, it’s designed to augment your HTML with just enough behavior to make it shine.</p>
             <section class="collapsible" data-controller="collapsible keyboard-shortcut" data-collapsible-collapsed-value="false" data-keyboard-shortcut-command-value="o">
@@ -172,5 +227,18 @@
             </section>
         </div>
     </section>
+    <h3>React</h3>
     <div data-controller="react-test" data-react-test-data-value='{"someVar":"foo"}' data-react-test-label-value="Label supplied"></div>
+    <h3>Todo</h3>
+    <div data-controller="todo">
+        <input type="text" placeholder="...check the mail" data-todo-target="newItemInput" data-action="todo#updateInput">
+        <button class="button button-small" data-action="todo#add" data-todo-target="addButton" type="button" disabled>Add item</button>
+        <ul data-todo-target="items">
+            <li>Get milk</li>
+            <li>Use a template tag</li>
+        </ul>
+        <template data-todo-target="template">
+            <li data-controller="hello" data-hello-label-value="todo"></li>
+        </template>
+    </div>
 </section>
