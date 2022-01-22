@@ -32,9 +32,9 @@
         content: "▲";
     }
 </style>
-<script type="module">
-    import { Application, Controller } from "https://unpkg.com/@hotwired/stimulus/dist/stimulus.js";
-    window.Stimulus = Application.start();
+<script>
+document.addEventListener('wagtail:stimulus-init', function() {
+    // see bakerydemo/ui/wagtail_hooks.py for where this event is fired
 
     class Hello extends Controller {
       static targets = [ "name" ];
@@ -210,6 +210,7 @@
     }
 
     Stimulus.register("todo", TodoController);
+});
 </script>
 <section class="panel">
     <h2>Hello world</h2>

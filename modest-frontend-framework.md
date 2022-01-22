@@ -145,6 +145,14 @@ Case against Stimulus JS
 - There are solutions for writing Jest test online but none are part of the official docs (note: Alpine js also has no testing guidelines), but it is possible to write tests for.
 - [Recent 3.0](https://world.hey.com/hotwired/stimulus-3-c438d432) did have some breaking changes so some online docs are out of date (however, this is similar for Alpine js v1/v2 and lit.dev vs Polymer), welcome to the JavaScript ecosystem.
 
+Potential architecture
+
+- Wagtail core code would likely use the recommended [Webpack build system approach](https://stimulus.hotwired.dev/handbook/installing#using-webpack-helpers) and controller file naming conventions so that we do not need to manually load each new controller added to the Wagtail admin. This assumes we want all controllers on all page, I think this is a good assumption to make but it does add to the base JS load.
+- On every admin page, the Stimulus code is loaded with the default controllers added and an event `wagtail:stimulus-init` would be fired that other code could hook into. See https://github.com/lb-/bakerydemo/blob/ui-experiments/bakerydemo/ui/wagtail_hooks.py
+- We could also add handling of the [debug flag](https://stimulus.hotwired.dev/handbook/installing#debugging) to be true when Django is in local dev mode, this will aid those customising Wagtail and also those working on Wagtail core.
+- If custom controllers are added (or overriding existing ones), they can leverage this event and also know that when this event fires the `Stimulus` and `Controller` global will be available.
+- We may want to put these behind a global object like `wagtail.stimulus.Stimulus` for example - so we do not populate the global object AND it allows other customisations where another Stimulus application exists in isolation of the Wagtail one.
+
 ## Stimulus use cases
 
 ### Use Case 1 - Collapsible
