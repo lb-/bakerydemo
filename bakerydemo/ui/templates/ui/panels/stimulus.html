@@ -1,3 +1,5 @@
+{% load wagtailadmin_tags %}
+
 <style>
     .collapsible .title-wrapper {
         box-sizing: border-box;
@@ -210,6 +212,84 @@ document.addEventListener('wagtail:stimulus-init', function() {
     }
 
     Stimulus.register("todo", TodoController);
+
+    /**
+     * When fetch method is activated it will request the URL provided.
+     * The result will be dispatched to an event on the controlled element as 'request:response'
+     * */
+    class RequestController extends Controller {
+        static values = { 'url': String };
+
+        fetch() {
+            const dispatch = this.dispatch;
+
+            fetch(this.urlValue).then(function(response) {
+                return response.json();
+            }).then((data) => {
+                console.log('response resolved', data );
+                this.element.querySelectorAll('.button-longrunning-active').forEach(element => {
+                    element.removeAttribute('disabled');
+                    element.classList.remove('button-longrunning-active');
+                });
+                this.dispatch("response", { detail: { data } });
+            });
+        }
+
+    }
+
+    /**
+     * Contrived example to show two controllers working together via JS events.
+     * When this controller's onResponse method is triggered it will update the container target
+     * with some data from the result.
+     * */
+    class ActivityController extends Controller {
+        static targets = ['container'];
+
+        onResponse(event) {
+            this.containerTarget.innerText = event.detail.data.activity;
+        }
+
+        reset() {
+            this.containerTarget.innerText = '';
+        }
+    }
+
+    /**
+     * A POC replacement for button-longrunning
+     * where, when clicked the button will show as loading (just disabled for now)
+     * The stop (un-disable) can be triggered by another event globally.
+     * Not sure if this is a good approach but a stopSelectorValue can be added to allow
+     * for scoping the event.
+     * 
+     * For simple cases (where stopping the loading state does not matter), can be
+     * <button data-controller="loading-button" data-action="loading-button#start">label</button>
+     * 
+     * Could be further enhanced to output the spinner icon, classes etc.
+     * While the data-attributes may be longer, we could find a way to implement this
+     * without declaring the icon each time.
+     * */
+    class LoadingButtonController extends Controller {
+
+        static values = { stopSelector: {default: '*', type: String}};
+
+        start() {
+            this.element.setAttribute('disabled', '');
+        }
+
+        stop(event) {
+            // only stop if the event's target matches the selector value
+            // default is '*' so any event will match
+
+            const stopSelectorValue = this.stopSelectorValue;
+            if (event.target.matches(stopSelectorValue)) {
+                this.element.removeAttribute('disabled');
+            }
+        }
+    }
+
+    Stimulus.register("request", RequestController);
+    Stimulus.register("activity", ActivityController);
+    Stimulus.register("loading-button", LoadingButtonController);
 });
 </script>
 <section class="panel">
@@ -242,4 +322,19 @@ document.addEventListener('wagtail:stimulus-init', function() {
             <li data-controller="hello" data-hello-label-value="todo"></li>
         </template>
     </div>
+    <h3>API with result passing via event to second controller</h3>
+    <p>A contrived example where two controllers are used, one that makes the request and one that handles the response.</p>
+    <article class="find-an-activity" data-controller="request activity" data-request-url-value="https://www.boredapi.com/api/activity" data-action="request:response->activity#onResponse">
+        <button
+            class="button button-small"
+            data-action="request#fetch activity#reset loading-button#start request:response@document->loading-button#stop"
+            data-controller="loading-button"
+            data-loading-button-stop-selector-value=".find-an-activity"
+            type="button"
+        >
+            Find something to do
+        </button>
+        <div data-activity-target="container">
+        </div>
+    </article>
 </section>
