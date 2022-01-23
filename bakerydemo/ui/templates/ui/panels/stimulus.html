@@ -38,22 +38,26 @@
 document.addEventListener('wagtail:stimulus-init', function() {
     // see bakerydemo/ui/wagtail_hooks.py for where this event is fired
 
-    class Hello extends Controller {
-      static targets = [ "name" ];
-      static values = { label: { default: '', type: String }, replace: { default: false, type: Boolean } };
+    const Application = window.wagtail.stimulus.Application;
+    const Controller = window.wagtail.stimulus.Controller;
 
-      connect() {
-          console.log('stimulus', this.element);
-      }
-    }
+    // getControllerByIdentifier is not part of the built in stimulus API
+    // added in wagtail hooks
+    const Hello = window.wagtail.stimulus.getControllerByIdentifier('hello');
 
-    Stimulus.register("hello", Hello);
-
+    /**
+     * See bakerydemo/ui/wagtail_hooks.py for original `hello` definition.
+     * Demo's the concept of a controller being imported
+     */
     class Hello2 extends Hello {
         static targets = [ ...Hello.targets, 'other' ];
 
+        doLog() {
+          console.log('hello stimulus (2)', { element: this.element, label: this.labelValue });
+        }
+
         connect() {
-          console.log('stimulus 2', { element: this.element, label: this.labelValue });
+          super.connect();
 
           if (this.replaceValue) {
             this.element.innerText = this.labelValue;
@@ -63,11 +67,11 @@ document.addEventListener('wagtail:stimulus-init', function() {
 
     document.addEventListener('DOMContentLoaded', () => {
         console.log('DOMContentLoaded - registering replacement');
-        Stimulus.register("hello", Hello2);
+        Application.register("hello", Hello2);
     });
     
 
-    Stimulus.register('keyboard-shortcut', class extends Controller {
+    Application.register('keyboard-shortcut', class extends Controller {
         static targets = [ 'element' ];
         static values = { command: { default: '', type: String } };
 
@@ -89,7 +93,7 @@ document.addEventListener('wagtail:stimulus-init', function() {
         }
     });
 
-    Stimulus.register("collapsible", class extends Controller {
+    Application.register("collapsible", class extends Controller {
       static classes = [ "collapsed" ];
       static targets = [ "content", "title" ];
       static values = { collapsed: { default: false, type: Boolean }};
@@ -175,7 +179,7 @@ document.addEventListener('wagtail:stimulus-init', function() {
         }
     }
 
-    Stimulus.register("react-test", ReactTest);
+    Application.register("react-test", ReactTest);
 
     /**
      * Purpose is to validate the behaviour of template tags that themselves contain other controllers
@@ -211,7 +215,7 @@ document.addEventListener('wagtail:stimulus-init', function() {
 
     }
 
-    Stimulus.register("todo", TodoController);
+    Application.register("todo", TodoController);
 
     /**
      * When fetch method is activated it will request the URL provided.
@@ -287,9 +291,9 @@ document.addEventListener('wagtail:stimulus-init', function() {
         }
     }
 
-    Stimulus.register("request", RequestController);
-    Stimulus.register("activity", ActivityController);
-    Stimulus.register("loading-button", LoadingButtonController);
+    Application.register("request", RequestController);
+    Application.register("activity", ActivityController);
+    Application.register("loading-button", LoadingButtonController);
 });
 </script>
 <section class="panel">
