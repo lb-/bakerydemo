@@ -89,6 +89,7 @@ We want to ensure that anything we adopt, not only works with the existing abstr
   - CSP - Not compatible, there is away to 'ignore' a branch of a DOM tree to not allow Alpine to read those elements. There is a planned [CSP compatible build](https://alpinejs.dev/advanced/csp), however this is [not yet released and no timeline available](https://github.com/alpinejs/alpine/issues/237#issuecomment-999692410), the CSP build lacks all the functionality of the `x-` attributes though and 100% relies on classes.
   - Development - Mostly uses functions, not classes.
   - Initialisation - Initialises when added to the DOM, either on first render or after, however does not 'disconnect' when `x-data` is removed from the DOM element.
+  - Links - [When to use Alpine](https://lightit.io/blog/when-to-use-alpine-js/), [HTMX & Alpine in Django](https://www.saaspegasus.com/guides/modern-javascript-for-django-developers/htmx-alpine/), [Alpine speed issues](https://github.com/alpinejs/alpine/issues/566)
   - Platform - No way to namespace the HTML attributes but the data name can be prefixed by convention, potential for accidental conflicts with external libraries using Alpine.
   - State & Reactivity - `data` object that is initialised and then self-contained in the component, not accessible outside, uses vue's reactivity model under the hood.
 - **[Stimulus](stimulus.hotwired.dev/)** 11.1k stars
@@ -96,6 +97,7 @@ We want to ensure that anything we adopt, not only works with the existing abstr
   - CSP - Compatible, although not explicitly stated in the documentation, See discussion [Security, CSP, and Stimulus](https://discuss.hotwired.dev/t/security-csp-and-stimulus/171).
   - Development - Uses [ES6 classes](https://caniuse.com/es6-class), although in theory it could work with function expressions, has a debug mode for local development.
   - Initialisation - Initialises when added to the DOM, either on first render or after, does 'disconnect' when `data-controller` is removed from the DOM element.
+  - Links - [Alpine vs Stimulus JS](https://brianschiller.com/blog/2021/11/05/alpine-stimulus-js) - recommends Stimulus but does not address CSP concern, + see Stimulus Resources below.
   - Platform - Allows for a [custom namespaced set of data attributes](https://stimulus.hotwired.dev/handbook/installing#overriding-attribute-defaults) (e.g. `data-controller` could become `data-wg-controller`) creating zero conflicts with any other additional usage of Stimulus, which means the controller names can be simple. For example, we can use `data-wg-controller='modal'` instead of `data-controller='wg-modal'` everywhere, we may not need to namespace the action/target attributes.
   - State/Reactivity - Data attributes, uses DOM mutation observer for reactivity, controller class methods available for each 'value' when changed (including previous value).
 - **[Web Components (Lit)](https://lit.dev/)** 10.1k stars
@@ -103,6 +105,7 @@ We want to ensure that anything we adopt, not only works with the existing abstr
   - CSP - Unclear, there is an ongoing discussion about the [ShadowDOM and usage of `innerHTML`](https://github.com/google/WebFundamentals/issues/8817)
   - Development - Web components, Shadow DOM, Typescript (in docs but not required), Decorators, build tool recommended.
   - Initialisation - As the components are just DOM components, no initialisation required for each element.
+  - Links - [The problem with web components](https://adamsilver.io/blog/the-problem-with-web-components/)
   - Platform - Compiled web components should be isolated and can be prefixed (e.g wg-modal), so it should not conflict if others also use their own web components.
   - State/Reactivity - [Reactive properties](https://lit.dev/docs/components/properties/) approach, contained within the Class and not accessible outside, can be 'synced' with attributes on the component though.
 - **Excluded**
@@ -132,7 +135,6 @@ We want to ensure that anything we adopt, not only works with the existing abstr
 - We can avoid a lot of global functions populating Window (e.g. `window.LockUnlockAction`) by adopting Stimulus.
 - We may want to implement something similar to [Alpine.js `x-cloak` directive](https://alpinejs.dev/directives/cloak), this is quite useful when you want to wait for the JS to trigger before showing some content.
 - We may want to move to `template` elements instead of `script` for template content (e.g. expanding formset), not critical but a nicer modern approach.
-- Articles; [Stimulus 2.0 - HN comments](https://news.ycombinator.com/item?id=25305467), [Official Stimulus discussion board](https://discuss.hotwired.dev/), [Intro to Stimulus](https://www.smashingmagazine.com/2020/07/introduction-stimulusjs/), [When to use Alpine](https://lightit.io/blog/when-to-use-alpine-js/), [HTMX & Alpine in Django](https://www.saaspegasus.com/guides/modern-javascript-for-django-developers/htmx-alpine/), [The problem with web components](https://adamsilver.io/blog/the-problem-with-web-components/), [Alpine speed issues](https://github.com/alpinejs/alpine/issues/566),
 
 #### Case against Stimulus JS
 
@@ -140,10 +142,31 @@ We want to ensure that anything we adopt, not only works with the existing abstr
   - Ideally the Telepath adapter keeps minimal and the 'work' is kept in the Controller and all the Telepath JS code does it convert the provided args to their relevant data attribute values and just puts something in the DOM for Stimulus to work with.
   - Worst case - this is no different to now, we still init some elements in pure JS, however we need to review approaches we can take.
   - Maybe the Telepath 'render' method can just output the HTML with the spread data attributes and the work is always done in the Controller. Maybe one class can serve both purposes (`render` is not used by Stimulus), we would have to be careful with `this` as there would be the Telepath instance AND the Stimulus instance I guess.
+- Using with Typescript will work but it is a bit verbose, see resources section, maybe we can somehow create a WagtailBaseController that is smart about this?
+- There is no official approach to testing in the documentation, however there are resources online and it appears to be possible to set up in Jest without too many issues.
 - Web components may be the way to go, but this moves us more away from a light touch approach and it will be harder to tell where the lines stop between this and React, maybe if we were scrapping React?
 - It is still just JavaScript and buggy or inconsistent code can be written, but we will have a base of a consistent class based approach for everything, instead of ad-hoc approaches.
 - There are solutions for writing Jest test online but none are part of the official docs (note: Alpine js also has no testing guidelines), but it is possible to write tests for.
 - [Recent 3.0](https://world.hey.com/hotwired/stimulus-3-c438d432) did have some breaking changes so some online docs are out of date (however, this is similar for Alpine js v1/v2 and lit.dev vs Polymer), welcome to the JavaScript ecosystem.
+
+#### Resources
+
+- [Stimulus 2.0 - HN comments](https://news.ycombinator.com/item?id=25305467) - the good, bad and ugly feedback
+- [Official Stimulus discussion board](https://discuss.hotwired.dev/)
+- [Blog - Intro to Stimulus](https://www.smashingmagazine.com/2020/07/introduction-stimulusjs/)
+- [Awesome Stimulus JS](https://github.com/skatkov/awesome-stimulusjs)
+- [Full Library of Stimulus controllers](https://sub-xaero.github.io/stimulus-library/docs) - great example of a BaseController / Typescript usage but no unit tests it seems, We may not want to use this library but it is a good reference.
+- [Better Stimulus](https://www.betterstimulus.com/) - a set of resources (similar to awesome list) + best practices/recommendations.
+- [Podcast - Changelog - Stimulus JS](https://changelog.com/podcast/286)
+- **Testing**
+  - https://github.com/hotwired/stimulus/issues/130
+  - https://discuss.hotwired.dev/t/testing-stimulus/90/8
+  - https://shime.sh/til/testing-stimulus
+- **Typescript**
+  - https://dieterlunn.ca/stimulus-and-typescript/
+  - https://github.com/hotwired/stimulus/issues/221
+  - [targets and typescript · Issue #121 · hotwired/stimulus](https://github.com/hotwired/stimulus/issues/121)
+  - https://www.sourlemon.co.za/blog/rails-typescript-and-stimulus/
 
 #### Potential architecture
 
@@ -152,6 +175,8 @@ We want to ensure that anything we adopt, not only works with the existing abstr
 - We could also add handling of the [debug flag](https://stimulus.hotwired.dev/handbook/installing#debugging) to be true when Django is in local dev mode, this will aid those customising Wagtail and also those working on Wagtail core.
 - If custom controllers are added (or overriding existing ones), they can leverage this event and also know that when this event fires the `Stimulus` and `Controller` global will be available.
 - We may want to put these behind a global object like `wagtail.stimulus.Stimulus` for example - so we do not populate the global object AND it allows other customisations where another Stimulus application exists in isolation of the Wagtail one.
+- We may want to actually define a prefix for all controllers (e.g. wg-loading-button) instead of a prefix for the data attributes as the controller name is used by default for prefixing the events on dispatch. Further investigation needed to see if this behaviour can be changed. Alternatively if we have a `WagtailBaseController` it could extend this method and modify this behaviour to prefix all events with `wagtail:` so an event dispatched from a collapsible controller would be something like `wagtail:collapsible:close`.
+- We can even render Stimulus controlled elements via React, there are some edge cases we need to be aware of, and I doubt this will work when the controller also renders a new React element on the inner controlled one but it may open an avenue to avoid re-doing all the same components in React and non-React. Note: When react modifies the inner content of an element and the Stimulus controller also does this, the next re-render will take priority but the first render (with the adding of the controlled element) will be handled by Stimulus, this can be avoided if needed by putting a unique key on the controlled element when we know we want Stimulus to 'take over' again.
 
 ## Stimulus use cases
 
@@ -161,7 +186,34 @@ We want to ensure that anything we adopt, not only works with the existing abstr
 - It may be preferred we provide a styled variant of the [`details`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/details) element instead of coding this at all.
 - However, our existing collapsible code has some custom event firing (for comments) and this would still require some kind of JS code written and initialised.
 
-### Use Case 2 - Locking Action Button
+### Use Case 2 - Long Running Button
+
+- client/src/entrypoints/admin/core.js (see button.button-longrunning usage)
+- Some modifications would be needed initially so there is less reliance on classes by default (to hide the spinner)
+- But this would be a great candidate for Stimulus
+- Something like `- <button data-controller="loading-button" data-action="loading-button#start">label</button>` would cover most cases, with the ability to define the fallback re-enable after as a data value, along with the loading text label etc.
+- Also the 'stop' or 'cancel' could be handled with lots of flexibility by the HTML to implement.
+- In the below HTML you can see we are using the same button with multiple controllers, start a new request, reset the existing data from the previous request AND start the loading indicator - all on click.
+- Then there is an extra action that will stop the loading state when the document receives an event `request:response`
+- We can further scope the trigger of the stop via the 'stop-selector-value' (just an idea, might be a nicer way).
+- This shows off the power of the multiple controllers, we do not need to duplicate the 'disable a button and add a spinner' in each and every case, and we get a lot of power out of the data attributes.
+- Note: The actual implementation may be a bit more abstracted into a generic 'container loading thing' and then have one that extends that for buttons.
+
+```
+        <button
+            class="button button-small"
+            data-action="request#fetch activity#reset loading-button#start request:response@document->loading-button#stop"
+            data-controller="loading-button"
+            data-loading-button-clicked-text-value="Loading..."
+            data-loading-button-stop-after-value="30000"
+            data-loading-button-stop-selector-value=".find-an-activity"
+            type="button"
+        >
+            Find something to do
+        </button>
+```
+
+### Use Case 3 - Locking Action Button
 
 - client/src/entrypoints/admin/lock-unlock-action.js
 - Current approach is to provide a global `LockUnlockAction` that accepts a `csrfToken` and a `next`, when called it will traverse the DOM for any `data-locking-action` to set up event listeners.
@@ -170,7 +222,7 @@ We want to ensure that anything we adopt, not only works with the existing abstr
 - The Controller would almost be a cut & paste of the existing lock-unlock-action.js, creating a form element and posting to it but with a consistent approach.
 - As noted above, if we wanted this button to do two things e.g. lock the page and also be able to be triggered by a keyboard shortcut, we could do this with two discrete controllers and then `<button data-controller='page-lock keyboard-shortcut' ...`.
 
-### Use Case 3 - Dropdown
+### Use Case 4 - Dropdown
 
 - client/src/entrypoints/admin/core.js (see `DropDown` function).
 - Current approach is to init this on load if there is a `data-dropdown`, there is code to throw an error if there is also not a `DropDownController` provided. Stimulus handles this scenario out of the box, when you attempt to access a target that does not exist you get a nicely formatted error.
@@ -179,7 +231,7 @@ We want to ensure that anything we adopt, not only works with the existing abstr
 - Aria attributes can be added/removed easily as per existing code.
 - It would be quite easy to provide the option to customise what classes are used for the open/closed state by HTML alone (handled by extra data attributes).
 
-### Use Case 4 - Expanding Formset / InlinePanel
+### Use Case 5 - Expanding Formset / InlinePanel
 
 - client/src/entrypoints/admin/expanding-formset.js
 - client/src/entrypoints/admin/page-editor.js - see InlinePanel
@@ -192,9 +244,10 @@ We want to ensure that anything we adopt, not only works with the existing abstr
 - However, the more complex case (InlinePanel) would need to use a different controller, let's say we call this `InlinePanelExpandingFormsetController` and it extends `ExpandingFormsetController`.
 - This extended class would have an override of `onInit` to do nothing, and then an override of `onAdd` to handle the additional behaviour (note: formCount would need to be resolved in isolation by reading the DOM).
 - The awesome thing though is once we start doing this it becomes easy to rewrite InlinePanel into a controller that accepts its init params as data attribute values (e.g. canOrder, maxForms etc).
+- Another approach to get the 'onInit' and 'onAdd' behaviour working well is to put these in different controllers and use the dispatch event system (see async content driven modals for info).
 - The behaviour of `initControls` may not be needed to be called in isolation as this would all happen based on the controller's `connect` method, meaning we could remove wagtail/contrib/search_promotions/templates/wagtailsearchpromotions/includes/searchpromotions_formset.js & wagtail/admin/templates/wagtailadmin/edit_handlers/inline_panel.js and just have the attributes passed into the HTML.
 
-### Use Case 5 - Async content driven modals
+### Use Case 6 - Async content driven modals
 
 - client/src/entrypoints/admin/modal-workflow.js
 - ModalWorkflow is quite a beast but basically it gets a URL (to call for the async HTML response) and then two sets of callbacks.
@@ -203,9 +256,10 @@ We want to ensure that anything we adopt, not only works with the existing abstr
 - So the Workflow action modal trigger could look something like `<button class="button" data-controller="modal-action workflow-modal" data-modal-action-url-value="{% url 'wagtailadmin_pages:workflow_action' revision.page.id action_name task_state.id %}" data-action="modal-workflow:open->workflow-modal#onload">{{ action_label }}</button>`
 - The controller `ModalActionController` would read the URL value, make the request, render the modal in the DOM, then fires off an event to the other controller once the HTML has responded.
 - Note: There are two ways to communicate between controllers, one is the syntax above the other is 'finding' the controller on the element and calling it's method directly.
+- The ideal case is via the event system though, as this is just the JavaScript custom events with an easy way to trigger and some built in assumptions (prefixed event name, event dispatched from the controlled element). The great thing about this is the framework kind of forces us to use JS events, which other JS can listen for (whether in Stimulus or not) making the 'platform' of Wagtail even more useful.
 - There is a fair bit glossed over here obviously, but one critical thing to note is that ANY elements that load from the async HTML will automatically be initialised (if they are Stimulus ones). This means that the bulk of the work in `DOCUMENT_CHOOSER_MODAL_ONLOAD_HANDLERS` will not be needed, adding event listeners, doing an initial search etc.
 
-### Use Case 6 - React driven components (Draftail)
+### Use Case 7 - React driven components (Draftail)
 
 - client/src/components/Draftail/index.js
 - Note: There is no need or even any reason to move Draftail to Stimulus, it should stay as a React component - we are not crazy.
@@ -215,7 +269,7 @@ We want to ensure that anything we adopt, not only works with the existing abstr
 - These can leverage the same Stimulus controller that will read the data attributes as initial options and then attach the React rendered component to it.
 - For example the Telepath variant will need a bit more work but should be able to read in the initialState as a JSON object on an attribute, render the input field and also call init editor while self-containing the other opts/getValue etc handling itself.
 
-### Use Case 7 - FUTURE: Keyboard shortcuts
+### Use Case 8 - FUTURE: Keyboard shortcuts
 
 - This is something that will become much easier to implement globally across Wagtail.
 - We would implement two controller types, one to say 'this button can be triggered by a keyboard shortcut' and another to show a modal of the available shortcuts on the page.
@@ -225,7 +279,7 @@ We want to ensure that anything we adopt, not only works with the existing abstr
 - We now have two discrete functions, one is a behaviour to make something a shortcut and the other is the modal, the great thing is that the modal can be implemented multiple ways (simple bootstrap modal or a full React component), either reading the DOM directly or via the Stimulus js API.
 - This also means that 'registering a shortcut key' for a button is as simple as adding a few data attributes via HTML, no additional JS at all!
 
-### Use Case 8 - FUTURE: Mini-map aka page navigator
+### Use Case 9 - FUTURE: Mini-map aka page navigator
 
 - Anything that should appear on the mini-map just needs the `data-controller='minimap-item'` added and also should have an `id` on that element. Additional value attributes could be used for things like 'label', 'icon' or even 'priority'.
 - Then when 'connect' is run, it passes a message (either via the Stimulus js system or a custom event) and the mini-map component listens to it, keeping a record if the id and its 'depth' and visual 'relative height' in the DOM structure (not pixel height but Tree height).
