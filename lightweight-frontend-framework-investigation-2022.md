@@ -293,6 +293,16 @@ We want to ensure that anything we adopt, not only works with the existing abstr
 - These can leverage the same Stimulus controller that will read the data attributes as initial options and then attach the React rendered component to it.
 - For example the Telepath variant will need a bit more work but should be able to read in the initialState as a JSON object on an attribute, render the input field and also call init editor while self-containing the other opts/getValue etc handling itself.
 
+### Use Case 9 - 2.16: Wagtail sidebar (menu)
+
+- client/src/components/Sidebar/Sidebar.tsx
+- A good example of the current situation is the new Wagtail admin sidebar, the code was written in 2021 and will become the default in Wagtail 2.16.
+- This has been built in React which means the support to provide [HTML and any additional JavaScript on the menu items has had to be deprecated](https://github.com/wagtail/wagtail/blob/main/docs/releases/2.16.md#deprecated-sidebar-capabilities).
+- The Wagtail team are forced to decide between writing new UI components in jQuery, ad-hoc JS or React and React makes sense in those options but we lose so much flexibility that pure HTML with 'sprinkles of JS provides.
+- To support the documented custom branding we still need to read HTML from somewhere else in the DOM and copy it in with dangerouslySetInnerHTML client/src/components/Sidebar/modules/WagtailBranding.tsx
+- To support a cookie storage of 'is sidebar open' we need to write the cookie and then init the JS, read the cookie and then build the sidebar as open/closed, but if this was just HTML we could access this cookie in Django and just change the data-attributes.
+- The core team have had to re-write an entire menu, including all possible sub-elements in React, instead of just using mostly the HTML that exists.
+
 ### Use Case 9 - FUTURE: Keyboard shortcuts
 
 - This is something that will become much easier to implement globally across Wagtail.
