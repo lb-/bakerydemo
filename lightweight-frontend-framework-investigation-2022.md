@@ -1,14 +1,12 @@
 # Lightweight JavaScript Framework
 
-## Context
-
-- Throughout 2022, Wagtail will be releasing a major UI overhaul of the user interface and features in Wagtail’s page editor.
-- React is an incredible library but better serves situations where the full control of the DOM branch is given to React, DOM rendering is 'given over' to JavaScript and Django templates cannot be leveraged to change what is inside those DOM elements.
-- jQuery has served a great purpose, providing easy DOM traversal and manipulation, however it is becoming a bottleneck for new features and modern DOM APIs are sufficient and jQuery does not solve the problem of making it easy to write consistent code (component state). Additional to this we end up having to a lot of 'initialising' of elements whenever added to the DOM by other means (other JS or maybe async HTML).
+The Wagtail core team are investigating other frontend frameworks as part of the work to resolve the [UI Technical Debt](https://github.com/wagtail/wagtail/discussions/7689), and with the upcoming [Page Editor enhancements](https://github.com/wagtail/wagtail/discussions/7739).
 
 ## Goals
 
-A frontend framework or library that will help Wagtail continue to be an incredible user experience, while keeping Wagtail easy to develop and extend.
+The purpose of this document is to investigate what existing lightweight frontend frameworks could be used in Wagtail.
+
+We want to to see what may suitable for the middle ground of interactivity where React may not be an ideal option. We want to make it easy for those building Wagtail and building with Wagtail to think in HTML first (leveraging Django) but make a great experience for those editing width Wagtail.
 
 A look at where our goals for this library align with our Wagtail vision pillars.
 
@@ -30,6 +28,12 @@ A look at where our goals for this library align with our Wagtail vision pillars
   - Can we use these 'components' outside the Wagtail admin easily?
   - CSP compliance, remember not all instances of Wagtail activate this but we aim to support it.
 
+## Additional context
+
+- Throughout 2022, Wagtail will be releasing a major UI overhaul of the user interface and features in Wagtail’s page editor.
+- React is an incredible library but better serves situations where the full control of the DOM branch is given to React, DOM rendering is 'given over' to JavaScript and Django templates cannot be leveraged (easily) to change what is inside those DOM elements.
+- jQuery has served a great purpose, providing easy DOM traversal and manipulation, however it is becoming a bottleneck for new features and modern DOM APIs are sufficient and jQuery does not solve the problem of making it easy to write consistent code (component state). Additional to this we end up having to a lot of 'initialising' of elements whenever added to the DOM by other means (other JS or maybe async HTML).
+
 ### Assumptions
 
 - **Not in scope** - Component library (e.g. modals/tooltips etc), it is assumed that discussion will be separate. Components will be implemented or adopted using whatever framework is selected.
@@ -39,18 +43,21 @@ A look at where our goals for this library align with our Wagtail vision pillars
 
 ### Where React fits
 
+- React is a different paradigm to HTML with JS, instead it reverses the world as JS first and foremost (JSX is just JS under the hood).
 - React is an incredible solution high complexity, large state, components with a high level of interactivity (e.g. Draftail editor).
-- React components are great for a self-contained component, owning its own state.
+- React components are great for a self-contained component, owning its own state where the DOM structure is contained 100% in React.
 - React provides a consistent approach to one way data flow that helps for testing and development.
 
 ### Why React is not a catch all solution
 
-- React elements need to be initialised when added
-- Harder to 'replace' an implementation with an extended one
-- Not possible to 'dig in' and modify some data (props) that is used
-- API must be exposed to customise behaviour
-- React takes over the whole tree it controls, so everything down the tree must also be React which means reimplementing everything in React and non-React
+- React elements need to be initialised for any DOM to be added to the browser, the HTML it produces does not exist until React builds it.
+- Harder to 'replace' an implementation with an extended one, while some React components may be class based components that could be extended there is no central and consistent way to provide this 'API'.
+- Not possible to 'dig in' and modify some data (props) that is used.
+- Not possible to use HTML provided by the server in any meaningful way, if you wanted to leverage any of the existing Django ecosystem like templating, custom form widgets, template includes for somewhere 'inside' the React component it is just not possible.
+- A specific API must be exposed to customise behaviour, and if you want this data from the server we need to reach for something like Telepath to do it.
+- React takes over the whole tree it controls, so everything down the tree must also be React which means reimplementing everything in React and non-React. While it is possible to add a DOM element and attach something to it (like a jQuery initialisation) it is not idea.
 - It is not practical to output Django server rendered HTML inside a React element, Telepath provides a nice abstraction for data though.
+- A good example of the current situation is the new Wagtail admin sidebar, the code was written in 2021 and will become the default in Wagtail 2.16. This has been built in React which means the support to provide [HTML and any additional JavaScript on the menu items has had to be deprecated](https://github.com/wagtail/wagtail/blob/main/docs/releases/2.16.md#deprecated-sidebar-capabilities). The Wagtail team are forced to decide between writing new UI components in jQuery, ad-hoc JS or React and React makes sense in those options but we lose so much flexibility that pure HTML with 'sprinkles of JS provides. This also leads to a situation where the main editor is no longer part of the HTML provided, it is not in the DOM until JS loads and adds it creating a less than ideal experience for our editors on slower browsers. See Use Case 9 for more details.
 
 ### A guide of when to use React or not
 
@@ -74,7 +81,7 @@ We want to ensure that anything we adopt, not only works with the existing abstr
 - StructBlock & StreamField
   - https://docs.wagtail.io/en/stable/reference/streamfield/widget_api.html
   - https://docs.wagtail.io/en/stable/advanced_topics/customisation/streamfield_blocks.html#additional-javascript-on-structblock-forms
-  - This is really an extension of the Telepath approach but should also be considered
+  - This is really an extension of the Telepath approach but should also be considered.
 
 ## Comparison of lightweight frameworks / libraries
 
