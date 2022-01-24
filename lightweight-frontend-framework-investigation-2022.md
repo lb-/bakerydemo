@@ -107,6 +107,13 @@ We want to ensure that anything we adopt, not only works with the existing abstr
   - Links - [Alpine vs Stimulus JS](https://brianschiller.com/blog/2021/11/05/alpine-stimulus-js) - recommends Stimulus but does not address CSP concern, + see Stimulus Resources below.
   - Platform - Allows for a [custom namespaced set of data attributes](https://stimulus.hotwired.dev/handbook/installing#overriding-attribute-defaults) (e.g. `data-controller` could become `data-wg-controller`) creating zero conflicts with any other additional usage of Stimulus, which means the controller names can be simple. For example, we can use `data-wg-controller='modal'` instead of `data-controller='wg-modal'` everywhere, we may not need to namespace the action/target attributes.
   - State/Reactivity - Data attributes, uses DOM mutation observer for reactivity, controller class methods available for each 'value' when changed (including previous value).
+- **[Web Components (Catalyst)](https://github.github.io/catalyst/)** ~1k stars
+  - Composing & Extending - Components can be composed with non-web element ones and with other web elements, dev tooling likely required to 'extend' an existing component, behaviour cannot be composed together in the one element at the HTML level. Inspired by Stimulus so very similar in goals and API, except that it is a web components approach, although not as much adoption.
+  - CSP - Unclear, but cannot see anything that would indicate this being an issue.
+  - Initialisation - As the components are just DOM components, no initialisation required for each element.
+  - Links - [Anti-patterns - great guide for naming things even if we go with Stimulus](https://github.github.io/catalyst/guide/anti-patterns/)
+  - Platform - Compiled components get added to a registry of web components available in the UI and should not conflict if a suitable naming convention is used.
+  - State/Reactivity - Recommends that state be stored on the DOM as attributes, this means that just HTML can be used for the initial state, can be changed by external code and `attributeChangedCallback` can be used to listen to these changes.
 - **[Web Components (Lit)](https://lit.dev/)** 10.1k stars
   - Composing & Extending - Components can be composed with non-web element ones and with other web elements, dev tooling likely required to 'extend' an existing component, behaviour cannot be composed together in the one element.
   - CSP - Unclear, there is an ongoing discussion about the [ShadowDOM and usage of `innerHTML`](https://github.com/google/WebFundamentals/issues/8817)
@@ -116,7 +123,6 @@ We want to ensure that anything we adopt, not only works with the existing abstr
   - Platform - Compiled web components should be isolated and can be prefixed (e.g wg-modal), so it should not conflict if others also use their own web components.
   - State/Reactivity - [Reactive properties](https://lit.dev/docs/components/properties/) approach, contained within the Class and not accessible outside, can be 'synced' with attributes on the component though.
 - **Excluded**
-  - [Catalyst](https://github.github.io/catalyst/) - Web Components library, inspired by Stimulus, still has similar web components risks and requires build tooling to extend, might be worth a deeper look though.
   - [HTMX](https://htmx.org/) - This library provides a way to patch in server side provided HTML to parts of the DOM, useful but does not serve the purpose of the lightweight frontend framework. Also, this library is very hard to google. It is more of a compliment to lightweight frameworks instead of a replacement.
   - [min.js](https://github.com/remy/min.js) - DOM traversal and manipulation library, akin to jQuery, nice but we may end up with the same ad-hoc approach as the current jQuery code, not really maintained.
   - [Trimmings](https://postlight.github.io/trimmings/) - Looks promising, kind of a mix between Alpine and HTMX, however it is still quite new and does not seem to provide much extensibility.
