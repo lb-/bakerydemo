@@ -187,7 +187,17 @@ We want to ensure that anything we adopt, not only works with the existing abstr
 - It may be preferred we provide a styled variant of the [`details`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/details) element instead of coding this at all.
 - However, our existing collapsible code has some custom event firing (for comments) and this would still require some kind of JS code written and initialised.
 
-### Use Case 2 - Long Running Button
+## Use Case 2 - Upgrade Notification
+
+- client/src/components/UpgradeNotification/index.js
+- See working on Wagtail code example here https://github.com/wagtail/wagtail/compare/385a0aee67a6730553be6581fdf3898f132f2d6d...lb-:ui-experiments?expand=1
+- Note: IE 11 support dropped in the commit & tsconfig to ES2015 required to run (which produces some Webpack errors to work through)
+- This is a great example of a simple component that requires some basic initial data from the rendered HTML and does something from it on page load
+- The HTML was already using data attributes to identify the element, target the 'values' to replace with teh resolved content and provide the initial 'current version'
+- Stimulus really shines here as it provides a consistent approach to this very common behaviour, and porting over to Stimulus actually makes the functionality easier to follow
+- Along with this we do not have to keep 'initing' this with additional manual code here client/src/entrypoints/admin/wagtailadmin.js - as Stimulus does this for us
+
+### Use Case 3 - Long Running Button
 
 - client/src/entrypoints/admin/core.js (see button.button-longrunning usage)
 - Some modifications would be needed initially so there is less reliance on classes by default (to hide the spinner)
@@ -214,7 +224,7 @@ We want to ensure that anything we adopt, not only works with the existing abstr
         </button>
 ```
 
-### Use Case 3 - Locking Action Button
+### Use Case 4 - Locking Action Button
 
 - client/src/entrypoints/admin/lock-unlock-action.js
 - Current approach is to provide a global `LockUnlockAction` that accepts a `csrfToken` and a `next`, when called it will traverse the DOM for any `data-locking-action` to set up event listeners.
@@ -223,7 +233,7 @@ We want to ensure that anything we adopt, not only works with the existing abstr
 - The Controller would almost be a cut & paste of the existing lock-unlock-action.js, creating a form element and posting to it but with a consistent approach.
 - As noted above, if we wanted this button to do two things e.g. lock the page and also be able to be triggered by a keyboard shortcut, we could do this with two discrete controllers and then `<button data-controller='page-lock keyboard-shortcut' ...`.
 
-### Use Case 4 - Dropdown
+### Use Case 5 - Dropdown
 
 - client/src/entrypoints/admin/core.js (see `DropDown` function).
 - Current approach is to init this on load if there is a `data-dropdown`, there is code to throw an error if there is also not a `DropDownController` provided. Stimulus handles this scenario out of the box, when you attempt to access a target that does not exist you get a nicely formatted error.
@@ -232,7 +242,7 @@ We want to ensure that anything we adopt, not only works with the existing abstr
 - Aria attributes can be added/removed easily as per existing code.
 - It would be quite easy to provide the option to customise what classes are used for the open/closed state by HTML alone (handled by extra data attributes).
 
-### Use Case 5 - Expanding Formset / InlinePanel
+### Use Case 6 - Expanding Formset / InlinePanel
 
 - client/src/entrypoints/admin/expanding-formset.js
 - client/src/entrypoints/admin/page-editor.js - see InlinePanel
@@ -248,7 +258,7 @@ We want to ensure that anything we adopt, not only works with the existing abstr
 - Another approach to get the 'onInit' and 'onAdd' behaviour working well is to put these in different controllers and use the dispatch event system (see async content driven modals for info).
 - The behaviour of `initControls` may not be needed to be called in isolation as this would all happen based on the controller's `connect` method, meaning we could remove wagtail/contrib/search_promotions/templates/wagtailsearchpromotions/includes/searchpromotions_formset.js & wagtail/admin/templates/wagtailadmin/edit_handlers/inline_panel.js and just have the attributes passed into the HTML.
 
-### Use Case 6 - Async content driven modals
+### Use Case 7 - Async content driven modals
 
 - client/src/entrypoints/admin/modal-workflow.js
 - ModalWorkflow is quite a beast but basically it gets a URL (to call for the async HTML response) and then two sets of callbacks.
@@ -260,7 +270,7 @@ We want to ensure that anything we adopt, not only works with the existing abstr
 - The ideal case is via the event system though, as this is just the JavaScript custom events with an easy way to trigger and some built in assumptions (prefixed event name, event dispatched from the controlled element). The great thing about this is the framework kind of forces us to use JS events, which other JS can listen for (whether in Stimulus or not) making the 'platform' of Wagtail even more useful.
 - There is a fair bit glossed over here obviously, but one critical thing to note is that ANY elements that load from the async HTML will automatically be initialised (if they are Stimulus ones). This means that the bulk of the work in `DOCUMENT_CHOOSER_MODAL_ONLOAD_HANDLERS` will not be needed, adding event listeners, doing an initial search etc.
 
-### Use Case 7 - React driven components (Draftail)
+### Use Case 8 - React driven components (Draftail)
 
 - client/src/components/Draftail/index.js
 - Note: There is no need or even any reason to move Draftail to Stimulus, it should stay as a React component - we are not crazy.
@@ -270,7 +280,7 @@ We want to ensure that anything we adopt, not only works with the existing abstr
 - These can leverage the same Stimulus controller that will read the data attributes as initial options and then attach the React rendered component to it.
 - For example the Telepath variant will need a bit more work but should be able to read in the initialState as a JSON object on an attribute, render the input field and also call init editor while self-containing the other opts/getValue etc handling itself.
 
-### Use Case 8 - FUTURE: Keyboard shortcuts
+### Use Case 9 - FUTURE: Keyboard shortcuts
 
 - This is something that will become much easier to implement globally across Wagtail.
 - We would implement two controller types, one to say 'this button can be triggered by a keyboard shortcut' and another to show a modal of the available shortcuts on the page.
@@ -280,7 +290,7 @@ We want to ensure that anything we adopt, not only works with the existing abstr
 - We now have two discrete functions, one is a behaviour to make something a shortcut and the other is the modal, the great thing is that the modal can be implemented multiple ways (simple bootstrap modal or a full React component), either reading the DOM directly or via the Stimulus js API.
 - This also means that 'registering a shortcut key' for a button is as simple as adding a few data attributes via HTML, no additional JS at all!
 
-### Use Case 9 - FUTURE: Mini-map aka page navigator
+### Use Case 10 - FUTURE: Mini-map aka page navigator
 
 - Anything that should appear on the mini-map just needs the `data-controller='minimap-item'` added and also should have an `id` on that element. Additional value attributes could be used for things like 'label', 'icon' or even 'priority'.
 - Then when 'connect' is run, it passes a message (either via the Stimulus js system or a custom event) and the mini-map component listens to it, keeping a record if the id and its 'depth' and visual 'relative height' in the DOM structure (not pixel height but Tree height).
