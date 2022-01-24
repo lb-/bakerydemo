@@ -194,6 +194,8 @@ We want to ensure that anything we adopt, not only works with the existing abstr
 
 ## Stimulus use cases
 
+Note: Most of the use cases can map very closely to Catalyst, the exception being use case 3 and 7. These would be possible in Catalyst but require quite a different approach as each element can only have one controller associated with it in Catalyst.
+
 ### Use Case 1 - Collapsible
 
 - client/src/entrypoints/admin/collapsible.js
