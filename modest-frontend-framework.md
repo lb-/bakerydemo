@@ -142,6 +142,7 @@ We want to ensure that anything we adopt, not only works with the existing abstr
   - Ideally the Telepath adapter keeps minimal and the 'work' is kept in the Controller and all the Telepath JS code does it convert the provided args to their relevant data attribute values and just puts something in the DOM for Stimulus to work with.
   - Worst case - this is no different to now, we still init some elements in pure JS, however we need to review approaches we can take.
   - Maybe the Telepath 'render' method can just output the HTML with the spread data attributes and the work is always done in the Controller. Maybe one class can serve both purposes (`render` is not used by Stimulus), we would have to be careful with `this` as there would be the Telepath instance AND the Stimulus instance I guess.
+- Relies ES6 classes, may not able to be compiled down to ES5, so our bundle will need to move to ES6 (2015) - https://stimulus.hotwired.dev/handbook/installing#browser-support. https://caniuse.com/?search=es6
 - Using with Typescript will work but it is a bit verbose, see resources section, maybe we can somehow create a WagtailBaseController that is smart about this?
 - There is no official approach to testing in the documentation, however there are resources online and it appears to be possible to set up in Jest without too many issues.
 - Web components may be the way to go, but this moves us more away from a light touch approach and it will be harder to tell where the lines stop between this and React, maybe if we were scrapping React?
