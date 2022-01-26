@@ -172,6 +172,8 @@ We want to ensure that anything we adopt, not only works with the existing abstr
 - [Full Library of Stimulus controllers](https://sub-xaero.github.io/stimulus-library/docs) - great example of a BaseController / Typescript usage but no unit tests it seems, We may not want to use this library but it is a good reference.
 - [Better Stimulus](https://www.betterstimulus.com/) - a set of resources (similar to awesome list) + best practices/recommendations.
 - [Podcast - Changelog - Stimulus JS](https://changelog.com/podcast/286)
+- **Dev Environment**
+  - [Upgrade to Stimulus 3 & dropping IE 11 Support](https://dev.to/nejremeslnici/upgrade-to-stimulus-3-say-bye-to-ie11-and-celebrate-b7g)
 - **Testing**
   - https://github.com/hotwired/stimulus/issues/130
   - https://discuss.hotwired.dev/t/testing-stimulus/90/8
