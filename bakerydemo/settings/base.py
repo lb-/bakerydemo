@@ -57,6 +57,8 @@ INSTALLED_APPS = [
     'wagtail.contrib.routable_page',
     'wagtail.core',
 
+    'wagtail-wagtail-legacy-hallo-editor.wagtail_wagtail_legacy_hallo_editor',
+
     'rest_framework',
     'modelcluster',
     'taggit',
@@ -183,3 +185,10 @@ WAGTAILSEARCH_BACKENDS = {
 
 # Wagtail settings
 WAGTAIL_SITE_NAME = "bakerydemo"
+
+
+WAGTAILADMIN_RICH_TEXT_EDITORS = {
+    'default': {
+        'WIDGET': 'wagtail-wagtail-legacy-hallo-editor.wagtail_wagtail_legacy_hallo_editor.hallo.HalloRichTextArea'
+    }
+}

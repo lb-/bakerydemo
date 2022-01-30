@@ -1,7 +1,7 @@
 from django.urls import path, include
 from django.views.i18n import JavaScriptCatalog
 
-from hallo import (
+from .hallo import (
     HalloFormatPlugin, HalloHeadingPlugin, HalloListPlugin, HalloPlugin)
 from wagtail.admin.rich_text.converters.editor_html import (
     LinkTypeRule, PageLinkHandler, WhitelistRule)

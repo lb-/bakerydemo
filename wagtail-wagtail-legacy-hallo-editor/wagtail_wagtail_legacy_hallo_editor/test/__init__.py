@@ -1,1 +1,0 @@
-default_app_config = "wagtail_wagtail_legacy_hallo_editor.test.apps.WagtailWagtailLegacyHalloEditorTestAppConfig"
