@@ -6,6 +6,10 @@ The legacy rich text editor for the Wagtail CMS. Based on [Hallo.js](http://hall
 
 Please be aware of the `known hallo.js issues <https://github.com/wagtail/wagtail/issues?q=is%3Aissue+is%3Aclosed+hallo+label%3A%22component%3ARich+text%22+label%3Atype%3ABug+label%3A%22status%3AWont+Fix%22>`_ should you want to keep using it.
 
+## Installing the Hallo Editor
+
+* Important: Requires jQuery and jQueryUI - which are not included and may not always be included with Wagtail.
+
 
 ## Extending the Hallo Editor
 
