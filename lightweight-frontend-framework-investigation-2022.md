@@ -141,13 +141,15 @@ We want to ensure that anything we adopt, not only works with the existing abstr
 - Even the mounting of React components could leverage Stimulus, providing a simple way to initialise various DOM elements with their React injection, with some of the props being supplied to the component as data attributes... which can even trigger a re-render if the data-attributes change from some other JS.
 - Stimulus JS is modest, it does not try to solve everything (no animations), DOM manipulations still need to be written in JS for example.
 - As the state is stored on the data attributes, any other code can modify these attributes to change the behaviour (for example, want to close all collapsibles, just change `data-collapsible-collapsed-value` to false with any JS and it will work), this means that Django templates can be used extensively for 'initial' data without having to write any init JS functions.
-- This library is a core part of the Rails ecosystem and built by the team at Basecamp, it is unlikely to go anywhere anytime soon.
+- This library is a core part of the Rails ecosystem (as of V7) and built by the team at Basecamp, it is unlikely to go anywhere anytime soon.
+- The migration towards this can be gradual, we could even start by updating a bunch of already existing data attributes to what their eventual naming would be (core team need to agree on a controller prefix like `wg-`) along with the CustomEvent names used.
 
 #### Further notes
 
 - We can avoid a lot of global functions populating Window (e.g. `window.LockUnlockAction`) by adopting Stimulus.
 - We may want to implement something similar to [Alpine.js `x-cloak` directive](https://alpinejs.dev/directives/cloak), this is quite useful when you want to wait for the JS to trigger before showing some content.
 - We may want to move to `template` elements instead of `script` for template content (e.g. expanding formset), not critical but a nicer modern approach.
+- We can even render Stimulus controlled elements via React, there are some edge cases we need to be aware of, and I doubt this will work when the controller also renders a new React element on the inner controlled one but it may open an avenue to avoid re-doing all the same components in React and non-React. Note: When react modifies the inner content of an element and the Stimulus controller also does this, the next re-render will take priority but the first render (with the adding of the controlled element) will be handled by Stimulus, this can be avoided if needed by putting a unique key on the controlled element when we know we want Stimulus to 'take over' again.
 
 #### Case against Stimulus JS
 
@@ -155,12 +157,11 @@ We want to ensure that anything we adopt, not only works with the existing abstr
   - Ideally the Telepath adapter keeps minimal and the 'work' is kept in the Controller and all the Telepath JS code does it convert the provided args to their relevant data attribute values and just puts something in the DOM for Stimulus to work with.
   - Worst case - this is no different to now, we still init some elements in pure JS, however we need to review approaches we can take.
   - Maybe the Telepath 'render' method can just output the HTML with the spread data attributes and the work is always done in the Controller. Maybe one class can serve both purposes (`render` is not used by Stimulus), we would have to be careful with `this` as there would be the Telepath instance AND the Stimulus instance I guess.
-- Relies ES6 classes, may not able to be compiled down to ES5, so our bundle will need to move to ES6 (2015) - https://stimulus.hotwired.dev/handbook/installing#browser-support. https://caniuse.com/?search=es6
+- Relies ES6 classes, may not able to be compiled down to ES5, so our bundle will need to move to ES6 (2015) - https://stimulus.hotwired.dev/handbook/installing#browser-support. https://caniuse.com/?search=es6 **Update** - after some investigation this is NOT a limitation, the library can be compiled down to ES5 for use inside our existing codebase.
 - Using with Typescript will work but it is a bit verbose, see resources section, maybe we can somehow create a WagtailBaseController that is smart about this?
-- There is no official approach to testing in the documentation, however there are resources online and it appears to be possible to set up in Jest without too many issues.
+- There is no official approach to testing in the documentation, however there are resources online and it appears to be possible to set up in Jest without too many issues, as of JSDOM 16 there is no need to polyfill any JSDOM behaviour to test Stimulus.
 - Web components may be the way to go, but this moves us more away from a light touch approach and it will be harder to tell where the lines stop between this and React, maybe if we were scrapping React?
 - It is still just JavaScript and buggy or inconsistent code can be written, but we will have a base of a consistent class based approach for everything, instead of ad-hoc approaches.
-- There are solutions for writing Jest test online but none are part of the official docs (note: Alpine js also has no testing guidelines), but it is possible to write tests for.
 - [Recent 3.0](https://world.hey.com/hotwired/stimulus-3-c438d432) did have some breaking changes so some online docs are out of date (however, this is similar for Alpine js v1/v2 and lit.dev vs Polymer), welcome to the JavaScript ecosystem.
 
 #### Resources
@@ -186,13 +187,28 @@ We want to ensure that anything we adopt, not only works with the existing abstr
 
 #### Potential architecture
 
-- Wagtail core code would likely use the recommended [Webpack build system approach](https://stimulus.hotwired.dev/handbook/installing#using-webpack-helpers) and controller file naming conventions so that we do not need to manually load each new controller added to the Wagtail admin. This assumes we want all controllers on all page, I think this is a good assumption to make but it does add to the base JS load.
+- Wagtail core code would likely have a core controller import that would be loaded in the core.js, it would pull in all controllers and then load them using the `Stimulus.load` functionality, the great thing about this is we can add a prefix to all controllers here, the controllers themselves would not need to be named with the prefix in the code. This assumes we want all controllers on all pages, I think this is a good assumption to make but it does add to the base JS load. This would be similar to the [Webpack Helper](https://stimulus.hotwired.dev/handbook/installing#using-webpack-helpers) approach but allows for each controller to be nested in a folder.
 - On every admin page, the Stimulus code is loaded with the default controllers added and an event `wagtail:stimulus-init` would be fired that other code could hook into. See https://github.com/lb-/bakerydemo/blob/ui-experiments/bakerydemo/ui/wagtail_hooks.py
 - We could also add handling of the [debug flag](https://stimulus.hotwired.dev/handbook/installing#debugging) to be true when Django is in local dev mode, this will aid those customising Wagtail and also those working on Wagtail core.
+- Conceptually, controllers are NOT components, they may be similar but a controller defines a behaviour matched to some DOM targets, actions (events) and values (data attributes stored) but one element can have multiple controllers. This is a very powerful abstraction and lets us build out some core behaviour that can be shared two ways; one by adding two controllers to the one element, two - class inheritance.
 - If custom controllers are added (or overriding existing ones), they can leverage this event and also know that when this event fires the `Stimulus` and `Controller` global will be available.
-- We may want to put these behind a global object like `wagtail.stimulus.Stimulus` for example - so we do not populate the global object AND it allows other customisations where another Stimulus application exists in isolation of the Wagtail one.
-- We may want to actually define a prefix for all controllers (e.g. wg-loading-button) instead of a prefix for the data attributes as the controller name is used by default for prefixing the events on dispatch. Further investigation needed to see if this behaviour can be changed. Alternatively if we have a `WagtailBaseController` it could extend this method and modify this behaviour to prefix all events with `wagtail:` so an event dispatched from a collapsible controller would be something like `wagtail:collapsible:close`.
-- We can even render Stimulus controlled elements via React, there are some edge cases we need to be aware of, and I doubt this will work when the controller also renders a new React element on the inner controlled one but it may open an avenue to avoid re-doing all the same components in React and non-React. Note: When react modifies the inner content of an element and the Stimulus controller also does this, the next re-render will take priority but the first render (with the adding of the controlled element) will be handled by Stimulus, this can be avoided if needed by putting a unique key on the controlled element when we know we want Stimulus to 'take over' again.
+- We should these behind a global object like `wagtail.stimulus.Stimulus` for example - so we do not populate the global object AND it allows other customisations where another Stimulus application exists in isolation of the Wagtail one.
+- We may want to actually define a prefix for all controllers (e.g. `wg-spinner`) instead of a prefix for the data attributes as the controller name is used by default for prefixing the events on dispatch. Further investigation needed to see if this behaviour can be changed. Some ideas for prefix convention; `wg` = WaGtail, `wx` = Wagtail eXperience, `ww` = Wagtail Wagtail, `wu` = Wagtail Ui etc. I think two letters is good.
+- It is important to note that the `data-controller` names can be completely isolated from the css classes names, this offers much more functionality and helps future usage of the 'behaviour' as a standalone exported library vs the 'styles'. See how StackOverflow's docs for their Stacks UI library explains this - https://stackoverflow.design/product/guidelines/javascript/ .
+- Accessibility - Controllers could be built to **enforce** good aria attributes (throw error if expected attributes are not provided in initial DOM) or create those on connection (if not supplied). Modifying the right aria attributes by the controller would be a given.
+- Folder structure for each controller would look very similar to the Components, but we may want to define three types of controllers;
+  - 1. base controller (this is the core controller that all others would inherit and gives us room to abstract some behaviour as needed)
+  - 2. behaviour controllers (core behaviour based controllers, this may be for thin wrappers on common libraries like focus trap, mousetrap, animate.css or whatever we desire)
+  - 3. component controllers (this would contain the common 'component' way of thinking, such as popover/dialog/dropdown/details etc)
+  - 4. utils - could be pulled out to the shared utils but may be suitable inside the controllers folder, things like DOM element names, shared behaviour etc.
+
+## Stimulus in the wild
+
+- **Stacks** - UI library used by StackOverflow - https://stackoverflow.design/product/guidelines/javascript/ & https://github.com/StackExchange/Stacks/blob/develop/lib/ts/stacks.ts (uses Stimulus v2)
+- **Kanety** - A bunch of Stimulus controllers in isolated packges - https://www.npmjs.com/~kanety
+- **Groundwork** - Django applications with JS components built with Stimulus - https://github.com/commonknowledge/groundwork
+- **Orchid** - Lavarel framework with some good docs on how to use Stimulus inside their application - https://orchid.software/en/docs/javascript/#stimulus + good article on their justification of Simulus https://blog.orchid.software/lasting-stack/
+- **Stimulus Components** - Library of components built with Stimulus https://github.com/stimulus-components/stimulus-components
 
 ## Stimulus use cases
 
