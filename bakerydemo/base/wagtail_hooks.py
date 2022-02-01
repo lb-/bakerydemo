@@ -1,5 +1,6 @@
 from wagtail.contrib.modeladmin.options import (
     ModelAdmin, ModelAdminGroup, modeladmin_register)
+from wagtail.contrib.modeladmin.views import CreateView
 
 from bakerydemo.breads.models import Country, BreadIngredient, BreadType
 from bakerydemo.base.models import People, FooterText
@@ -45,7 +46,22 @@ class BreadModelAdminGroup(ModelAdminGroup):
     items = (BreadIngredientAdmin, BreadTypeAdmin, BreadCountryAdmin)
 
 
+
+class CustomCreateView(CreateView):
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['create_url'] = self.create_url
+        return context
+
+    def get_success_url(self):
+        next = self.request.GET.get('next')
+        if next:
+            return next
+        return self.index_url
+
 class PeopleModelAdmin(ModelAdmin):
+    create_view_class = CustomCreateView
     model = People
     menu_label = 'People'  # ditch this to use verbose_name_plural from model
     menu_icon = 'fa-users'  # change as required

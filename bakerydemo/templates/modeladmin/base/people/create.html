@@ -1,0 +1,28 @@
+{% extends "modeladmin/create.html" %}
+{% load i18n wagtailadmin_tags %}
+
+{% block extra_js %}
+  {{ block.super}}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('[data-next]').forEach(function(button) {
+      button.addEventListener('click', function(event) {
+        var form = document.querySelector('.content-wrapper form');
+        form.action = form.action + '?next=' + button.dataset.next;
+        console.log('event', event);
+        // event.preventDefault();
+      });
+    });
+  })
+</script>
+{% endblock %}
+
+
+{% block form_actions %}
+  {{ block.super }}
+  <div class="dropdown dropup dropdown-button match-width">
+    <button type="submit" class="button button-secondary action-save button-longrunning" data-next="{{ create_url }}" data-clicked-text="{% trans 'Saving…' %}">
+      {% icon name="spinner" %}<em>{% trans 'Save & add another' %}</em>
+    </button>
+  </div>
+{% endblock %}
