@@ -9,19 +9,35 @@ Please be aware of the `known hallo.js issues <https://github.com/wagtail/wagtai
 ## Installing the Hallo Editor
 
 * Important: Requires jQuery and jQueryUI - which are not included and may not always be included with Wagtail.
+* **INSTRUCTIONS NEEDED FOR PACKAGE HERE**
 
-
-## Extending the Hallo Editor
+## Using the Hallo Editor
 
 To use hallo.js on Wagtail 2.x, add the following to your settings:
 
 ```python
     WAGTAILADMIN_RICH_TEXT_EDITORS = {
-        'default': {
+        'legacy': {
             'WIDGET': 'wagtail.admin.rich_text.HalloRichTextArea'
         }
     }
 ```
+
+```python
+# models.py
+from wagtail.admin.edit_handlers import FieldPanel
+from wagtail.core.fields import RichTextField
+from wagtail.core.models import Page
+
+class HalloPage(Page):
+    body = RichTextField(editor='legacy')
+
+    content_panels = Page.content_panels + [
+        FieldPanel('body', classname='full'),
+    ]
+```
+
+## Extending the Hallo Editor
 
 The legacy hallo.js editor’s functionality can be extended through plugins. For information on developing custom ``hallo.js`` plugins, see the project's page: https://github.com/bergie/hallo
 
