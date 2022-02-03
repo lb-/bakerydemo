@@ -1,32 +1,9 @@
-from django.urls import path, include
-from django.views.i18n import JavaScriptCatalog
-
 from .hallo import (
     HalloFormatPlugin, HalloHeadingPlugin, HalloListPlugin, HalloPlugin)
 from wagtail.admin.rich_text.converters.editor_html import (
     LinkTypeRule, PageLinkHandler, WhitelistRule)
 from wagtail.core import hooks
 from wagtail.core.whitelist import allow_without_attributes, attribute_rule, check_url
-
-
-@hooks.register("register_admin_urls")
-def register_admin_urls():
-    urls = [
-        path('jsi18n/', JavaScriptCatalog.as_view(packages=['wagtail_wagtail_legacy_hallo_editor']), name='javascript_catalog'),
-
-        # Add your other URLs here, and they will appear under `/admin/wagtail_legacy_hallo_editor/`
-        # Note: you do not need to check for authentication in views added here, Wagtail does this for you!
-    ]
-
-    return [
-        path(
-            "wagtail_legacy_hallo_editor/",
-            include(
-                (urls, "wagtail_wagtail_legacy_hallo_editor"),
-                namespace="wagtail_wagtail_legacy_hallo_editor",
-            ),
-        )
-    ]
 
 
 @hooks.register('register_rich_text_features')
@@ -36,7 +13,7 @@ def register_core_features(features):
         'hallo', 'hr',
         HalloPlugin(
             name='hallohr',
-            js=['wagtailadmin/js/hallo-plugins/hallo-hr.js'],
+            js=['js/hallo-plugins/hallo-hr.js'],
             order=45,
         )
     )
@@ -50,7 +27,7 @@ def register_core_features(features):
             name='hallowagtaillink',
             js=[
                 'wagtailadmin/js/page-chooser-modal.js',
-                'wagtailadmin/js/hallo-plugins/hallo-wagtaillink.js',
+                'js/hallo-plugins/hallo-wagtaillink.js',
             ],
         )
     )
@@ -111,7 +88,7 @@ def register_core_features(features):
             name='hallowagtailembeds',
             js=[
                 'wagtailembeds/js/embed-chooser-modal.js',
-                'wagtailembeds/js/hallo-plugins/hallo-wagtailembeds.js',
+                'js/hallo-plugins/hallo-wagtailembeds.js',
             ],
         )
     )
@@ -123,7 +100,7 @@ def register_core_features(features):
             name='hallowagtailimage',
             js=[
                 'wagtailimages/js/image-chooser-modal.js',
-                'wagtailimages/js/hallo-plugins/hallo-wagtailimage.js',
+                'js/hallo-plugins/hallo-wagtailimage.js',
             ],
         )
     )
@@ -134,7 +111,7 @@ def register_core_features(features):
             name='hallowagtaildoclink',
             js=[
                 'wagtaildocs/js/document-chooser-modal.js',
-                'wagtaildocs/js/hallo-plugins/hallo-wagtaildoclink.js',
+                'js/hallo-plugins/hallo-wagtaildoclink.js',
             ],
         )
     )

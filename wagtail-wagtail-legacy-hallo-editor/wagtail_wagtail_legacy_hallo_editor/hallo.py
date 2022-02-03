@@ -81,7 +81,7 @@ class HalloRequireParagraphsPlugin(HalloPlugin):
     @property
     def media(self):
         return Media(js=[
-            versioned_static('wagtailadmin/js/hallo-plugins/hallo-requireparagraphs.js'),
+            versioned_static('js/hallo-plugins/hallo-requireparagraphs.js'),
         ]) + super().media
 
 
@@ -95,7 +95,6 @@ CORE_HALLO_PLUGINS = [
 
 class HalloRichTextArea(widgets.Textarea):
     template_name = 'wagtail_wagtail_legacy_hallo_editor/widgets/hallo_rich_text_area.html'
-
 
     # this class's constructor accepts a 'features' kwarg
     accepts_features = True
@@ -155,8 +154,9 @@ class HalloRichTextArea(widgets.Textarea):
     @cached_property
     def media(self):
         media = Media(js=[
-            versioned_static('wagtailadmin/js/vendor/hallo.js'),
-            versioned_static('wagtailadmin/js/hallo-bootstrap.js'),
+            versioned_static('js/vendor/hallo.js'),
+            versioned_static('js/hallo-editor.js'),
+            versioned_static('js/hallo-telepath.js'),
         ], css={
             'all': [versioned_static('wagtailadmin/css/panels/hallo.css')]
         })
