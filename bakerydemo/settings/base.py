@@ -188,6 +188,9 @@ WAGTAIL_SITE_NAME = "bakerydemo"
 
 
 WAGTAILADMIN_RICH_TEXT_EDITORS = {
+    # 'hallo': {
+    #     'WIDGET': 'wagtail.admin.rich_text.HalloRichTextArea'  
+    # },
     'legacy': {
         'WIDGET': 'wagtail-wagtail-legacy-hallo-editor.wagtail_wagtail_legacy_hallo_editor.hallo.HalloRichTextArea'
     }
