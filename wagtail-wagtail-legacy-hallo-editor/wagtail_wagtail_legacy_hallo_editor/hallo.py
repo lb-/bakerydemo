@@ -158,7 +158,7 @@ class HalloRichTextArea(widgets.Textarea):
             versioned_static('js/hallo-editor.js'),
             versioned_static('js/hallo-telepath.js'),
         ], css={
-            'all': [versioned_static('wagtailadmin/css/panels/hallo.css')]
+            'all': [versioned_static('css/hallo.css')]
         })
 
         for plugin in self.plugins:
