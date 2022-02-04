@@ -100,6 +100,23 @@
 }
 
 /* Icons */
+.hallotoolbar [class^='icon-'], .hallotoolbar [class*=' icon-']:before, .hallotoolbar [class^='icon-']:before {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-family: wagtail;
+    font-style: normal;
+    font-weight: normal;
+    font-variant: normal;
+    text-transform: none;
+    speak: none;
+    text-decoration: none;
+    width: 1.3em;
+    line-height: 1em;
+    text-align: left;
+    vertical-align: middle;
+    margin-right: 0.2em;
+}
+
 .hallotoolbar [class^="icon-"]:after,
 .hallotoolbar [class^="icon-"]:after {
   text-align: right;
