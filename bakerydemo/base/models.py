@@ -365,3 +365,9 @@ class FormPage(AbstractEmailForm):
             FieldPanel('subject'),
         ], "Email"),
     ]
+
+class HalloTestPage(Page):
+    body = RichTextField(editor='legacy', blank=True)
+    content_panels = Page.content_panels + [
+        FieldPanel('body', classname='full'),
+    ]

@@ -56,8 +56,9 @@ INSTALLED_APPS = [
     'wagtail.contrib.modeladmin',
     'wagtail.contrib.routable_page',
     'wagtail.core',
+    'wagtail_legacy_hallo_editor',
 
-    'wagtail-wagtail-legacy-hallo-editor.wagtail_wagtail_legacy_hallo_editor',
+    # 'wagtail-wagtail-legacy-hallo-editor.wagtail_wagtail_legacy_hallo_editor',
 
     'rest_framework',
     'modelcluster',
