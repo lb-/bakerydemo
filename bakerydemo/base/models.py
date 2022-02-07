@@ -2,9 +2,12 @@ from __future__ import unicode_literals
 
 from django.db import models
 
+
 from modelcluster.fields import ParentalKey
 from modelcluster.models import ClusterableModel
 
+from wagtail.core.models import Page
+from wagtail.core.blocks import CharBlock, RichTextBlock
 from wagtail.admin.edit_handlers import (
     FieldPanel,
     FieldRowPanel,
@@ -366,8 +369,16 @@ class FormPage(AbstractEmailForm):
         ], "Email"),
     ]
 
+
 class HalloTestPage(Page):
-    body = RichTextField(editor='legacy', blank=True)
+    body = RichTextField(editor='hallo', blank=True)
+
+    body_stream = StreamField([
+        ('heading', CharBlock(form_classname="full title")),
+        ('paragraph', RichTextBlock(editor='hallo')),
+    ], blank=True)
+
     content_panels = Page.content_panels + [
         FieldPanel('body', classname='full'),
+        StreamFieldPanel('body_stream'),
     ]
