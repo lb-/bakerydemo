@@ -6,7 +6,7 @@ from django.db import models
 from modelcluster.fields import ParentalKey
 from modelcluster.models import ClusterableModel
 
-from wagtail.core.models import Page
+from wagtail.core.models import Page, Orderable
 from wagtail.core.blocks import CharBlock, RichTextBlock
 from wagtail.admin.edit_handlers import (
     FieldPanel,
@@ -43,6 +43,7 @@ class People(index.Indexed, ClusterableModel):
     first_name = models.CharField("First name", max_length=254)
     last_name = models.CharField("Last name", max_length=254)
     job_title = models.CharField("Job title", max_length=254)
+    bio = RichTextField(editor='hallo', blank=True)
 
     image = models.ForeignKey(
         'wagtailimages.Image',
@@ -60,6 +61,7 @@ class People(index.Indexed, ClusterableModel):
             ])
         ], "Name"),
         FieldPanel('job_title'),
+        FieldPanel('bio'),
         ImageChooserPanel('image')
     ]
 
@@ -370,6 +372,18 @@ class FormPage(AbstractEmailForm):
     ]
 
 
+
+class PageContent(Orderable, models.Model):
+    page = ParentalKey(
+        'HalloTestPage', related_name='page_panel', on_delete=models.CASCADE
+    )
+
+    content = RichTextField(editor='hallo', blank=True)
+
+    panels = [ FieldPanel('content') ]
+
+
+
 class HalloTestPage(Page):
     body = RichTextField(editor='hallo', blank=True)
 
@@ -381,4 +395,5 @@ class HalloTestPage(Page):
     content_panels = Page.content_panels + [
         FieldPanel('body', classname='full'),
         StreamFieldPanel('body_stream'),
+        InlinePanel('page_panel', label="Content"),
     ]
