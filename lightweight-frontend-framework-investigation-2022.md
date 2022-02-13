@@ -101,8 +101,8 @@ We want to ensure that anything we adopt, not only works with the existing abstr
   - State & Reactivity - `data` object that is initialised and then self-contained in the component, not accessible outside, uses vue's reactivity model under the hood.
 - **[Stimulus](stimulus.hotwired.dev/)** 11.1k stars
   - Composing & Extending - Global object can be used to add additional registered items, even replace and extend existing behaviour with class inheritance, behaviour can be composed and also multiple controllers can be put on the one element (e.g. a modal trigger that also has a keyboard shortcut behaviour).
-  - CSP - Compatible, although not explicitly stated in the documentation, See discussion [Security, CSP, and Stimulus](https://discuss.hotwired.dev/t/security-csp-and-stimulus/171).
-  - Development - Uses [ES6 classes](https://caniuse.com/es6-class), although in theory it could work with function expressions, has a debug mode for local development.
+  - CSP - Compatible, see the repo [security notes](https://github.com/hotwired/stimulus/blob/main/SECURITY.md).
+  - Development - Uses [ES6 classes](https://caniuse.com/es6-class), although it can work with function expressions or ES5 compilation target, has a debug mode for local development.
   - Initialisation - Initialises when added to the DOM, either on first render or after, does 'disconnect' when `data-controller` is removed from the DOM element.
   - Links - [Alpine vs Stimulus JS](https://brianschiller.com/blog/2021/11/05/alpine-stimulus-js) - recommends Stimulus but does not address CSP concern, + see Stimulus Resources below.
   - Platform - Allows for a [custom namespaced set of data attributes](https://stimulus.hotwired.dev/handbook/installing#overriding-attribute-defaults) (e.g. `data-controller` could become `data-wg-controller`) creating zero conflicts with any other additional usage of Stimulus, which means the controller names can be simple. For example, we can use `data-wg-controller='modal'` instead of `data-controller='wg-modal'` everywhere, we may not need to namespace the action/target attributes.
