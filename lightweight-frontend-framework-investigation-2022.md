@@ -99,6 +99,13 @@ We want to ensure that anything we adopt, not only works with the existing abstr
   - Links - [When to use Alpine](https://lightit.io/blog/when-to-use-alpine-js/), [HTMX & Alpine in Django](https://www.saaspegasus.com/guides/modern-javascript-for-django-developers/htmx-alpine/), [Alpine speed issues](https://github.com/alpinejs/alpine/issues/566)
   - Platform - No way to namespace the HTML attributes but the data name can be prefixed by convention, potential for accidental conflicts with external libraries using Alpine.
   - State & Reactivity - `data` object that is initialised and then self-contained in the component, not accessible outside, uses vue's reactivity model under the hood.
+- **[hyperscript](https://hyperscript.org/)** < 1k stars
+  - Composing & Extending - No real pattern here, most likely would require copy/paste of existing inline hyperscript code.
+  - CSP - While eval is not used, the approach taken would run afoul of the intent of CSP as per their own [security page](https://hyperscript.org/docs/#security), they have a way to block a DOM tree from reading hyperscript (similar to Alpine) but that is it.
+  - Development - Uses a custom scripting language that is compiled to JS, non-standard.
+  - Initialisation - Appears to handle content added to the DOM after initial load, but unclear.
+  - Links - [HTMX usage of hyperscript](https://htmx.org/docs/#hyperscript), [A first look at hyperscript](https://putyourlightson.com/articles/a-first-look-at-hyperscript)
+  - Platform - Not class based, everything is namespaced with a global namespace so conflicts would be likely if not careful (use by other libraries), does not appear to have a good abstraction around sharing classes/mixins or similar nor overriding already loaded behaviour. There is a pluggable grammar though which is interesting.
 - **[Stimulus](stimulus.hotwired.dev/)** 11.1k stars
   - Composing & Extending - Global object can be used to add additional registered items, even replace and extend existing behaviour with class inheritance, behaviour can be composed and also multiple controllers can be put on the one element (e.g. a modal trigger that also has a keyboard shortcut behaviour).
   - CSP - Compatible, see the repo [security notes](https://github.com/hotwired/stimulus/blob/main/SECURITY.md).
