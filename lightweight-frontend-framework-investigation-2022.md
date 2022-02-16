@@ -130,7 +130,7 @@ We want to ensure that anything we adopt, not only works with the existing abstr
   - Platform - Compiled web components should be isolated and can be prefixed (e.g wg-modal), so it should not conflict if others also use their own web components.
   - State/Reactivity - [Reactive properties](https://lit.dev/docs/components/properties/) approach, contained within the Class and not accessible outside, can be 'synced' with attributes on the component though.
 - **Excluded**
-  - [HTMX](https://htmx.org/) - This library provides a way to patch in server side provided HTML to parts of the DOM, useful but does not serve the purpose of the lightweight frontend framework. Also, this library is very hard to google. It is more of a compliment to lightweight frameworks instead of a replacement.
+  - [HTMX](https://htmx.org/) - This library provides a way to patch in server side provided HTML to parts of the DOM, useful but does not serve the purpose of the lightweight frontend framework. Also, this library is very hard to google. It is more of a compliment to lightweight frameworks instead of a replacement, as per their [own documentation](https://htmx.org/docs/#hyperscript) when referring to hyperscript.
   - [min.js](https://github.com/remy/min.js) - DOM traversal and manipulation library, akin to jQuery, nice but we may end up with the same ad-hoc approach as the current jQuery code, not really maintained.
   - [Trimmings](https://postlight.github.io/trimmings/) - Looks promising, kind of a mix between Alpine and HTMX, however it is still quite new and does not seem to provide much extensibility.
   - [UmbrellaJS](https://umbrellajs.com/) - DOM traversal and manipulation library, akin to jQuery, maintained but not what we are looking for.
@@ -180,6 +180,8 @@ We want to ensure that anything we adopt, not only works with the existing abstr
 - [Full Library of Stimulus controllers](https://sub-xaero.github.io/stimulus-library/docs) - great example of a BaseController / Typescript usage but no unit tests it seems, We may not want to use this library but it is a good reference.
 - [Better Stimulus](https://www.betterstimulus.com/) - a set of resources (similar to awesome list) + best practices/recommendations.
 - [Podcast - Changelog - Stimulus JS](https://changelog.com/podcast/286)
+- [jQuery events to DOM events](https://github.com/leastbad/jquery-events-to-dom-events) - For Stimulus or not, this library looks great and simple, allowing bidirectional event passing between jQuery and non-jQuery events
+- [Mutation first development](https://leastbad.com/mutation-first-development) - good article on why handling initialisation manually (of components, e.g. jquery or even React dom render) is problematic.
 - **Dev Environment**
   - [Upgrade to Stimulus 3 & dropping IE 11 Support](https://dev.to/nejremeslnici/upgrade-to-stimulus-3-say-bye-to-ie11-and-celebrate-b7g)
 - **Testing**
@@ -195,7 +197,8 @@ We want to ensure that anything we adopt, not only works with the existing abstr
 #### Potential architecture
 
 - Wagtail core code would likely have a core controller import that would be loaded in the core.js, it would pull in all controllers and then load them using the `Stimulus.load` functionality, the great thing about this is we can add a prefix to all controllers here, the controllers themselves would not need to be named with the prefix in the code. This assumes we want all controllers on all pages, I think this is a good assumption to make but it does add to the base JS load. This would be similar to the [Webpack Helper](https://stimulus.hotwired.dev/handbook/installing#using-webpack-helpers) approach but allows for each controller to be nested in a folder.
-  - **Update** Instead of a global, maybe we do not expose the Stimulus application at all but rather let the event listener described below be the only way to hook in. This makes it easier to test, easier to work in extensions and also gives a lot more leeway into how the solution is documented. We must also consider what happens when devs try to add a Controller that is using ES6 classes when our code will be running ES5 classes for the first few releases probably - Stacks offers a nice solution here but it is for Stimulus 2.
+  - **Update** Instead of a global, maybe we do not expose the Stimulus application at all but rather let the event listener described below be the only way to hook in. This makes it easier to test, easier to work in extensions and also gives a lot more leeway into how the solution is documented. We must also consider what happens when devs try to add a Controller that is using ES6 classes when our code will be running ES5 classes for the first few releases probably.
+  - The approach taken by [Stacks](https://github.com/StackExchange/Stacks/blob/develop/lib/ts/stacks.ts) (running Stimulus 2) is a great one, it provides an abstraction for an easy way to create controllers from an object (not a class), this works around the ES5/ES6 issues. Additional to this, it ensures that no new controllers with the 'special' prefix of `s-` can be added. We could port this approach to allow any new controllers to be added but allow overrides of existing controllers with the prefix we use but not adding any new ones with that prefix. There is also some great TypeScript code examples of extra handling in the base controller/application.
 - On every admin page, the Stimulus code is loaded with the default controllers added and an event `wagtail:stimulus-init` would be fired that other code could hook into. See https://github.com/lb-/bakerydemo/blob/ui-experiments/bakerydemo/ui/wagtail_hooks.py
 - We could also add handling of the [debug flag](https://stimulus.hotwired.dev/handbook/installing#debugging) to be true when Django is in local dev mode, this will aid those customising Wagtail and also those working on Wagtail core.
 - Conceptually, controllers are NOT components, they may be similar but a controller defines a behaviour matched to some DOM targets, actions (events) and values (data attributes stored) but one element can have multiple controllers. This is a very powerful abstraction and lets us build out some core behaviour that can be shared two ways; one by adding two controllers to the one element, two - class inheritance.
@@ -213,10 +216,11 @@ We want to ensure that anything we adopt, not only works with the existing abstr
 ## Stimulus in the wild
 
 - **Stacks** - UI library used by StackOverflow - https://stackoverflow.design/product/guidelines/javascript/ & https://github.com/StackExchange/Stacks/blob/develop/lib/ts/stacks.ts (uses Stimulus v2)
-- **Kanety** - A bunch of Stimulus controllers in isolated packges - https://www.npmjs.com/~kanety
+- **Kanety** - A bunch of Stimulus controllers in isolated packages - https://www.npmjs.com/~kanety
 - **Groundwork** - Django applications with JS components built with Stimulus - https://github.com/commonknowledge/groundwork
 - **Orchid** - Lavarel framework with some good docs on how to use Stimulus inside their application - https://orchid.software/en/docs/javascript/#stimulus + good article on their justification of Simulus https://blog.orchid.software/lasting-stack/
 - **Stimulus Components** - Library of components built with Stimulus https://github.com/stimulus-components/stimulus-components
+- **Sockpuppet** - Django package that builds upon Stimulus and morphdom (a DOM patching & diff library) for server side sockets interactivity - not recommending this approach for Wagtail, however it is an interesting approach.
 
 ## Stimulus use cases
 
