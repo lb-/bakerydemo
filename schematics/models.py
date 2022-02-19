@@ -11,10 +11,14 @@ from wagtail.admin.edit_handlers import (
     InlinePanel,
 )
 from wagtail.core.models import Orderable, Page
-from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail.search import index
 from wagtail.snippets.edit_handlers import SnippetChooserPanel
 from wagtail.snippets.models import register_snippet
+
+from .edit_handlers import (
+    SchematicEditHandler,
+    SchematicImageChooserPanel,
+)
 
 
 @register_snippet
@@ -31,9 +35,11 @@ class Schematic(index.Indexed, ClusterableModel):
 
     panels = [
         FieldPanel("title"),
-        ImageChooserPanel("image"),
+        SchematicImageChooserPanel("image"),
         InlinePanel("points", heading="Points", label="Point"),
     ]
+
+    edit_handler = SchematicEditHandler(panels)
 
     def __str__(self):
         title = getattr(self, "title", "Schematic")

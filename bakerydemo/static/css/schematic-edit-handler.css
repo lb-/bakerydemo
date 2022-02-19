@@ -1,0 +1,19 @@
+/* preview image - container */
+
+.schematic-edit-handler .image-chooser .chosen {
+  padding-left: 0;
+}
+
+.schematic-edit-handler .image-chooser .preview-image {
+  display: inline-block; /* ensure container matches image size */
+  max-width: 100%;
+  margin: 2rem 0;
+  float: none;
+  position: relative;
+}
+
+.schematic-edit-handler .image-chooser .preview-image img {
+  max-height: 100%;
+  max-width: 100%;
+}
+
