@@ -10,9 +10,10 @@ from wagtail.admin.edit_handlers import (
     FieldRowPanel,
     InlinePanel,
 )
-from wagtail.core.models import Orderable
+from wagtail.core.models import Orderable, Page
 from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail.search import index
+from wagtail.snippets.edit_handlers import SnippetChooserPanel
 from wagtail.snippets.models import register_snippet
 
 
@@ -89,3 +90,15 @@ class SchematicPoint(Orderable, models.Model):
     class Meta:
         verbose_name_plural = "Points"
         verbose_name = "Point"
+
+
+class ProductPage(Page):
+
+    schematic = models.ForeignKey(
+        "schematics.Schematic",
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="product_page_schematic",
+    )
+
+    content_panels = Page.content_panels + [SnippetChooserPanel("schematic")]
