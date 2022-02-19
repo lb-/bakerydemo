@@ -17,3 +17,76 @@
   max-width: 100%;
 }
 
+/* inline panels - add visible numbers */
+
+.schematic-edit-handler .multiple {
+  counter-reset: css-counter 0;
+}
+
+.schematic-edit-handler [data-inline-panel-child]:not(.deleted) {
+  counter-increment: css-counter 1;
+}
+
+.schematic-edit-handler
+  [data-inline-panel-child]:not(.deleted)
+  > fieldset::before {
+  content: counter(css-counter) ". ";
+}
+
+/* preview image - points */
+/* tooltip styles based on https://blog.logrocket.com/creating-beautiful-tooltips-with-only-css/ */
+
+.schematic-edit-handler .image-chooser .preview-image .points {
+  counter-reset: css-counter 0;
+}
+
+.schematic-edit-handler .image-chooser .preview-image .point {
+  counter-increment: css-counter 1;
+  position: absolute;
+}
+
+.schematic-edit-handler .image-chooser .preview-image .point::before {
+  background-clip: padding-box; /* ensures the 'hover' target is larger than the visible circle */
+  background-color: #7c4c4c;
+  border-radius: 50%;
+  border: 0.25rem solid transparent;
+  color: rgb(236, 236, 236);
+  box-shadow: 0 -2px 0 rgba(0, 0, 0, 0.1) inset;
+  content: counter(css-counter);
+  text-align: center;
+  line-height: 1.75rem;
+  font-weight: bolder;
+  display: block;
+  height: 1.75rem;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 1.75rem;
+  z-index: 1;
+}
+
+.schematic-edit-handler .image-chooser .preview-image .point .label {
+  opacity: 0; /* hide by default */
+  position: absolute;
+
+  /* vertically center */
+  top: 50%;
+  transform: translateY(-50%);
+
+  /* move to right */
+  left: 100%;
+  margin-left: 1.25rem; /* and add a small left margin */
+
+  /* basic styles */
+  width: 5rem;
+  padding: 5px;
+  border-radius: 5px;
+  background: #000;
+  color: #fff;
+  text-align: center;
+  transition: opacity 300ms ease-in-out;
+  z-index: 10;
+}
+
+.schematic-edit-handler .image-chooser .preview-image .point:hover .label {
+  opacity: 1;
+}

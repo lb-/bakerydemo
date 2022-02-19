@@ -1,3 +1,11 @@
 <div class="schematic-edit-handler" data-controller="schematic-edit-handler">
+  <template data-schematic-edit-handler-target="imagePointTemplate">
+    <li
+      class="point"
+      data-schematic-edit-handler-target="imagePoint"
+    >
+      <span class="label"></span>
+    </li>
+  </template>
   {% extends "wagtailadmin/edit_handlers/object_list.html" %}
 </div>

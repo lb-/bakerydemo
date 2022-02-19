@@ -1,6 +1,6 @@
 from django.utils.html import format_html
 
-from wagtail.admin.edit_handlers import ObjectList
+from wagtail.admin.edit_handlers import MultiFieldPanel, ObjectList
 from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail.images.widgets import AdminImageChooser
 
@@ -52,3 +52,7 @@ class SchematicEditHandler(ObjectList):
     class Media:
         css = {"all": ("css/schematic-edit-handler.css",)}
         js = ("js/schematic-edit-handler.js",)
+
+
+class SchematicPointPanel(MultiFieldPanel):
+    template = "schematics/edit_handlers/schematic_point_panel.html"

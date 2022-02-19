@@ -18,6 +18,7 @@ from wagtail.snippets.models import register_snippet
 from .edit_handlers import (
     SchematicEditHandler,
     SchematicImageChooserPanel,
+    SchematicPointPanel,
 )
 
 
@@ -75,19 +76,45 @@ class SchematicPoint(Orderable, models.Model):
         validators=[MaxValueValidator(100.0), MinValueValidator(0)],
     )
 
-    panels = [
-        FieldPanel("label"),
+    fields = [
+        FieldPanel(
+            "label",
+            widget=forms.TextInput(
+                attrs={
+                    "data-action": "schematic-edit-handler#updatePoints",
+                    "data-point-label": True,
+                }
+            ),
+        ),
         FieldRowPanel(
             [
                 FieldPanel(
-                    "x", widget=forms.NumberInput(attrs={"min": 0.0, "max": 100.0})
+                    "x",
+                    widget=forms.NumberInput(
+                        attrs={
+                            "data-action": "schematic-edit-handler#updatePoints",
+                            "data-point-x": True,
+                            "min": 0.0,
+                            "max": 100.0,
+                        }
+                    ),
                 ),
                 FieldPanel(
-                    "y", widget=forms.NumberInput(attrs={"min": 0.0, "max": 100.0})
+                    "y",
+                    widget=forms.NumberInput(
+                        attrs={
+                            "data-action": "schematic-edit-handler#updatePoints",
+                            "data-point-y": True,
+                            "min": 0.0,
+                            "max": 100.0,
+                        }
+                    ),
                 ),
             ]
         ),
     ]
+
+    panels = [SchematicPointPanel(fields)]
 
     def __str__(self):
         schematic_title = getattr(self.schematic, "title", "Schematic")
