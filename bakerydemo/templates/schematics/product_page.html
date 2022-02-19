@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% load wagtailimages_tags %}
+
+{% block head-extra %}
+  <style>
+    .schematic {
+      position: relative;
+    }
+
+
+    .schematic .points {
+      margin-bottom: 0;
+    }
+
+    .schematic .point {
+      position: absolute;
+    }
+
+    .schematic .point::before {
+      background-color: #fb7575;
+      border-radius: 50%;
+      box-shadow: 0 -2px 0 rgba(0, 0, 0, 0.1) inset;
+      content: "";
+      display: block;
+      border: 0.5rem solid transparent;
+      height: 2.75rem;
+      background-clip: padding-box; /* ensures the 'hover' target is larger than the visible circle */
+      position: absolute;
+      transform: translate(-50%, -50%);
+      width: 2.75rem;
+      z-index: 1;
+    }
+
+    .point .label {
+      opacity: 0; /* hide by default */
+      position: absolute;
+
+      /* vertically center */
+      top: 50%;
+      transform: translateY(-50%);
+
+      /* move to right */
+      left: 100%;
+      margin-left: 1.25rem; /* and add a small left margin */
+
+      /* basic styles */
+      font-family: sans-serif;
+      width: 12rem;
+      padding: 5px;
+      border-radius: 5px;
+      background: #000;
+      color: #fff;
+      text-align: center;
+      transition: opacity 300ms ease-in-out;
+      z-index: 10;
+    }
+
+    .schematic .point:hover .label {
+      opacity: 1;
+    }
+  </style>
+{% endblock head-extra %}
+
+{% block content %}
+  {% include "base/include/header.html" %}
+  <div class="container">
+    <div class="row">
+      {% image self.schematic.image width-1920 as schematic_image %}
+      <div class="schematic col-md-12">
+        <img src="{{ schematic_image.url }}" alt="{{ schematic.title }}" />
+        <ul class="points">
+          {% for point in self.schematic.points.all %}
+          <li class="point" style="left: {{ point.x }}%; bottom: {{ point.y }}%">
+            <span class="label">{{ point.label }}</span>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+{% endblock content %}
