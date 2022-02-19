@@ -13,6 +13,7 @@ window.addEventListener("stimulus:init", ({ detail }) => {
 
     connect() {
       this.setupImageInputObserver();
+      this.setupImageDropHandlers();
       this.updatePoints();
     }
 
@@ -30,6 +31,26 @@ window.addEventListener("stimulus:init", ({ detail }) => {
       deletePointButton.addEventListener("click", (event) => {
         this.updatePoints(event);
       });
+    }
+
+    /**
+     * Allow the point to be dragged using the 'move' effect and set its data.
+     *
+     * @param {DragEvent} event
+     */
+    pointDragStart(event) {
+      event.dataTransfer.dropEffect = "move";
+      event.dataTransfer.setData("text/plain", event.target.dataset.id);
+      event.target.style.opacity = "0.5";
+    }
+
+    /**
+     * When dragging finishes on a point, reset its opacity.
+     *
+     * @param {DragEvent} event
+     */
+    pointDragEnd({ target }) {
+      target.style.opacity = "1";
     }
 
     /**
@@ -51,6 +72,42 @@ window.addEventListener("stimulus:init", ({ detail }) => {
         attributeFilter: ["value"],
         attributeOldValue: true,
         attributes: true,
+      });
+    }
+
+    /**
+     * Once connected, set up the dragover and drop events on the preview image container.
+     * We are unable to easily do this with `data-action` attributes in the template.
+     */
+    setupImageDropHandlers() {
+      const previewImageContainer = this.imageInputTarget
+        .closest(".field-content")
+        .querySelector(".preview-image");
+
+      previewImageContainer.addEventListener("dragover", (event) => {
+        event.preventDefault();
+        event.dataTransfer.dropEffect = "move";
+      });
+
+      previewImageContainer.addEventListener("drop", (event) => {
+        event.preventDefault();
+
+        const inputId = event.dataTransfer.getData("text/plain");
+        const { height, width } = previewImageContainer.getBoundingClientRect();
+
+        const xNumber = event.offsetX / width + Number.EPSILON;
+        const x = Math.round(xNumber * 10000) / 100;
+        const yNumber = 1 - event.offsetY / height + Number.EPSILON;
+        const y = Math.round(yNumber * 10000) / 100;
+
+        const inlinePanel = document
+          .getElementById(inputId)
+          .closest("[data-inline-panel-child]");
+
+        inlinePanel.querySelector("[data-point-x]").value = x;
+        inlinePanel.querySelector("[data-point-y]").value = y;
+
+        this.updatePoints(event);
       });
     }
 
