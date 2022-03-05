@@ -1,0 +1,36 @@
+<div id="container">
+  <script>
+		// IMPORTANT: this script should be moved to an isolated file so it does not load every time this panel is used
+    document.addEventListener("DOMContentLoaded", function () {
+      const targetNode = document.getElementById("container");
+      const config = { attributes: false, childList: true, subtree: true };
+      const callback = function (mutationsList, observer2) {
+        for (const mutation of mutationsList) {
+          if (mutation.type === "childList") {
+            // Check if nodes were added
+            // ADDED - also ignore nodes that are only text nodes
+            const addedNodes = Array.from(mutation.addedNodes).filter(function (
+              element
+            ) {
+              return element.nodeName !== "#text";
+            });
+            if (addedNodes.length > 0) {
+              const $addedRecurrenceField = django
+                .jQuery(addedNodes[0])
+                .find(".recurrence-widget");
+              console.log("$addedRecurrenceField", $addedRecurrenceField);
+              // Length has to be 1, to prevent cases when draging inlines returns length 0 or more than 1.
+              if ($addedRecurrenceField.length === 1) {
+                initRecurrenceWidget($addedRecurrenceField);
+              }
+            }
+          }
+        }
+      };
+      // cannot use observer as the recurrence code adds a global
+      const observer2 = new MutationObserver(callback);
+      observer2.observe(targetNode, config);
+    });
+  </script>
+  {% include "wagtailadmin/edit_handlers/field_row_panel.html" %}
+</div>

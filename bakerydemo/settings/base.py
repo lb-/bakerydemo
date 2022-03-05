@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'bakerydemo.base',
     'bakerydemo.blog',
     'bakerydemo.breads',
+    'bakerydemo.events',
     'bakerydemo.locations',
     'bakerydemo.search',
 
@@ -57,6 +58,7 @@ INSTALLED_APPS = [
     'wagtail.contrib.routable_page',
     'wagtail.core',
 
+    'recurrence',
     'rest_framework',
     'modelcluster',
     'taggit',
