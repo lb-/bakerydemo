@@ -32,6 +32,7 @@ class EndBlock(BaseStepBlock):
     class Meta:
         form_classname="end-block-wrapper"
         icon = "radio-full"
+        label = "End"
 
 
 class EventBlock(BaseStepBlock):
@@ -65,21 +66,27 @@ class TaskBlock(BaseStepBlock):
 
 
 class BaseStepsStreamBlock(StreamBlock):
-
-    # general activity blocks
     task_block = TaskBlock()
     event_block = EventBlock()
     document_block = DocumentBlock()
 
-    # special end block (should not be able to add steps after end in a Stream)
-    end_block = EndBlock()
+class GatewayBlock(BaseStepsStreamBlock):
 
-class ExclusiveGatewayBlock(BaseStepsStreamBlock):
     class Meta:
         icon = "pick"
-        label = "Decision"
+        label = "Option"
 
 
+class GatewayListBlock(ListBlock):
+
+    def __init__(self, **kwargs):
+        super().__init__(child_block=GatewayBlock(),**kwargs)
+
+class ExclusiveGatewayListBlock(GatewayListBlock):
+
+    class Meta:
+        icon = "code"
+        label = "Exclusive steps"
 
 class StartStreamBlock(StreamBlock):
     start_block = StartBlock()
@@ -98,5 +105,12 @@ class StepsStreamBlock(BaseStepsStreamBlock):
     """
 
     # add ability for nested sets of process steps
-    exclusive_gateway_block = ExclusiveGatewayBlock()
+    exclusive_gateway_block = ExclusiveGatewayListBlock()
+
+    # special end block (should not be able to add steps after end in a Stream)
+    end_block = EndBlock()
+
+    class Meta:
+        # overall process must have an end step (does not account for nested end steps)
+        block_counts = {'end_block': {'min_num': 1}}
 
