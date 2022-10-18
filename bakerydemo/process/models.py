@@ -42,6 +42,10 @@ class Process(PreviewableMixin, RevisionMixin, models.Model):
         FieldPanel("steps"),
     ]
 
+    def get_preview_template(self, request, mode_name):
+        print('get_preview_template', request)
+        return "process/previews/process.html"
+
     def __str__(self):
         return self.title
 
