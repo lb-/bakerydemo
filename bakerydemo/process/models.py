@@ -1,17 +1,16 @@
 from django.db import models
 
-from wagtail.snippets.models import register_snippet
+from wagtail.admin.panels import FieldPanel
 from wagtail.fields import StreamField
-from wagtail.admin.panels import FieldPanel, InlinePanel
-from modelcluster.fields import ParentalKey
-from modelcluster.models import ClusterableModel
+from wagtail.models import PreviewableMixin, RevisionMixin
+from wagtail.snippets.models import register_snippet
 
 from .blocks import StartStreamBlock, StepsStreamBlock
 
 
 
 @register_snippet
-class Process(models.Model):
+class Process(PreviewableMixin, RevisionMixin, models.Model):
     """
     Stores a business process with the goal of aligning with BPMN basics.
     """
