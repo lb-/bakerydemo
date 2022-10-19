@@ -1,5 +1,6 @@
 from wagtail.blocks import (
     CharBlock,
+    ChoiceBlock,
     StreamBlock,
     ListBlock,
     StructBlock,
@@ -12,6 +13,19 @@ from wagtail.documents.blocks import DocumentChooserBlock
 class BaseStepBlock(StructBlock):
     label = CharBlock()
     description = TextBlock(blank=True, required=False)
+    # works - but need it to be something better like user groups?
+    lane = ChoiceBlock(
+        choices=[
+            ("", "Select a lane"),
+            ("h2", "H2"),
+            ("h3", "H3"),
+            ("h4", "H4"),
+        ],
+        default="h2",
+        blank=True,
+        required=False,
+    )
+
 
     class Meta:
         icon = "placeholder"
