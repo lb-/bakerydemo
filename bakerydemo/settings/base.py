@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "bakerydemo.locations",
     "bakerydemo.recipes",
     "bakerydemo.search",
+    "bakerydemo.wryneck",
     "wagtail.contrib.search_promotions",
     "wagtail.contrib.forms",
     "wagtail.contrib.redirects",
@@ -188,6 +189,15 @@ WAGTAILSEARCH_BACKENDS = {
         "BACKEND": "wagtail.search.backends.database",
         "INDEX": "bakerydemo",
     },
+}
+
+WAGTAILADMIN_RICH_TEXT_EDITORS = {
+    'wryneck': {
+        'WIDGET': 'bakerydemo.wryneck.widgets.WryneckRichTextArea',
+        # 'OPTIONS': {
+        #     'features': ['h2', 'bold', 'italic', 'link', 'document-link']
+        # }
+    }
 }
 
 # Wagtail settings

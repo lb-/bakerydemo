@@ -185,7 +185,11 @@ class StandardPage(Page):
     body = StreamField(
         BaseStreamBlock(), verbose_name="Page body", blank=True, use_json_field=True
     )
+    testing_content = RichTextField(
+        null=True, blank=True, editor='wryneck',
+    )
     content_panels = Page.content_panels + [
+        FieldPanel("testing_content"),
         FieldPanel("introduction"),
         FieldPanel("body"),
         FieldPanel("image"),

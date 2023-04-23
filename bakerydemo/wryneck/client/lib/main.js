@@ -1,3 +1,3 @@
-import { Controller } from "@hotwired/stimulus";
+import { WryneckController } from "../WryneckController";
 
-console.log('lib loaded', Controller);
+window.Stimulus.register('wryneck', WryneckController);
