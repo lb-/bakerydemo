@@ -12,6 +12,7 @@ document.querySelector('#app').innerHTML = `
       <img src="${javascriptLogo}" class="logo vanilla" alt="JavaScript logo" />
     </a>
     <h1>Hello Vite!</h1>
+    <div class="element"></div>
     <div class="card">
       <button id="counter" type="button"></button>
     </div>
@@ -21,4 +22,15 @@ document.querySelector('#app').innerHTML = `
   </div>
 `
 
-setupCounter(document.querySelector('#counter'))
+setupCounter(document.querySelector('#counter'));
+
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+
+new Editor({
+  element: document.querySelector('.element'),
+  extensions: [
+    StarterKit,
+  ],
+  content: '<p>Hello World!</p>',
+});

@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "help": "vite build --help",
     "build": "vite build",
     "preview": "vite preview"
   },
@@ -12,8 +13,10 @@
     "vite": "^4.3.0"
   },
   "dependencies": {
+    "@hotwired/stimulus": "^3.2.1",
     "@tiptap/core": "^2.0.3",
     "@tiptap/pm": "^2.0.3",
-    "@tiptap/starter-kit": "^2.0.3"
+    "@tiptap/starter-kit": "^2.0.3",
+    "prettier": "^3.0.0-alpha.7-for-vscode"
   }
 }
