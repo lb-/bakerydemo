@@ -1,4 +1,5 @@
 from wagtail import hooks
+from wagtail.admin.menu import MenuItem
 from wagtail.admin.userbar import AccessibilityItem
 from wagtail.snippets.models import register_snippet
 from wagtail.snippets.views.snippets import SnippetViewSet, SnippetViewSetGroup
@@ -72,3 +73,23 @@ class BakerySnippetViewSetGroup(SnippetViewSetGroup):
 # When using a SnippetViewSetGroup class to group several SnippetViewSet classes together,
 # you only need to register the SnippetViewSetGroup class with Wagtail:
 register_snippet(BakerySnippetViewSetGroup)
+
+
+@hooks.register('register_help_menu_item')
+def register_explain_menu_item():
+  """
+  See https://docs.wagtail.org/en/stable/reference/hooks.html#construct-help-menu
+  """
+
+  return MenuItem(
+        'Explain',
+        '#explain-content',
+        icon_name='clipboard-list',
+        order=10000,
+        attrs={
+            'data-controller': 'w-action',
+            'data-action': 'click->w-action#redirect:prevent:stop',
+            'data-a11y-dialog-show': 'explain-content',
+            'role': 'button'
+        }
+    )
